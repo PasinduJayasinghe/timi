@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..600,0..1,0&display=block">
+<style>
+body{margin:0;background:#E6E4F2;-webkit-font-smoothing:antialiased}
+a{color:#5B47D6}a:hover{color:#3F2FB0}
+input::placeholder,textarea::placeholder{color:#6B6F88}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+</style>
+</helmet>
+
+<section id="t2" style="padding:48px 56px 40px;font-family:Inter,system-ui,sans-serif;color:#1E1B4B">
+<div style="display:flex;align-items:baseline;gap:12px;margin-bottom:6px"><a href="#t2" style="font:600 11px 'JetBrains Mono',monospace;padding:3px 8px;background:#1E1B4B;color:#fff;border-radius:5px;text-decoration:none">2</a><h1 style="margin:0;font-size:22px;font-weight:700;letter-spacing:-.02em">Daybar — Sheets, popovers &amp; toasts</h1></div>
+<p style="margin:0 0 28px;max-width:760px;font-size:13px;line-height:1.55;color:#5B5F7A;text-wrap:pretty"><a href="#2a">2a</a> is live — switch the type and the fields change. <a href="#2b">2b</a>/<a href="#2c">2c</a> pin the other two types with a picker open and a validation state. Back to <a href="Daybar Windows.dc.html">Windows</a>.</p>
+
+<div style="display:flex;flex-wrap:wrap;gap:40px;align-items:flex-start">
+
+<div id="2a" style="display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;align-items:center;gap:8px;font-size:12px;color:#5B5F7A"><a href="#2a" style="font:600 10.5px 'JetBrains Mono',monospace;padding:3px 7px;background:rgba(30,27,75,.1);color:#1E1B4B;border-radius:5px;text-decoration:none">2a</a>Start task sheet · interactive</div>
+<div data-screen-label="Start task sheet" style="position:relative;width:380px;height:780px;border-radius:20px;overflow:hidden;background:linear-gradient(160deg,#F1EDFF 0%,#E8EEFF 100%);box-shadow:0 30px 80px rgba(46,36,120,.22);display:flex;flex-direction:column">
+<div style="position:absolute;width:280px;height:280px;left:-90px;top:-70px;border-radius:50%;background:#A78BFA;opacity:.42;filter:blur(70px)"></div>
+<div style="position:absolute;width:300px;height:300px;right:-120px;top:320px;border-radius:50%;background:#7DB4FF;opacity:.42;filter:blur(80px)"></div>
+<div style="position:relative;height:48px;display:flex;align-items:center;gap:10px;padding:0 14px"><div style="width:18px;height:18px;border-radius:6px;background:linear-gradient(135deg,#8B7CF6,#6C9BFF)"></div><span style="font-size:13px;font-weight:600">Friday, 10 October</span></div>
+<div style="position:relative;margin:0 12px;height:38px;border-radius:13px;background:rgba(255,255,255,.45)"></div>
+<div style="position:relative;margin:10px 12px;display:flex;flex-direction:column;gap:6px"><div style="height:56px;border-radius:16px;background:rgba(255,255,255,.5)"></div><div style="height:56px;border-radius:16px;background:rgba(255,255,255,.5)"></div><div style="height:56px;border-radius:16px;background:rgba(255,255,255,.5)"></div></div>
+<div style="position:absolute;inset:0;background:rgba(30,27,75,.16);backdrop-filter:blur(3px)"></div>
+
+<div role="dialog" aria-label="Start a task" style="position:absolute;left:0;right:0;bottom:0;top:72px;border-radius:22px 22px 20px 20px;background:rgba(255,255,255,.82);backdrop-filter:blur(30px) saturate(150%);border:1px solid rgba(255,255,255,.95);box-shadow:0 -12px 40px rgba(46,36,120,.18);display:flex;flex-direction:column;padding:8px 16px 16px;gap:14px;overflow:hidden">
+<div style="align-self:center;width:36px;height:4px;border-radius:2px;background:rgba(91,95,122,.3)"></div>
+<div style="display:flex;align-items:center;justify-content:space-between;margin-top:-4px"><span style="font-size:16px;font-weight:700;letter-spacing:-.01em">Start a task</span><button aria-label="Close" style="width:32px;height:32px;border-radius:10px;border:none;background:rgba(91,95,122,.08);display:grid;place-items:center;color:#5B5F7A;cursor:pointer;padding:0" style-hover="background:rgba(91,95,122,.16);color:#1E1B4B" style-focus="outline:2px solid #8B7CF6;outline-offset:2px"><span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1">close</span></button></div>
+
+<div role="radiogroup" aria-label="Task type" style="display:grid;grid-template-columns:repeat(3,1fr);padding:3px;border-radius:13px;background:rgba(91,95,122,.08)">
+<sc-for list="{{ segs }}" as="g" hint-placeholder-count="3">
+<button role="radio" aria-checked="{{ g.active }}" onClick="{{ g.onClick }}" style="height:36px;border-radius:10px;border:none;display:flex;align-items:center;justify-content:center;gap:5px;font:600 12px Inter,sans-serif;cursor:pointer;background:{{ g.bg }};color:{{ g.color }};box-shadow:{{ g.shadow }};transition:background .2s" style-focus="outline:2px solid #8B7CF6;outline-offset:1px"><span style="font-family:'Material Symbols Rounded';font-size:16px;line-height:1">{{ g.icon }}</span>{{ g.label }}</button>
+</sc-for>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:10px">
+<sc-for list="{{ fields }}" as="f" hint-placeholder-count="3">
+<label style="display:flex;flex-direction:column;gap:5px">
+<span style="font-size:11.5px;font-weight:600;color:#5B5F7A">{{ f.label }}<span style="font-weight:400">{{ f.hint }}</span></span>
+<span style="height:40px;box-sizing:border-box;display:flex;align-items:center;gap:8px;padding:0 12px;border-radius:12px;background:rgba(255,255,255,.85);border:1px solid rgba(91,95,122,.18)">
+<sc-if value="{{ f.hasIcon }}"><span style="font-family:'Material Symbols Rounded';font-size:17px;line-height:1;color:{{ f.ink }}">{{ f.icon }}</span></sc-if>
+<input value="{{ f.value }}" onChange="{{ f.onChange }}" placeholder="{{ f.placeholder }}" style="flex:1;min-width:0;border:none;background:transparent;outline:none;font:400 13.5px Inter,sans-serif;color:#1E1B4B">
+<sc-if value="{{ f.picker }}"><span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1;color:#5B5F7A">expand_more</span></sc-if>
+</span>
+</label>
+</sc-for>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:6px">
+<span style="font-size:11.5px;font-weight:600;color:#5B5F7A">Estimate <span style="font-weight:400">(optional)</span></span>
+<div style="display:flex;gap:6px">
+<sc-for list="{{ ests }}" as="e" hint-placeholder-count="5">
+<button onClick="{{ e.onClick }}" aria-pressed="{{ e.active }}" style="height:32px;flex:1;border-radius:10px;font:500 12px 'JetBrains Mono',monospace;cursor:pointer;border:1px solid {{ e.border }};background:{{ e.bg }};color:{{ e.color }}" style-focus="outline:2px solid #8B7CF6;outline-offset:2px">{{ e.label }}</button>
+</sc-for>
+</div>
+</div>
+
+<button style="height:52px;flex-shrink:0;border-radius:16px;border:none;display:flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg,#6650E0,#4572DB);color:#fff;font:600 15px Inter,sans-serif;cursor:pointer;box-shadow:0 10px 28px rgba(91,71,214,.4)" style-hover="box-shadow:0 12px 32px rgba(91,71,214,.55);transform:translateY(-1px)" style-focus="outline:2px solid #8B7CF6;outline-offset:3px"><span style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1;font-variation-settings:'FILL' 1">play_arrow</span>Start {{ startLabel }}</button>
+<div style="margin-top:-6px;text-align:center;font-size:11px;color:#5B5F7A">Pauses the running timer · <span style="font-family:'JetBrains Mono',monospace">Ctrl Enter</span></div>
+
+<div style="display:flex;flex-direction:column;gap:4px;min-height:0">
+<span style="font-size:10.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#5B5F7A">Recent</span>
+<div style="display:flex;align-items:center;gap:8px;height:44px;padding:0 4px 0 8px;border-radius:12px" style-hover="background:rgba(255,255,255,.8)"><span style="width:26px;height:26px;border-radius:8px;display:grid;place-items:center;background:rgba(43,179,163,.18);color:#0F766B;font-family:'Material Symbols Rounded';font-size:15px">confirmation_number</span><div style="flex:1;min-width:0;line-height:1.2"><div style="font-size:12.5px;font-weight:500">#4821 Login loop on Safari</div><div style="font-size:11px;color:#5B5F7A">Client C · yesterday</div></div><button aria-label="Restart" style="width:32px;height:32px;border-radius:50%;border:1.5px solid rgba(91,71,214,.4);background:#fff;color:#5B47D6;display:grid;place-items:center;cursor:pointer;padding:0" style-focus="outline:2px solid #8B7CF6;outline-offset:2px"><span style="font-family:'Material Symbols Rounded';font-size:17px;line-height:1;font-variation-settings:'FILL' 1">replay</span></button></div>
+<div style="display:flex;align-items:center;gap:8px;height:44px;padding:0 4px 0 8px;border-radius:12px" style-hover="background:rgba(255,255,255,.8)"><span style="width:26px;height:26px;border-radius:8px;display:grid;place-items:center;background:rgba(108,155,255,.2);color:#2F5BC4;font-family:'Material Symbols Rounded';font-size:15px">folder</span><div style="flex:1;min-width:0;line-height:1.2"><div style="font-size:12.5px;font-weight:500">Draft release notes</div><div style="font-size:11px;color:#5B5F7A">SLE Hub · today</div></div><button aria-label="Restart" style="width:32px;height:32px;border-radius:50%;border:1.5px solid rgba(91,71,214,.4);background:#fff;color:#5B47D6;display:grid;place-items:center;cursor:pointer;padding:0" style-focus="outline:2px solid #8B7CF6;outline-offset:2px"><span style="font-family:'Material Symbols Rounded';font-size:17px;line-height:1;font-variation-settings:'FILL' 1">replay</span></button></div>
+<div style="display:flex;align-items:center;gap:8px;height:44px;padding:0 4px 0 8px;border-radius:12px" style-hover="background:rgba(255,255,255,.8)"><span style="width:26px;height:26px;border-radius:8px;display:grid;place-items:center;background:rgba(139,124,246,.18);color:#5B47D6;font-family:'Material Symbols Rounded';font-size:15px">work</span><div style="flex:1;min-width:0;line-height:1.2"><div style="font-size:12.5px;font-weight:500">Code review — cart service</div><div style="font-size:11px;color:#5B5F7A">Client B · Integrations · Wed</div></div><button aria-label="Restart" style="width:32px;height:32px;border-radius:50%;border:1.5px solid rgba(91,71,214,.4);background:#fff;color:#5B47D6;display:grid;place-items:center;cursor:pointer;padding:0" style-focus="outline:2px solid #8B7CF6;outline-offset:2px"><span style="font-family:'Material Symbols Rounded';font-size:17px;line-height:1;font-variation-settings:'FILL' 1">replay</span></button></div>
+</div>
+</div>
+</div>
+</div>
+
+<div id="2b" style="display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;align-items:center;gap:8px;font-size:12px;color:#5B5F7A"><a href="#2b" style="font:600 10.5px 'JetBrains Mono',monospace;padding:3px 7px;background:rgba(30,27,75,.1);color:#1E1B4B;border-radius:5px;text-decoration:none">2b</a>Internal project · project picker open</div>
+<div style="width:380px;box-sizing:border-box;border-radius:22px;background:rgba(255,255,255,.82);border:1px solid #fff;box-shadow:0 20px 60px rgba(46,36,120,.18);padding:16px;display:flex;flex-direction:column;gap:14px;background-image:linear-gradient(160deg,rgba(241,237,255,.6),rgba(232,238,255,.6))">
+<div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:16px;font-weight:700">Start a task</span><span style="width:32px;height:32px;border-radius:10px;background:rgba(91,95,122,.08);display:grid;place-items:center;color:#5B5F7A;font-family:'Material Symbols Rounded';font-size:18px">close</span></div>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);padding:3px;border-radius:13px;background:rgba(91,95,122,.08)"><span style="height:36px;display:flex;align-items:center;justify-content:center;gap:5px;font-size:12px;font-weight:600;color:#5B5F7A"><span style="font-family:'Material Symbols Rounded';font-size:16px">work</span>Client</span><span style="height:36px;border-radius:10px;background:#fff;box-shadow:0 2px 8px rgba(46,36,120,.1);display:flex;align-items:center;justify-content:center;gap:5px;font-size:12px;font-weight:600;color:#2F5BC4"><span style="font-family:'Material Symbols Rounded';font-size:16px">folder</span>Internal</span><span style="height:36px;display:flex;align-items:center;justify-content:center;gap:5px;font-size:12px;font-weight:600;color:#5B5F7A"><span style="font-family:'Material Symbols Rounded';font-size:16px">confirmation_number</span>Support</span></div>
+<div style="position:relative;display:flex;flex-direction:column;gap:5px">
+<span style="font-size:11.5px;font-weight:600;color:#5B5F7A">Project</span>
+<span style="height:40px;box-sizing:border-box;display:flex;align-items:center;gap:8px;padding:0 12px;border-radius:12px;background:#fff;border:1px solid #fff;outline:2px solid #8B7CF6;outline-offset:1px"><span style="font-family:'Material Symbols Rounded';font-size:17px;color:#2F5BC4">folder</span><span style="flex:1;font-size:13.5px">SLE</span><span style="font-family:'Material Symbols Rounded';font-size:18px;color:#5B5F7A">expand_less</span></span>
+<div role="listbox" style="position:absolute;top:72px;left:0;right:0;z-index:2;padding:6px;border-radius:14px;background:rgba(255,255,255,.97);border:1px solid #fff;box-shadow:0 16px 40px rgba(46,36,120,.22);display:flex;flex-direction:column;gap:2px">
+<div style="height:36px;display:flex;align-items:center;gap:8px;padding:0 10px;border-radius:9px;background:rgba(108,155,255,.14);font-size:13px;font-weight:500"><b style="font-weight:700">SLE</b>&nbsp;Hub<span style="flex:1"></span><span style="font-family:'Material Symbols Rounded';font-size:16px;color:#2F5BC4">check</span></div>
+<div style="height:36px;display:flex;align-items:center;gap:8px;padding:0 10px;border-radius:9px;font-size:13px"><b style="font-weight:700">SLE</b>&nbsp;Hub — Mobile</div>
+<div style="height:1px;background:rgba(91,95,122,.12);margin:2px 4px"></div>
+<div style="height:36px;display:flex;align-items:center;gap:6px;padding:0 10px;border-radius:9px;font-size:13px;font-weight:500;color:#5B47D6"><span style="font-family:'Material Symbols Rounded';font-size:16px">add</span>Create project “SLE”</div>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:5px;opacity:.5"><span style="font-size:11.5px;font-weight:600;color:#5B5F7A">Task title</span><span style="height:40px;border-radius:12px;background:#fff;border:1px solid rgba(91,95,122,.18)"></span></div>
+<div style="height:40px"></div>
+<span style="height:52px;border-radius:16px;display:flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg,#6650E0,#4572DB);color:#fff;font-size:15px;font-weight:600;opacity:.45"><span style="font-family:'Material Symbols Rounded';font-size:22px;font-variation-settings:'FILL' 1">play_arrow</span>Start internal task</span>
+<div style="margin-top:-8px;text-align:center;font-size:11px;color:#5B5F7A">Disabled until a project and title are set</div>
+</div>
+</div>
+
+<div id="2c" style="display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;align-items:center;gap:8px;font-size:12px;color:#5B5F7A"><a href="#2c" style="font:600 10.5px 'JetBrains Mono',monospace;padding:3px 7px;background:rgba(30,27,75,.1);color:#1E1B4B;border-radius:5px;text-decoration:none">2c</a>Support ticket · field error</div>
+<div style="width:380px;box-sizing:border-box;border-radius:22px;background:rgba(255,255,255,.82);border:1px solid #fff;box-shadow:0 20px 60px rgba(46,36,120,.18);padding:16px;display:flex;flex-direction:column;gap:12px;background-image:linear-gradient(160deg,rgba(241,237,255,.6),rgba(232,238,255,.6))">
+<div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:16px;font-weight:700">Start a task</span><span style="width:32px;height:32px;border-radius:10px;background:rgba(91,95,122,.08);display:grid;place-items:center;color:#5B5F7A;font-family:'Material Symbols Rounded';font-size:18px">close</span></div>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);padding:3px;border-radius:13px;background:rgba(91,95,122,.08)"><span style="height:36px;display:flex;align-items:center;justify-content:center;gap:5px;font-size:12px;font-weight:600;color:#5B5F7A"><span style="font-family:'Material Symbols Rounded';font-size:16px">work</span>Client</span><span style="height:36px;display:flex;align-items:center;justify-content:center;gap:5px;font-size:12px;font-weight:600;color:#5B5F7A"><span style="font-family:'Material Symbols Rounded';font-size:16px">folder</span>Internal</span><span style="height:36px;border-radius:10px;background:#fff;box-shadow:0 2px 8px rgba(46,36,120,.1);display:flex;align-items:center;justify-content:center;gap:5px;font-size:12px;font-weight:600;color:#0F766B"><span style="font-family:'Material Symbols Rounded';font-size:16px">confirmation_number</span>Support</span></div>
+<div style="display:flex;flex-direction:column;gap:5px"><span style="font-size:11.5px;font-weight:600;color:#5B5F7A">Ticket number</span><span style="height:40px;box-sizing:border-box;display:flex;align-items:center;gap:8px;padding:0 12px;border-radius:12px;background:#fff;border:1.5px solid #C2410C"><span style="font:500 13.5px 'JetBrains Mono',monospace;color:#5B5F7A">#</span><span style="font:500 13.5px 'JetBrains Mono',monospace">48A0</span></span><span style="display:flex;align-items:center;gap:4px;font-size:11.5px;color:#B23A0A;font-weight:500"><span style="font-family:'Material Symbols Rounded';font-size:14px">error</span>Ticket numbers are digits only</span></div>
+<div style="display:flex;flex-direction:column;gap:5px"><span style="font-size:11.5px;font-weight:600;color:#5B5F7A">Subject</span><span style="height:40px;box-sizing:border-box;display:flex;align-items:center;padding:0 12px;border-radius:12px;background:#fff;border:1px solid rgba(91,95,122,.18);font-size:13.5px">Webhook retries failing</span></div>
+<div style="display:flex;flex-direction:column;gap:5px"><span style="font-size:11.5px;font-weight:600;color:#5B5F7A">Client <span style="font-weight:400">(optional)</span></span><span style="height:40px;box-sizing:border-box;display:flex;align-items:center;gap:8px;padding:0 12px;border-radius:12px;background:#fff;border:1px solid rgba(91,95,122,.18);font-size:13.5px;color:#6B6F88"><span style="font-family:'Material Symbols Rounded';font-size:17px;color:#5B5F7A">apartment</span><span style="flex:1">None</span><span style="font-family:'Material Symbols Rounded';font-size:18px;color:#5B5F7A">expand_more</span></span></div>
+<div style="display:flex;gap:6px"><span style="flex:1;height:32px;border-radius:10px;display:grid;place-items:center;border:1px solid rgba(91,95,122,.18);background:#fff;font:500 12px 'JetBrains Mono',monospace">15m</span><span style="flex:1;height:32px;border-radius:10px;display:grid;place-items:center;border:1px solid #5B47D6;background:rgba(139,124,246,.16);color:#3F2FB0;font:600 12px 'JetBrains Mono',monospace">30m</span><span style="flex:1;height:32px;border-radius:10px;display:grid;place-items:center;border:1px solid rgba(91,95,122,.18);background:#fff;font:500 12px 'JetBrains Mono',monospace">1h</span><span style="flex:1;height:32px;border-radius:10px;display:grid;place-items:center;border:1px solid rgba(91,95,122,.18);background:#fff;font:500 12px 'JetBrains Mono',monospace">2h</span></div>
+<span style="height:52px;border-radius:16px;display:flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg,#6650E0,#4572DB);color:#fff;font-size:15px;font-weight:600;box-shadow:0 10px 28px rgba(91,71,214,.4)"><span style="font-family:'Material Symbols Rounded';font-size:22px;font-variation-settings:'FILL' 1">play_arrow</span>Start ticket</span>
+</div>
+</div>
+
+<div id="2d" style="display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;align-items:center;gap:8px;font-size:12px;color:#5B5F7A"><a href="#2d" style="font:600 10.5px 'JetBrains Mono',monospace;padding:3px 7px;background:rgba(30,27,75,.1);color:#1E1B4B;border-radius:5px;text-decoration:none">2d</a>Task details popover · opened from a row or a timeline bar</div>
+<div style="position:relative;width:380px;padding:18px 0 0;border-radius:20px;background:linear-gradient(160deg,#F1EDFF,#E8EEFF)">
+<div style="margin:0 10px;display:flex;align-items:center;gap:8px;height:56px;padding:0 8px;border-radius:16px;background:rgba(255,255,255,.9);border:1px solid #fff;box-shadow:0 6px 20px rgba(46,36,120,.1)"><span style="width:20px;height:20px;box-sizing:border-box;border-radius:50%;border:1.5px solid rgba(91,95,122,.45);margin:0 6px"></span><span style="width:28px;height:28px;border-radius:9px;display:grid;place-items:center;background:rgba(139,124,246,.18);color:#5B47D6;font-family:'Material Symbols Rounded';font-size:17px">work</span><span style="flex:1;font-size:13.5px;font-weight:500">Checkout flow — fix payment step</span></div>
+<div role="dialog" aria-label="Task details" style="position:relative;margin:10px 14px 18px;padding:16px;border-radius:20px;background:rgba(255,255,255,.9);backdrop-filter:blur(30px);border:1px solid #fff;box-shadow:0 20px 50px rgba(46,36,120,.22);display:flex;flex-direction:column;gap:14px">
+<div style="position:absolute;top:-6px;left:56px;width:12px;height:12px;background:#fff;transform:rotate(45deg)"></div>
+<div style="display:flex;align-items:flex-start;gap:8px"><div style="flex:1;font-size:16px;font-weight:700;line-height:1.3;letter-spacing:-.01em">Checkout flow — fix payment step</div><span style="width:32px;height:32px;border-radius:10px;display:grid;place-items:center;color:#5B5F7A;font-family:'Material Symbols Rounded';font-size:18px">more_horiz</span></div>
+<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:-6px"><span style="height:26px;padding:0 9px 0 7px;border-radius:8px;display:flex;align-items:center;gap:4px;background:rgba(139,124,246,.16);color:#5B47D6;font-size:12px;font-weight:600"><span style="font-family:'Material Symbols Rounded';font-size:15px">work</span>Client project</span><span style="height:26px;padding:0 9px;border-radius:8px;display:flex;align-items:center;background:rgba(91,95,122,.08);font-size:12px;font-weight:500">Client A</span><span style="height:26px;padding:0 9px;border-radius:8px;display:flex;align-items:center;background:rgba(91,95,122,.08);font-size:12px;font-weight:500">Storefront</span></div>
+<label style="display:flex;flex-direction:column;gap:5px"><span style="font-size:11.5px;font-weight:600;color:#5B5F7A">Notes</span><span style="min-height:64px;box-sizing:border-box;padding:9px 12px;border-radius:12px;background:rgba(241,237,255,.6);border:1px solid rgba(91,95,122,.14);font-size:13px;line-height:1.5;color:#1E1B4B">3DS redirect drops the cart id on return. Repro on staging with test card ending 3220.</span></label>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+<div style="display:flex;flex-direction:column;gap:5px"><span style="font-size:11.5px;font-weight:600;color:#5B5F7A">Reminder</span><span style="height:38px;box-sizing:border-box;display:flex;align-items:center;gap:6px;padding:0 10px;border-radius:11px;background:#fff;border:1px solid rgba(91,95,122,.18)"><span style="font-family:'Material Symbols Rounded';font-size:16px;color:#5B47D6;font-variation-settings:'FILL' 1">notifications</span><span style="font:500 13px 'JetBrains Mono',monospace;flex:1">12:15 am</span><span style="font-family:'Material Symbols Rounded';font-size:17px;color:#5B5F7A">expand_more</span></span></div>
+<div style="display:flex;flex-direction:column;gap:5px"><span style="font-size:11.5px;font-weight:600;color:#5B5F7A">Estimate</span><span style="height:38px;box-sizing:border-box;display:flex;align-items:center;gap:6px;padding:0 10px;border-radius:11px;background:#fff;border:1px solid rgba(91,95,122,.18)"><span style="font-family:'Material Symbols Rounded';font-size:16px;color:#5B5F7A">timer</span><span style="font:500 13px 'JetBrains Mono',monospace">2h</span></span></div>
+</div>
+<div style="display:flex;gap:6px;margin-top:-6px"><span style="height:28px;padding:0 9px;border-radius:8px;display:grid;place-items:center;background:rgba(91,95,122,.08);font:500 11.5px 'JetBrains Mono',monospace">+15m</span><span style="height:28px;padding:0 9px;border-radius:8px;display:grid;place-items:center;background:rgba(139,124,246,.16);color:#3F2FB0;font:600 11.5px 'JetBrains Mono',monospace">+30m</span><span style="height:28px;padding:0 9px;border-radius:8px;display:grid;place-items:center;background:rgba(91,95,122,.08);font:500 11.5px 'JetBrains Mono',monospace">+1h</span><span style="height:28px;padding:0 9px;border-radius:8px;display:grid;place-items:center;background:rgba(91,95,122,.08);font-size:11.5px;font-weight:500">Tomorrow 7 pm</span></div>
+<div style="display:flex;flex-direction:column;gap:6px">
+<div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:11.5px;font-weight:600;color:#5B5F7A">Sessions</span><span style="font:600 12px 'JetBrains Mono',monospace">1h 39m <span style="color:#5B5F7A;font-weight:500">/ 2h</span></span></div>
+<div style="height:6px;border-radius:3px;background:rgba(91,95,122,.12);overflow:hidden"><div style="width:82%;height:100%;border-radius:3px;background:linear-gradient(90deg,#8B7CF6,#6C9BFF)"></div></div>
+<div style="display:flex;flex-direction:column">
+<div style="display:flex;align-items:center;height:32px;gap:8px;font:500 12px 'JetBrains Mono',monospace;border-bottom:1px solid rgba(91,95,122,.1)"><span style="width:8px;height:8px;border-radius:50%;background:linear-gradient(135deg,#8B7CF6,#6C9BFF);box-shadow:0 0 0 3px rgba(139,124,246,.2)"></span><span style="flex:1">11:18 pm → now</span><span style="color:#5B47D6;font-weight:600">24:13</span></div>
+<div style="display:flex;align-items:center;height:32px;gap:8px;font:500 12px 'JetBrains Mono',monospace;border-bottom:1px solid rgba(91,95,122,.1)"><span style="width:8px;height:8px;border-radius:50%;background:#8B7CF6;opacity:.5"></span><span style="flex:1">8:00 pm → 9:15 pm</span><span>1h 15m</span></div>
+<div style="display:flex;align-items:center;height:32px;gap:8px;font-size:11.5px;color:#5B47D6;font-weight:600"><span style="font-family:'Material Symbols Rounded';font-size:15px">add</span>Add a session manually</div>
+</div>
+</div>
+<div style="display:flex;gap:8px"><span style="height:40px;padding:0 12px;border-radius:12px;display:flex;align-items:center;gap:6px;color:#B2306A;font-size:13px;font-weight:600;background:rgba(242,127,165,.12)"><span style="font-family:'Material Symbols Rounded';font-size:17px">delete</span>Delete</span><span style="flex:1;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;gap:6px;background:linear-gradient(135deg,#6650E0,#4572DB);color:#fff;font-size:13px;font-weight:600"><span style="font-family:'Material Symbols Rounded';font-size:18px;font-variation-settings:'FILL' 1">pause</span>Pause timer</span></div>
+</div>
+</div>
+</div>
+
+<div id="2e" style="display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;align-items:center;gap:8px;font-size:12px;color:#5B5F7A"><a href="#2e" style="font:600 10.5px 'JetBrains Mono',monospace;padding:3px 7px;background:rgba(30,27,75,.1);color:#1E1B4B;border-radius:5px;text-decoration:none">2e</a>In-app toasts &amp; sync chip states</div>
+<div style="width:380px;box-sizing:border-box;padding:20px 16px;border-radius:20px;background:linear-gradient(160deg,#F1EDFF,#E8EEFF);display:flex;flex-direction:column;gap:12px">
+<span style="font-size:10.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#5B5F7A">Session saved (timer stopped)</span>
+<div role="status" style="display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:14px;background:rgba(255,255,255,.95);border:1px solid #fff;box-shadow:0 14px 36px rgba(46,36,120,.18);font-size:13px;font-weight:500"><span style="font-family:'Material Symbols Rounded';font-size:18px;color:#0F766B;font-variation-settings:'FILL' 1">check_circle</span><span style="flex:1">Session saved · <span style="font-family:'JetBrains Mono',monospace">1h 24m</span> · Client project</span><span style="font-size:12px;font-weight:600;color:#5B47D6">Undo</span></div>
+<span style="font-size:10.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#5B5F7A">Switching timers</span>
+<div role="status" style="display:flex;align-items:flex-start;gap:8px;padding:10px 12px;border-radius:14px;background:rgba(255,255,255,.95);border:1px solid #fff;box-shadow:0 14px 36px rgba(46,36,120,.18);font-size:13px;line-height:1.4"><span style="font-family:'Material Symbols Rounded';font-size:18px;color:#5B47D6">swap_horiz</span><span style="flex:1"><b style="font-weight:600">Draft release notes</b> paused and saved (<span style="font-family:'JetBrains Mono',monospace">40m</span>). Now timing <b style="font-weight:600">Checkout flow</b>.</span></div>
+<span style="font-size:10.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#5B5F7A">Saved offline</span>
+<div role="status" style="display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:14px;background:rgba(255,255,255,.95);border:1px solid #fff;box-shadow:0 14px 36px rgba(46,36,120,.18);font-size:13px"><span style="font-family:'Material Symbols Rounded';font-size:18px;color:#4E5370">cloud_off</span><span style="flex:1">Session saved on this device · will sync when you’re back online</span></div>
+<span style="font-size:10.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#5B5F7A;margin-top:4px">Footer sync chip</span>
+<div style="display:flex;flex-wrap:wrap;gap:8px">
+<span style="height:26px;display:flex;align-items:center;gap:5px;padding:0 10px 0 8px;border-radius:13px;font-size:11.5px;font-weight:600;background:rgba(43,179,163,.16);color:#0F766B"><span style="font-family:'Material Symbols Rounded';font-size:15px">cloud_done</span>Saved</span>
+<span style="height:26px;display:flex;align-items:center;gap:5px;padding:0 10px 0 8px;border-radius:13px;font-size:11.5px;font-weight:600;background:rgba(108,155,255,.18);color:#2F5BC4"><span style="font-family:'Material Symbols Rounded';font-size:15px">sync</span>Syncing</span>
+<span style="height:26px;display:flex;align-items:center;gap:5px;padding:0 10px 0 8px;border-radius:13px;font-size:11.5px;font-weight:600;background:rgba(91,95,122,.12);color:#4E5370"><span style="font-family:'Material Symbols Rounded';font-size:15px">cloud_off</span>Offline · saved on this device</span>
+</div>
+<div style="font-size:11.5px;line-height:1.5;color:#5B5F7A">Hovering Offline shows “Saved on this device, will sync later · 2 sessions waiting”. Syncing spins the icon (static with reduce-motion).</div>
+</div>
+</div>
+
+</div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const TYPES = [
+  {key:'client',label:'Client',icon:'work',ink:'#5B47D6',start:'client task'},
+  {key:'internal',label:'Internal',icon:'folder',ink:'#2F5BC4',start:'internal task'},
+  {key:'support',label:'Support',icon:'confirmation_number',ink:'#0F766B',start:'ticket'}
+];
+const FIELDS = {
+  client:[{k:'client',label:'Client',icon:'apartment',picker:true,placeholder:'Choose a client'},{k:'project',label:'Project',icon:'work',picker:true,placeholder:'Choose a project'},{k:'title',label:'Task title',placeholder:'What are you working on?'}],
+  internal:[{k:'iproject',label:'Project',icon:'folder',picker:true,placeholder:'Choose a project'},{k:'ititle',label:'Task title',placeholder:'What are you working on?'}],
+  support:[{k:'ticket',label:'Ticket number',icon:'tag',placeholder:'4830'},{k:'subject',label:'Subject',placeholder:'Short summary of the issue'},{k:'sclient',label:'Client',hint:' (optional)',icon:'apartment',picker:true,placeholder:'None'}]
+};
+class Component extends DCLogic {
+  state = { type:'client', est:'1h', v:{client:'Client A',project:'Storefront',title:'',iproject:'SLE Hub'} };
+  renderVals(){
+    const s=this.state, cur=TYPES.find(t=>t.key===s.type);
+    return {
+      segs:TYPES.map(t=>{const a=t.key===s.type; return {...t,active:a,bg:a?'#fff':'transparent',color:a?t.ink:'#5B5F7A',shadow:a?'0 2px 8px rgba(46,36,120,.1)':'none',onClick:()=>this.setState({type:t.key})};}),
+      fields:FIELDS[s.type].map(f=>({...f,hint:f.hint||'',hasIcon:!!f.icon,ink:cur.ink,picker:!!f.picker,value:s.v[f.k]||'',onChange:e=>this.setState({v:{...s.v,[f.k]:e.target.value}})})),
+      ests:['15m','30m','1h','2h','Custom'].map(l=>{const a=s.est===l; return {label:l,active:a,bg:a?'rgba(139,124,246,.16)':'#fff',border:a?'#5B47D6':'rgba(91,95,122,.18)',color:a?'#3F2FB0':'#1E1B4B',onClick:()=>this.setState({est:a?null:l})};}),
+      startLabel:cur.start
+    };
+  }
+}
+</script>
+</body>
+</html>

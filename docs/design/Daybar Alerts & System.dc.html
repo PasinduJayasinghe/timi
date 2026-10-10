@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..600,0..1,0&display=block">
+<style>
+body{margin:0;background:#E6E4F2;-webkit-font-smoothing:antialiased}
+a{color:#5B47D6}a:hover{color:#3F2FB0}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+</style>
+</helmet>
+
+<section id="t4" style="padding:48px 56px 40px;font-family:Inter,system-ui,sans-serif;color:#1E1B4B">
+<div style="display:flex;align-items:baseline;gap:12px;margin-bottom:6px"><a href="#t4" style="font:600 11px 'JetBrains Mono',monospace;padding:3px 8px;background:#1E1B4B;color:#fff;border-radius:5px;text-decoration:none">4</a><h1 style="margin:0;font-size:22px;font-weight:700;letter-spacing:-.02em">Daybar — Alerts, reminders, settings &amp; tray</h1></div>
+<p style="margin:0 0 28px;max-width:760px;font-size:13px;line-height:1.55;color:#5B5F7A;text-wrap:pretty"><a href="#4a">4a</a> counts down live; lead time and chime are adjustable in place. Join leads to <a href="#4b">4b</a>. <a href="#4e">4e</a> toggles work. Back to <a href="Daybar Windows.dc.html">Windows</a>.</p>
+
+<div style="display:flex;flex-wrap:wrap;gap:40px;align-items:flex-start">
+
+<div id="4a" style="display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;align-items:center;gap:8px;font-size:12px;color:#5B5F7A"><a href="#4a" style="font:600 10.5px 'JetBrains Mono',monospace;padding:3px 7px;background:rgba(30,27,75,.1);color:#1E1B4B;border-radius:5px;text-decoration:none">4a</a>Meeting alarm · own window 360×340, centred on screen</div>
+<div role="alertdialog" aria-label="Meeting starting soon" data-screen-label="Meeting alarm" style="position:relative;width:360px;height:340px;box-sizing:border-box;border-radius:20px;overflow:hidden;background:linear-gradient(160deg,#FFF0F6 0%,#F1EDFF 60%,#E8EEFF 100%);box-shadow:0 30px 80px rgba(46,36,120,.28),0 0 0 6px rgba(242,127,165,.14);display:flex;flex-direction:column;padding:16px 18px 14px;gap:12px">
+<div style="position:absolute;width:240px;height:240px;right:-80px;top:-90px;border-radius:50%;background:#F27FA5;opacity:.38;filter:blur(60px)"></div>
+<div style="position:absolute;width:220px;height:220px;left:-80px;bottom:-90px;border-radius:50%;background:#A78BFA;opacity:.35;filter:blur(60px)"></div>
+<div style="position:relative;display:flex;align-items:center;gap:8px"><span style="display:flex;align-items:center;gap:5px;height:26px;padding:0 10px 0 8px;border-radius:13px;background:rgba(255,255,255,.7);color:#B2306A;font-size:11.5px;font-weight:600"><span style="font-family:'Material Symbols Rounded';font-size:15px;line-height:1;font-variation-settings:'FILL' 1">notifications_active</span>Meeting soon</span><span style="flex:1"></span>
+<button onClick="{{ toggleChime }}" aria-label="{{ chimeLabel }}" title="{{ chimeLabel }}" style="width:32px;height:32px;border-radius:10px;border:none;background:transparent;display:grid;place-items:center;color:#5B5F7A;cursor:pointer;padding:0" style-hover="background:rgba(255,255,255,.7)" style-focus="outline:2px solid #8B7CF6;outline-offset:2px"><span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1">{{ chimeIcon }}</span></button>
+</div>
+<div style="position:relative;display:flex;align-items:flex-end;gap:14px">
+<div style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:0"><span style="font-size:18px;font-weight:700;letter-spacing:-.01em;line-height:1.25">Sprint planning · Client A</span><span style="font-size:12.5px;color:#5B5F7A">Starts at 12:30 am · 45 min · 6 people</span></div>
+<div style="display:flex;flex-direction:column;align-items:flex-end"><span style="font-size:10px;font-weight:600;letter-spacing:.06em;color:#5B5F7A">IN</span><span aria-live="off" style="font:600 28px 'JetBrains Mono',monospace;letter-spacing:-.02em;color:#B2306A;line-height:1">{{ countdown }}</span></div>
+</div>
+<div style="position:relative;height:4px;border-radius:2px;background:rgba(178,48,106,.12);overflow:hidden"><div style="height:100%;width:{{ progress }};border-radius:2px;background:linear-gradient(90deg,#F27FA5,#8B7CF6);transition:width 1s linear"></div></div>
+<button style="position:relative;height:48px;border-radius:14px;border:none;display:flex;align-items:center;justify-content:center;gap:8px;background:#B2306A;color:#fff;font:600 14px Inter,sans-serif;cursor:pointer;box-shadow:0 10px 24px rgba(178,48,106,.35)" style-hover="background:#9E2A5E" style-focus="outline:2px solid #8B7CF6;outline-offset:3px"><span style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1;font-variation-settings:'FILL' 1">videocam</span>Join Google Meet</button>
+<div style="position:relative;display:grid;grid-template-columns:1fr 1fr;gap:8px">
+<button style="height:40px;border-radius:12px;border:1px solid rgba(255,255,255,.9);background:rgba(255,255,255,.7);display:flex;align-items:center;justify-content:center;gap:6px;font:600 13px Inter,sans-serif;color:#1E1B4B;cursor:pointer" style-hover="background:#fff" style-focus="outline:2px solid #8B7CF6;outline-offset:2px"><span style="font-family:'Material Symbols Rounded';font-size:17px;line-height:1">snooze</span>Snooze 2 min</button>
+<button style="height:40px;border-radius:12px;border:1px solid rgba(255,255,255,.9);background:rgba(255,255,255,.4);display:flex;align-items:center;justify-content:center;font:600 13px Inter,sans-serif;color:#5B5F7A;cursor:pointer" style-hover="background:rgba(255,255,255,.8);color:#1E1B4B" style-focus="outline:2px solid #8B7CF6;outline-offset:2px">Dismiss</button>
+</div>
+<div style="position:relative;display:flex;align-items:center;gap:6px;font-size:11.5px;color:#5B5F7A"><span style="flex:1">Alert me before</span>
+<sc-for list="{{ leads }}" as="l" hint-placeholder-count="4"><button onClick="{{ l.onClick }}" aria-pressed="{{ l.active }}" style="height:32px;min-width:38px;border-radius:9px;font:500 11.5px 'JetBrains Mono',monospace;cursor:pointer;border:1px solid {{ l.border }};background:{{ l.bg }};color:{{ l.color }}" style-focus="outline:2px solid #8B7CF6;outline-offset:2px">{{ l.label }}</button></sc-for>
+</div>
+</div>
+</div>
+
+<div id="4b" style="display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;align-items:center;gap:8px;font-size:12px;color:#5B5F7A"><a href="#4b" style="font:600 10.5px 'JetBrains Mono',monospace;padding:3px 7px;background:rgba(30,27,75,.1);color:#1E1B4B;border-radius:5px;text-decoration:none">4b</a>After “Join” · offer a Meeting timer</div>
+<div style="position:relative;width:360px;box-sizing:border-box;border-radius:20px;overflow:hidden;background:linear-gradient(160deg,#FFF0F6,#F1EDFF 60%,#E8EEFF);box-shadow:0 30px 80px rgba(46,36,120,.24);padding:18px;display:flex;flex-direction:column;gap:12px">
+<div style="position:absolute;width:220px;height:220px;right:-80px;top:-90px;border-radius:50%;background:#F27FA5;opacity:.32;filter:blur(60px)"></div>
+<div style="position:relative;display:flex;align-items:center;gap:8px;font-size:12px;color:#0F766B;font-weight:600"><span style="font-family:'Material Symbols Rounded';font-size:17px;font-variation-settings:'FILL' 1">check_circle</span>Opened Google Meet in your browser</div>
+<div style="position:relative;font-size:16px;font-weight:700;line-height:1.3">Track this meeting?</div>
+<div style="position:relative;font-size:13px;line-height:1.5;color:#5B5F7A;text-wrap:pretty">Start a Meeting timer for <b style="color:#1E1B4B;font-weight:600">Sprint planning · Client A</b>. <b style="color:#1E1B4B;font-weight:600">Checkout flow</b> will pause and save.</div>
+<div style="position:relative;display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:14px;background:rgba(255,255,255,.65);border:1px solid #fff"><span style="width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:rgba(242,127,165,.22);color:#B2306A;font-family:'Material Symbols Rounded';font-size:17px">videocam</span><div style="flex:1;line-height:1.25"><div style="font-size:12.5px;font-weight:600">Meeting · Client A</div><div style="font-size:11px;color:#5B5F7A">Ends 1:15 am — timer stops when the event ends</div></div></div>
+<div style="position:relative;display:grid;grid-template-columns:1fr auto;gap:8px"><span style="height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;gap:6px;background:linear-gradient(135deg,#6650E0,#4572DB);color:#fff;font-size:13.5px;font-weight:600;box-shadow:0 8px 22px rgba(91,71,214,.35)"><span style="font-family:'Material Symbols Rounded';font-size:20px;font-variation-settings:'FILL' 1">play_arrow</span>Start meeting timer</span><span style="height:44px;padding:0 16px;border-radius:14px;display:grid;place-items:center;background:rgba(255,255,255,.6);font-size:13px;font-weight:600;color:#5B5F7A">Not now</span></div>
+<label style="position:relative;display:flex;align-items:center;gap:8px;font-size:12px;color:#5B5F7A"><span style="width:18px;height:18px;box-sizing:border-box;border-radius:5px;border:1.5px solid rgba(91,95,122,.5);background:#fff"></span>Always start automatically when I join</label>
+</div>
+</div>
+
+<div id="4c" style="display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;align-items:center;gap:8px;font-size:12px;color:#5B5F7A"><a href="#4c" style="font:600 10.5px 'JetBrains Mono',monospace;padding:3px 7px;background:rgba(30,27,75,.1);color:#1E1B4B;border-radius:5px;text-decoration:none">4c</a>Task reminder · Windows-style system toast</div>
+<div style="width:380px;height:300px;box-sizing:border-box;border-radius:16px;position:relative;overflow:hidden;background:linear-gradient(135deg,#C9C4DE,#B9C7E4);padding:18px;display:flex;flex-direction:column;justify-content:flex-end">
+<div style="position:absolute;left:14px;top:14px;font:500 10px 'JetBrains Mono',monospace;color:#3D4160">desktop · bottom-right corner</div>
+<div role="alert" style="width:344px;box-sizing:border-box;border-radius:12px;background:rgba(250,249,255,.92);backdrop-filter:blur(30px);border:1px solid rgba(255,255,255,.9);box-shadow:0 18px 44px rgba(30,27,75,.28);padding:12px 14px 14px;display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;align-items:center;gap:8px;font-size:11.5px;color:#5B5F7A"><span style="width:16px;height:16px;border-radius:5px;background:linear-gradient(135deg,#8B7CF6,#6C9BFF)"></span><span style="font-weight:600;color:#1E1B4B">Daybar</span><span>· now</span><span style="flex:1"></span><span style="width:32px;height:32px;margin:-8px -8px -8px 0;display:grid;place-items:center;font-family:'Material Symbols Rounded';font-size:16px">close</span></div>
+<div style="display:flex;gap:10px"><span style="width:36px;height:36px;flex-shrink:0;border-radius:10px;display:grid;place-items:center;background:rgba(139,124,246,.18);color:#5B47D6;font-family:'Material Symbols Rounded';font-size:20px;font-variation-settings:'FILL' 1">notifications</span><div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:13.5px;font-weight:600">Reply to Client B about API limits</span><span style="font-size:12px;color:#5B5F7A;display:flex;align-items:center;gap:5px">Reminder · <span style="font-family:'JetBrains Mono',monospace">11:55 pm</span> · <span style="font-family:'Material Symbols Rounded';font-size:13px;color:#5B47D6">work</span>Client B</span></div></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><span style="height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;gap:5px;background:linear-gradient(135deg,#6650E0,#4572DB);color:#fff;font-size:12.5px;font-weight:600"><span style="font-family:'Material Symbols Rounded';font-size:17px;font-variation-settings:'FILL' 1">play_arrow</span>Start timer</span><span style="height:36px;border-radius:8px;display:grid;place-items:center;background:rgba(30,27,75,.07);font-size:12.5px;font-weight:600">Snooze 10 min</span></div>
+</div>
+</div>
+</div>
+
+<div id="4d" style="display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;align-items:center;gap:8px;font-size:12px;color:#5B5F7A"><a href="#4d" style="font:600 10.5px 'JetBrains Mono',monospace;padding:3px 7px;background:rgba(30,27,75,.1);color:#1E1B4B;border-radius:5px;text-decoration:none">4d</a>System tray menu</div>
+<div style="width:300px;height:340px;box-sizing:border-box;border-radius:16px;position:relative;overflow:hidden;background:linear-gradient(135deg,#C9C4DE,#B9C7E4);display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-end;padding:0 18px 0 0">
+<div role="menu" style="width:252px;margin-bottom:8px;padding:6px;border-radius:14px;background:rgba(250,249,255,.94);backdrop-filter:blur(30px);border:1px solid rgba(255,255,255,.9);box-shadow:0 18px 44px rgba(30,27,75,.3);display:flex;flex-direction:column;font-size:13px">
+<div style="padding:8px 10px 10px;display:flex;align-items:center;gap:8px;border-bottom:1px solid rgba(91,95,122,.12);margin-bottom:4px"><span style="width:8px;height:8px;border-radius:50%;background:linear-gradient(135deg,#8B7CF6,#6C9BFF);box-shadow:0 0 0 3px rgba(139,124,246,.2)"></span><div style="flex:1;min-width:0;line-height:1.25"><div style="font-size:12.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Checkout flow — fix payment step</div><div style="font:500 11px 'JetBrains Mono',monospace;color:#5B47D6">24:13 running</div></div></div>
+<div role="menuitem" style="height:34px;display:flex;align-items:center;gap:10px;padding:0 10px;border-radius:8px;background:rgba(139,124,246,.14)"><span style="font-family:'Material Symbols Rounded';font-size:17px;color:#5B5F7A">open_in_new</span>Show Daybar</div>
+<div role="menuitem" style="height:34px;display:flex;align-items:center;gap:10px;padding:0 10px;border-radius:8px"><span style="font-family:'Material Symbols Rounded';font-size:17px;color:#5B5F7A;font-variation-settings:'FILL' 1">pause</span>Pause timer<span style="flex:1"></span><span style="font:500 10.5px 'JetBrains Mono',monospace;color:#5B5F7A">Ctrl Shift P</span></div>
+<div role="menuitem" style="height:34px;display:flex;align-items:center;gap:10px;padding:0 10px;border-radius:8px"><span style="font-family:'Material Symbols Rounded';font-size:17px;color:#5B5F7A">add</span>Quick add…<span style="flex:1"></span><span style="font:500 10.5px 'JetBrains Mono',monospace;color:#5B5F7A">Ctrl Shift Space</span></div>
+<div style="height:1px;background:rgba(91,95,122,.12);margin:4px 6px"></div>
+<div role="menuitem" style="height:42px;display:flex;align-items:center;gap:10px;padding:0 10px;border-radius:8px"><span style="font-family:'Material Symbols Rounded';font-size:17px;color:#B2306A">videocam</span><div style="flex:1;line-height:1.2"><div>Next: Sprint planning</div><div style="font:500 10.5px 'JetBrains Mono',monospace;color:#5B5F7A">12:30 am · in 48 min</div></div></div>
+<div style="height:1px;background:rgba(91,95,122,.12);margin:4px 6px"></div>
+<div role="menuitem" style="height:34px;display:flex;align-items:center;gap:10px;padding:0 10px;border-radius:8px"><span style="font-family:'Material Symbols Rounded';font-size:17px;color:#5B5F7A">power_settings_new</span>Quit Daybar</div>
+</div>
+<div style="align-self:stretch;height:40px;margin-right:-18px;background:rgba(30,27,75,.18);backdrop-filter:blur(20px);display:flex;align-items:center;justify-content:flex-end;gap:12px;padding:0 14px"><span style="width:24px;height:24px;border-radius:7px;background:linear-gradient(135deg,#8B7CF6,#6C9BFF);box-shadow:0 0 0 2px rgba(255,255,255,.7)"></span><span style="font:500 11px 'JetBrains Mono',monospace;color:#1E1B4B">11:42 PM</span></div>
+</div>
+</div>
+
+<div id="4e" style="display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;align-items:center;gap:8px;font-size:12px;color:#5B5F7A"><a href="#4e" style="font:600 10.5px 'JetBrains Mono',monospace;padding:3px 7px;background:rgba(30,27,75,.1);color:#1E1B4B;border-radius:5px;text-decoration:none">4e</a>Settings · interactive toggles</div>
+<div data-screen-label="Settings" style="position:relative;width:380px;height:780px;border-radius:20px;overflow:hidden;background:linear-gradient(160deg,#F1EDFF 0%,#E8EEFF 100%);box-shadow:0 30px 80px rgba(46,36,120,.22);display:flex;flex-direction:column">
+<div style="position:absolute;width:280px;height:280px;left:-90px;top:-70px;border-radius:50%;background:#A78BFA;opacity:.42;filter:blur(70px)"></div>
+<div style="position:absolute;width:300px;height:300px;right:-120px;top:420px;border-radius:50%;background:#7DB4FF;opacity:.42;filter:blur(80px)"></div>
+<div style="position:relative;height:48px;flex-shrink:0;display:flex;align-items:center;gap:6px;padding:0 8px"><a href="Daybar Windows.dc.html#1a" aria-label="Back" style="width:32px;height:32px;border-radius:10px;display:grid;place-items:center;color:#1E1B4B;text-decoration:none" style-hover="background:rgba(255,255,255,.75)"><span style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1">arrow_back</span></a><span style="flex:1;font-size:14px;font-weight:700">Settings</span><span style="width:32px;height:32px;display:grid;place-items:center;color:#5B5F7A;font-family:'Material Symbols Rounded';font-size:18px">close</span></div>
+<div style="position:relative;flex:1;overflow:auto;padding:0 12px 14px;display:flex;flex-direction:column;gap:14px">
+
+<div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:10.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#5B5F7A;padding:0 4px">General</span>
+<div style="border-radius:16px;background:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.9);backdrop-filter:blur(24px);display:flex;flex-direction:column">
+<sc-for list="{{ toggles }}" as="g" hint-placeholder-count="2">
+<div style="min-height:52px;display:flex;align-items:center;gap:10px;padding:6px 12px;border-bottom:1px solid rgba(91,95,122,.08)"><div style="flex:1;line-height:1.3"><div style="font-size:13px;font-weight:500">{{ g.label }}</div><div style="font-size:11.5px;color:#5B5F7A">{{ g.sub }}</div></div>
+<button role="switch" aria-checked="{{ g.on }}" aria-label="{{ g.label }}" onClick="{{ g.onClick }}" style="width:44px;height:32px;border:none;background:transparent;padding:0;cursor:pointer;display:grid;place-items:center;border-radius:16px" style-focus="outline:2px solid #8B7CF6;outline-offset:1px"><span style="position:relative;width:40px;height:24px;border-radius:12px;background:{{ g.track }};transition:background .2s"><span style="position:absolute;top:3px;left:{{ g.knob }};width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(30,27,75,.3);transition:left .25s cubic-bezier(.34,1.56,.64,1)"></span></span></button>
+</div>
+</sc-for>
+<div style="min-height:52px;display:flex;align-items:center;gap:10px;padding:6px 12px;border-bottom:1px solid rgba(91,95,122,.08)"><div style="flex:1;line-height:1.3"><div style="font-size:13px;font-weight:500">Global shortcut</div><div style="font-size:11.5px;color:#5B5F7A">Quick add from any app</div></div><span style="height:32px;padding:0 10px;border-radius:9px;display:flex;align-items:center;gap:4px;background:#fff;border:1px solid rgba(91,95,122,.18);font:500 11.5px 'JetBrains Mono',monospace">Ctrl Shift Space</span></div>
+<div style="min-height:52px;display:flex;align-items:center;gap:10px;padding:6px 12px"><div style="flex:1;line-height:1.3"><div style="font-size:13px;font-weight:500">Default reminder</div><div style="font-size:11.5px;color:#5B5F7A">For tasks you give a reminder</div></div><span style="height:32px;padding:0 8px 0 10px;border-radius:9px;display:flex;align-items:center;gap:4px;background:#fff;border:1px solid rgba(91,95,122,.18);font:500 12px 'JetBrains Mono',monospace">30 min<span style="font-family:'Material Symbols Rounded';font-size:17px;color:#5B5F7A">expand_more</span></span></div>
+</div></div>
+
+<div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:10.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#5B5F7A;padding:0 4px">Meetings</span>
+<div style="border-radius:16px;background:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.9);display:flex;flex-direction:column">
+<div style="min-height:52px;display:flex;align-items:center;gap:10px;padding:6px 12px;border-bottom:1px solid rgba(91,95,122,.08)"><div style="flex:1;font-size:13px;font-weight:500">Alert before meeting</div><div style="display:flex;padding:2px;border-radius:10px;background:rgba(91,95,122,.08)">
+<sc-for list="{{ leads }}" as="l" hint-placeholder-count="4"><button onClick="{{ l.onClick }}" aria-pressed="{{ l.active }}" style="height:32px;min-width:36px;border-radius:8px;border:none;font:500 11.5px 'JetBrains Mono',monospace;cursor:pointer;background:{{ l.segBg }};color:{{ l.segColor }};box-shadow:{{ l.segShadow }}" style-focus="outline:2px solid #8B7CF6">{{ l.label }}</button></sc-for>
+</div></div>
+<div style="min-height:52px;display:flex;align-items:center;gap:10px;padding:6px 12px"><div style="flex:1;line-height:1.3"><div style="font-size:13px;font-weight:500">Alarm sound</div><div style="font-size:11.5px;color:#5B5F7A">Gentle chime</div></div>
+<button role="switch" aria-checked="{{ chime }}" aria-label="Alarm sound" onClick="{{ toggleChime }}" style="width:44px;height:32px;border:none;background:transparent;padding:0;cursor:pointer;display:grid;place-items:center;border-radius:16px" style-focus="outline:2px solid #8B7CF6;outline-offset:1px"><span style="position:relative;width:40px;height:24px;border-radius:12px;background:{{ chimeTrack }};transition:background .2s"><span style="position:absolute;top:3px;left:{{ chimeKnob }};width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(30,27,75,.3);transition:left .25s cubic-bezier(.34,1.56,.64,1)"></span></span></button>
+</div>
+</div></div>
+
+<div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:10.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#5B5F7A;padding:0 4px">Google Calendar</span>
+<div style="border-radius:16px;background:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.9);display:flex;flex-direction:column">
+<div style="min-height:56px;display:flex;align-items:center;gap:10px;padding:6px 12px;border-bottom:1px solid rgba(91,95,122,.08)"><span style="width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:#E4DEFF;color:#3F2FB0;font-size:12px;font-weight:700">DA</span><div style="flex:1;min-width:0;line-height:1.3"><div style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">dev.account@example.com</div><div style="font-size:11.5px;color:#0F766B;display:flex;align-items:center;gap:4px"><span style="width:6px;height:6px;border-radius:50%;background:#2BB3A3"></span>Connected · synced 11:40 pm</div></div><button style="height:32px;padding:0 10px;border-radius:9px;border:1px solid rgba(178,48,106,.3);background:rgba(255,255,255,.7);font:600 12px Inter,sans-serif;color:#B2306A;cursor:pointer" style-hover="background:rgba(242,127,165,.14)" style-focus="outline:2px solid #8B7CF6;outline-offset:2px">Disconnect</button></div>
+<div style="padding:8px 12px 4px;font-size:11.5px;color:#5B5F7A">Calendars to include</div>
+<sc-for list="{{ cals }}" as="c" hint-placeholder-count="3">
+<button role="checkbox" aria-checked="{{ c.on }}" onClick="{{ c.onClick }}" style="min-height:40px;display:flex;align-items:center;gap:10px;padding:0 12px;border:none;background:transparent;font:500 13px Inter,sans-serif;color:#1E1B4B;cursor:pointer;text-align:left" style-hover="background:rgba(255,255,255,.6)" style-focus="outline:2px solid #8B7CF6;outline-offset:-2px"><span style="width:18px;height:18px;box-sizing:border-box;border-radius:5px;display:grid;place-items:center;border:{{ c.border }};background:{{ c.bg }};color:#fff;font-family:'Material Symbols Rounded';font-size:14px;line-height:1">{{ c.mark }}</span><span style="width:8px;height:8px;border-radius:50%;background:{{ c.dot }}"></span>{{ c.name }}</button>
+</sc-for>
+<div style="height:6px"></div>
+</div></div>
+<div style="text-align:center;font-size:11px;color:#5B5F7A">Daybar 0.4.0 · all data stored locally first</div>
+</div>
+</div>
+</div>
+
+</div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { left:298, lead:5, chime:true, t:{login:true,carry:true}, cals:{work:true,team:true,personal:false} };
+  componentDidMount(){ this.iv=setInterval(()=>this.setState(s=>({left:s.left>0?s.left-1:s.lead*60})),1000); }
+  componentWillUnmount(){ clearInterval(this.iv); }
+  renderVals(){
+    const s=this.state, pad=n=>String(n).padStart(2,'0');
+    const sw=on=>({track:on?'linear-gradient(135deg,#6650E0,#4572DB)':'rgba(91,95,122,.3)',knob:on?'19px':'3px'});
+    const tg=[{k:'login',label:'Start on login',sub:'Open Daybar pinned when Windows starts'},{k:'carry',label:'Carry over unfinished tasks',sub:'Tagged “from yesterday” the next day'}];
+    return {
+      countdown:`${Math.floor(s.left/60)}:${pad(s.left%60)}`,
+      progress:(100-s.left/(s.lead*60)*100).toFixed(1)+'%',
+      chime:s.chime, chimeIcon:s.chime?'volume_up':'volume_off', chimeLabel:s.chime?'Chime on':'Chime off',
+      toggleChime:()=>this.setState(x=>({chime:!x.chime})),
+      chimeTrack:sw(s.chime).track, chimeKnob:sw(s.chime).knob,
+      leads:[1,5,10,15].map(n=>{const a=s.lead===n; return {label:n+'m',active:a,
+        bg:a?'rgba(178,48,106,.12)':'rgba(255,255,255,.55)',border:a?'#B2306A':'rgba(255,255,255,.9)',color:a?'#8E2454':'#1E1B4B',
+        segBg:a?'#fff':'transparent',segColor:a?'#1E1B4B':'#5B5F7A',segShadow:a?'0 1px 4px rgba(46,36,120,.15)':'none',
+        onClick:()=>this.setState({lead:n,left:Math.min(s.left,n*60)})};}),
+      toggles:tg.map(g=>({...g,on:!!s.t[g.k],...sw(!!s.t[g.k]),onClick:()=>this.setState(x=>({t:{...x.t,[g.k]:!x.t[g.k]}}))})),
+      cals:[['work','Work · dev.account','#F27FA5'],['team','Team events','#8B7CF6'],['personal','Personal','#9AA0B8']].map(([k,name,dot])=>{const on=!!s.cals[k]; return {name,dot,on,mark:on?'check':'',
+        bg:on?'#5B47D6':'#fff',border:on?'none':'1.5px solid rgba(91,95,122,.5)',onClick:()=>this.setState(x=>({cals:{...x.cals,[k]:!x.cals[k]}}))};})
+    };
+  }
+}
+</script>
+</body>
+</html>

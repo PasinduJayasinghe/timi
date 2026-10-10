@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..600,0..1,0&display=block">
+<style>body{margin:0;background:#E6E4F2;-webkit-font-smoothing:antialiased}a{color:#5B47D6}a:hover{color:#3F2FB0}</style>
+</helmet>
+<div style="position:relative;max-width:1180px;margin:0 auto;padding:48px 32px 64px;font-family:Inter,system-ui,sans-serif;color:#1E1B4B;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;align-items:baseline;gap:12px"><span style="font:600 11px 'JetBrains Mono',monospace;padding:3px 8px;background:#1E1B4B;color:#fff;border-radius:5px">5</span><h1 style="margin:0;font-size:22px;font-weight:700;letter-spacing:-.02em">Daybar — Design tokens</h1><span style="flex:1"></span><a href="Daybar Windows.dc.html" style="font-size:13px">← Windows</a></div>
+
+<div style="padding:22px;border-radius:20px;background:rgba(255,255,255,.6);border:1px solid #fff;display:flex;flex-direction:column;gap:14px">
+<h2 style="margin:0;font-size:15px;font-weight:700">Surface &amp; text</h2>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px">
+<div style="display:flex;flex-direction:column;gap:6px"><div style="height:64px;border-radius:14px;background:linear-gradient(160deg,#F1EDFF,#E8EEFF);border:1px solid rgba(91,95,122,.15)"></div><b style="font-size:12px">bg-app</b><span style="font:500 11px 'JetBrains Mono',monospace;color:#5B5F7A">#F1EDFF → #E8EEFF</span></div>
+<div style="display:flex;flex-direction:column;gap:6px"><div style="height:64px;border-radius:14px;background:#A78BFA"></div><b style="font-size:12px">blob-violet</b><span style="font:500 11px 'JetBrains Mono',monospace;color:#5B5F7A">#A78BFA · 42% · blur 70</span></div>
+<div style="display:flex;flex-direction:column;gap:6px"><div style="height:64px;border-radius:14px;background:#7DB4FF"></div><b style="font-size:12px">blob-sky</b><span style="font:500 11px 'JetBrains Mono',monospace;color:#5B5F7A">#7DB4FF · 42% · blur 80</span></div>
+<div style="display:flex;flex-direction:column;gap:6px"><div style="height:64px;border-radius:14px;background:linear-gradient(160deg,#F1EDFF,#E8EEFF);padding:8px;box-sizing:border-box"><div style="height:100%;border-radius:10px;background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.85)"></div></div><b style="font-size:12px">glass</b><span style="font:500 11px 'JetBrains Mono',monospace;color:#5B5F7A">white/55 · border white/85</span></div>
+<div style="display:flex;flex-direction:column;gap:6px"><div style="height:64px;border-radius:14px;background:linear-gradient(160deg,#F1EDFF,#E8EEFF);padding:8px;box-sizing:border-box"><div style="height:100%;border-radius:10px;background:rgba(255,255,255,.82);border:1px solid #fff"></div></div><b style="font-size:12px">glass-strong</b><span style="font:500 11px 'JetBrains Mono',monospace;color:#5B5F7A">white/82 · sheets, popovers</span></div>
+<div style="display:flex;flex-direction:column;gap:6px"><div style="height:64px;border-radius:14px;background:#1E1B4B"></div><b style="font-size:12px">ink</b><span style="font:500 11px 'JetBrains Mono',monospace;color:#5B5F7A">#1E1B4B · 14.6:1</span></div>
+<div style="display:flex;flex-direction:column;gap:6px"><div style="height:64px;border-radius:14px;background:#5B5F7A"></div><b style="font-size:12px">ink-muted</b><span style="font:500 11px 'JetBrains Mono',monospace;color:#5B5F7A">#5B5F7A · 6.0:1</span></div>
+<div style="display:flex;flex-direction:column;gap:6px"><div style="height:64px;border-radius:14px;background:#5B47D6"></div><b style="font-size:12px">accent-ink / focus</b><span style="font:500 11px 'JetBrains Mono',monospace;color:#5B5F7A">#5B47D6 · 6.1:1 · ring #8B7CF6</span></div>
+<div style="display:flex;flex-direction:column;gap:6px"><div style="height:64px;border-radius:14px;background:linear-gradient(135deg,#8B7CF6,#6C9BFF)"></div><b style="font-size:12px">accent-gradient</b><span style="font:500 11px 'JetBrains Mono',monospace;color:#5B5F7A">#8B7CF6 → #6C9BFF · ring, bars, progress</span></div>
+<div style="display:flex;flex-direction:column;gap:6px"><div style="height:64px;border-radius:14px;background:linear-gradient(135deg,#6650E0,#4572DB);display:grid;place-items:center;color:#fff;font-size:13px;font-weight:600">Start</div><b style="font-size:12px">accent-gradient-strong</b><span style="font:500 11px 'JetBrains Mono',monospace;color:#5B5F7A">#6650E0 → #4572DB · white text ≥4.6:1</span></div>
+</div>
+<p style="margin:0;font-size:12px;line-height:1.5;color:#5B5F7A;max-width:760px;text-wrap:pretty">White text on #8B7CF6→#6C9BFF is only ~3:1, so buttons with labels use the one-step-deeper <b style="color:#1E1B4B">accent-gradient-strong</b>; the light gradient stays for icon-only controls, the running ring, bars and progress.</p>
+</div>
+
+<div style="padding:22px;border-radius:20px;background:rgba(255,255,255,.6);border:1px solid #fff;display:flex;flex-direction:column;gap:12px">
+<h2 style="margin:0;font-size:15px;font-weight:700">Task types</h2>
+<div style="display:grid;grid-template-columns:1.4fr 1fr .9fr 1fr 1fr 1fr;gap:10px;font-size:10.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#5B5F7A;padding:0 8px"><span>Type · icon</span><span>Base (fills)</span><span>Ink (text)</span><span>Tint bg (18–20%)</span><span>Bar (30% + edge 70%)</span><span>Tailwind key</span></div>
+<div style="display:grid;grid-template-columns:1.4fr 1fr .9fr 1fr 1fr 1fr;gap:10px;align-items:center;padding:8px;border-radius:12px;background:rgba(255,255,255,.6);font:500 11.5px 'JetBrains Mono',monospace"><span style="display:flex;align-items:center;gap:8px;font:600 13px Inter,sans-serif"><span style="width:28px;height:28px;border-radius:9px;display:grid;place-items:center;background:rgba(139,124,246,.18);color:#5B47D6;font-family:'Material Symbols Rounded';font-size:17px">work</span>Client project</span><span style="display:flex;align-items:center;gap:6px"><span style="width:18px;height:18px;border-radius:5px;background:#8B7CF6"></span>#8B7CF6</span><span style="color:#5B47D6">#5B47D6</span><span style="height:24px;border-radius:7px;background:rgba(139,124,246,.18)"></span><span style="height:24px;box-sizing:border-box;border-radius:7px;background:rgba(139,124,246,.3);border:1px solid rgba(139,124,246,.65)"></span><span>type-client</span></div>
+<div style="display:grid;grid-template-columns:1.4fr 1fr .9fr 1fr 1fr 1fr;gap:10px;align-items:center;padding:8px;border-radius:12px;background:rgba(255,255,255,.6);font:500 11.5px 'JetBrains Mono',monospace"><span style="display:flex;align-items:center;gap:8px;font:600 13px Inter,sans-serif"><span style="width:28px;height:28px;border-radius:9px;display:grid;place-items:center;background:rgba(108,155,255,.2);color:#2F5BC4;font-family:'Material Symbols Rounded';font-size:17px">folder</span>Internal project</span><span style="display:flex;align-items:center;gap:6px"><span style="width:18px;height:18px;border-radius:5px;background:#6C9BFF"></span>#6C9BFF</span><span style="color:#2F5BC4">#2F5BC4</span><span style="height:24px;border-radius:7px;background:rgba(108,155,255,.2)"></span><span style="height:24px;box-sizing:border-box;border-radius:7px;background:rgba(108,155,255,.3);border:1px solid rgba(108,155,255,.7)"></span><span>type-internal</span></div>
+<div style="display:grid;grid-template-columns:1.4fr 1fr .9fr 1fr 1fr 1fr;gap:10px;align-items:center;padding:8px;border-radius:12px;background:rgba(255,255,255,.6);font:500 11.5px 'JetBrains Mono',monospace"><span style="display:flex;align-items:center;gap:8px;font:600 13px Inter,sans-serif"><span style="width:28px;height:28px;border-radius:9px;display:grid;place-items:center;background:rgba(43,179,163,.18);color:#0F766B;font-family:'Material Symbols Rounded';font-size:17px">confirmation_number</span>Support ticket</span><span style="display:flex;align-items:center;gap:6px"><span style="width:18px;height:18px;border-radius:5px;background:#2BB3A3"></span>#2BB3A3</span><span style="color:#0F766B">#0F766B</span><span style="height:24px;border-radius:7px;background:rgba(43,179,163,.18)"></span><span style="height:24px;box-sizing:border-box;border-radius:7px;background:rgba(43,179,163,.28);border:1px solid rgba(43,179,163,.7)"></span><span>type-support</span></div>
+<div style="display:grid;grid-template-columns:1.4fr 1fr .9fr 1fr 1fr 1fr;gap:10px;align-items:center;padding:8px;border-radius:12px;background:rgba(255,255,255,.6);font:500 11.5px 'JetBrains Mono',monospace"><span style="display:flex;align-items:center;gap:8px;font:600 13px Inter,sans-serif"><span style="width:28px;height:28px;border-radius:9px;display:grid;place-items:center;background:rgba(233,162,59,.2);color:#8A5A0B;font-family:'Material Symbols Rounded';font-size:17px">groups</span>Meeting</span><span style="display:flex;align-items:center;gap:6px"><span style="width:18px;height:18px;border-radius:5px;background:#E9A23B"></span>#E9A23B</span><span style="color:#8A5A0B">#8A5A0B</span><span style="height:24px;border-radius:7px;background:rgba(233,162,59,.2)"></span><span style="height:24px;box-sizing:border-box;border-radius:7px;background:rgba(233,162,59,.3);border:1px solid rgba(233,162,59,.8)"></span><span>type-meeting</span></div>
+<div style="display:grid;grid-template-columns:1.4fr 1fr .9fr 1fr 1fr 1fr;gap:10px;align-items:center;padding:8px;border-radius:12px;background:rgba(255,255,255,.6);font:500 11.5px 'JetBrains Mono',monospace"><span style="display:flex;align-items:center;gap:8px;font:600 13px Inter,sans-serif"><span style="width:28px;height:28px;border-radius:9px;display:grid;place-items:center;background:rgba(154,160,184,.22);color:#4E5370;font-family:'Material Symbols Rounded';font-size:17px">category</span>Other</span><span style="display:flex;align-items:center;gap:6px"><span style="width:18px;height:18px;border-radius:5px;background:#9AA0B8"></span>#9AA0B8</span><span style="color:#4E5370">#4E5370</span><span style="height:24px;border-radius:7px;background:rgba(154,160,184,.22)"></span><span style="height:24px;box-sizing:border-box;border-radius:7px;background:rgba(154,160,184,.3);border:1px solid rgba(154,160,184,.8)"></span><span>type-other</span></div>
+<div style="display:grid;grid-template-columns:1.4fr 1fr .9fr 1fr 1fr 1fr;gap:10px;align-items:center;padding:8px;border-radius:12px;background:rgba(255,255,255,.6);font:500 11.5px 'JetBrains Mono',monospace"><span style="display:flex;align-items:center;gap:8px;font:600 13px Inter,sans-serif"><span style="width:28px;height:28px;border-radius:9px;display:grid;place-items:center;background:rgba(242,127,165,.2);color:#B2306A;font-family:'Material Symbols Rounded';font-size:17px">videocam</span>Calendar meeting</span><span style="display:flex;align-items:center;gap:6px"><span style="width:18px;height:18px;border-radius:5px;background:#F27FA5"></span>#F27FA5</span><span style="color:#B2306A">#B2306A</span><span style="height:24px;border-radius:7px;background:rgba(242,127,165,.2)"></span><span style="height:24px;box-sizing:border-box;border-radius:7px;background:rgba(242,127,165,.32);border:1px solid rgba(242,127,165,.8)"></span><span>type-calendar</span></div>
+<p style="margin:0;font-size:12px;color:#5B5F7A">Base colours never carry text. Ink values are all ≥5:1 on glass. Status: success #0F766B · syncing #2F5BC4 · offline #4E5370 · error #B23A0A.</p>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:20px">
+<div style="padding:22px;border-radius:20px;background:rgba(255,255,255,.6);border:1px solid #fff;display:flex;flex-direction:column;gap:14px">
+<h2 style="margin:0;font-size:15px;font-weight:700">Radius</h2>
+<div style="display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap">
+<div style="display:flex;flex-direction:column;gap:6px;align-items:center"><div style="width:48px;height:48px;border-radius:6px;background:rgba(139,124,246,.25)"></div><span style="font:500 11px 'JetBrains Mono',monospace">xs 6</span></div>
+<div style="display:flex;flex-direction:column;gap:6px;align-items:center"><div style="width:48px;height:48px;border-radius:10px;background:rgba(139,124,246,.25)"></div><span style="font:500 11px 'JetBrains Mono',monospace">sm 10</span></div>
+<div style="display:flex;flex-direction:column;gap:6px;align-items:center"><div style="width:48px;height:48px;border-radius:14px;background:rgba(139,124,246,.25)"></div><span style="font:500 11px 'JetBrains Mono',monospace">md 14</span></div>
+<div style="display:flex;flex-direction:column;gap:6px;align-items:center"><div style="width:48px;height:48px;border-radius:16px;background:rgba(139,124,246,.25)"></div><span style="font:500 11px 'JetBrains Mono',monospace">lg 16</span></div>
+<div style="display:flex;flex-direction:column;gap:6px;align-items:center"><div style="width:48px;height:48px;border-radius:20px;background:rgba(139,124,246,.25)"></div><span style="font:500 11px 'JetBrains Mono',monospace">xl 20</span></div>
+<div style="display:flex;flex-direction:column;gap:6px;align-items:center"><div style="width:48px;height:48px;border-radius:24px;background:rgba(139,124,246,.25)"></div><span style="font:500 11px 'JetBrains Mono',monospace">full</span></div>
+</div>
+<span style="font-size:12px;color:#5B5F7A">Chips 6–10 · buttons/inputs 12–14 · rows/panels 16–18 · windows/sheets 20–22</span>
+</div>
+<div style="padding:22px;border-radius:20px;background:rgba(255,255,255,.6);border:1px solid #fff;display:flex;flex-direction:column;gap:14px">
+<h2 style="margin:0;font-size:15px;font-weight:700">Blur &amp; shadow</h2>
+<div style="display:grid;grid-template-columns:auto 1fr;gap:8px 14px;font:500 11.5px 'JetBrains Mono',monospace;align-items:center">
+<span style="font-weight:600">blur-glass</span><span>backdrop-blur 24px · saturate 140%</span>
+<span style="font-weight:600">blur-sheet</span><span>backdrop-blur 30px · saturate 150%</span>
+<span style="font-weight:600">blur-blob</span><span>filter blur 70–90px</span>
+<span style="font-weight:600">shadow-sm</span><span>0 2px 8px rgb(46 36 120 / .10)</span>
+<span style="font-weight:600">shadow-md</span><span>0 8px 32px rgb(46 36 120 / .10)</span>
+<span style="font-weight:600">shadow-lg</span><span>0 20px 50px rgb(46 36 120 / .22)</span>
+<span style="font-weight:600">shadow-window</span><span>0 30px 80px rgb(46 36 120 / .22)</span>
+<span style="font-weight:600">glow-running</span><span>0 0 0 4px rgb(139 124 246 / .14), 0 8px 24px rgb(108 155 255 / .28)</span>
+</div>
+</div>
+<div style="padding:22px;border-radius:20px;background:rgba(255,255,255,.6);border:1px solid #fff;display:flex;flex-direction:column;gap:12px">
+<h2 style="margin:0;font-size:15px;font-weight:700">Spacing · 4px base</h2>
+<div style="display:flex;flex-direction:column;gap:6px;font:500 11px 'JetBrains Mono',monospace">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:40px">1 · 4</span><span style="width:4px;height:12px;background:#8B7CF6;border-radius:2px"></span></div>
+<div style="display:flex;align-items:center;gap:10px"><span style="width:40px">1.5 · 6</span><span style="width:6px;height:12px;background:#8B7CF6;border-radius:2px"></span><span style="color:#5B5F7A;font-family:Inter,sans-serif">row gap</span></div>
+<div style="display:flex;align-items:center;gap:10px"><span style="width:40px">2 · 8</span><span style="width:8px;height:12px;background:#8B7CF6;border-radius:2px"></span></div>
+<div style="display:flex;align-items:center;gap:10px"><span style="width:40px">3 · 12</span><span style="width:12px;height:12px;background:#8B7CF6;border-radius:2px"></span><span style="color:#5B5F7A;font-family:Inter,sans-serif">window gutter</span></div>
+<div style="display:flex;align-items:center;gap:10px"><span style="width:40px">4 · 16</span><span style="width:16px;height:12px;background:#8B7CF6;border-radius:2px"></span><span style="color:#5B5F7A;font-family:Inter,sans-serif">sheet padding</span></div>
+<div style="display:flex;align-items:center;gap:10px"><span style="width:40px">6 · 24</span><span style="width:24px;height:12px;background:#8B7CF6;border-radius:2px"></span></div>
+<div style="display:flex;align-items:center;gap:10px"><span style="width:40px">8 · 32</span><span style="width:32px;height:12px;background:#8B7CF6;border-radius:2px"></span><span style="color:#5B5F7A;font-family:Inter,sans-serif">min hit target</span></div>
+</div>
+<span style="font-size:12px;color:#5B5F7A">Heights: title bar 48 · tab 32 · input 40 · row 56 · footer 40 · timeline 212 · mini bar 56</span>
+</div>
+<div style="padding:22px;border-radius:20px;background:rgba(255,255,255,.6);border:1px solid #fff;display:flex;flex-direction:column;gap:10px">
+<h2 style="margin:0;font-size:15px;font-weight:700">Motion</h2>
+<div style="display:grid;grid-template-columns:auto 1fr;gap:8px 14px;font:500 11.5px 'JetBrains Mono',monospace">
+<span style="font-weight:600">spring</span><span>cubic-bezier(.34,1.56,.64,1) · 250–350ms</span>
+<span style="font-weight:600">check-pop</span><span>scale 1 → 1.25 → 1 · 320ms</span>
+<span style="font-weight:600">ease</span><span>cubic-bezier(.2,.8,.2,1) · 200ms</span>
+<span style="font-weight:600">pulse</span><span>running edge · 1.6s loop</span>
+</div>
+<span style="font-size:12px;color:#5B5F7A">prefers-reduced-motion: all animation/transition off (Tailwind <span style="font-family:'JetBrains Mono',monospace">motion-reduce:</span>).</span>
+</div>
+</div>
+
+<div style="padding:22px;border-radius:20px;background:rgba(255,255,255,.6);border:1px solid #fff;display:flex;flex-direction:column;gap:12px">
+<h2 style="margin:0;font-size:15px;font-weight:700">Type scale</h2>
+<div style="display:grid;grid-template-columns:120px 1fr 220px;gap:10px 16px;align-items:baseline">
+<span style="font:500 11px 'JetBrains Mono',monospace;color:#5B5F7A">display · 22/700</span><span style="font-size:22px;font-weight:700;letter-spacing:-.02em">A clean slate.</span><span style="font:500 11px 'JetBrains Mono',monospace;color:#5B5F7A">empty states</span>
+<span style="font:500 11px 'JetBrains Mono',monospace;color:#5B5F7A">title · 16/700</span><span style="font-size:16px;font-weight:700">Start a task</span><span style="font:500 11px 'JetBrains Mono',monospace;color:#5B5F7A">sheets, dialogs</span>
+<span style="font:500 11px 'JetBrains Mono',monospace;color:#5B5F7A">body · 13.5/500</span><span style="font-size:13.5px;font-weight:500">Checkout flow — fix payment step</span><span style="font:500 11px 'JetBrains Mono',monospace;color:#5B5F7A">task titles, inputs</span>
+<span style="font:500 11px 'JetBrains Mono',monospace;color:#5B5F7A">ui · 13/600</span><span style="font-size:13px;font-weight:600">Today · Friday, 10 October</span><span style="font:500 11px 'JetBrains Mono',monospace;color:#5B5F7A">tabs, buttons, title bar</span>
+<span style="font:500 11px 'JetBrains Mono',monospace;color:#5B5F7A">meta · 11.5/400</span><span style="font-size:11.5px;color:#5B5F7A">Client A · Storefront</span><span style="font:500 11px 'JetBrains Mono',monospace;color:#5B5F7A">secondary lines</span>
+<span style="font:500 11px 'JetBrains Mono',monospace;color:#5B5F7A">label · 10.5/600 caps</span><span style="font-size:10.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#5B5F7A">Recent</span><span style="font:500 11px 'JetBrains Mono',monospace;color:#5B5F7A">section labels</span>
+<span style="font:500 11px 'JetBrains Mono',monospace;color:#5B5F7A">timer · mono 28/600</span><span style="font:600 28px 'JetBrains Mono',monospace;color:#B2306A">4:58</span><span style="font:500 11px 'JetBrains Mono',monospace;color:#5B5F7A">alarm countdown</span>
+<span style="font:500 11px 'JetBrains Mono',monospace;color:#5B5F7A">timer · mono 14/600</span><span style="font:600 14px 'JetBrains Mono',monospace;color:#5B47D6">24:13</span><span style="font:500 11px 'JetBrains Mono',monospace;color:#5B5F7A">row / mini bar timer, tabular</span>
+<span style="font:500 11px 'JetBrains Mono',monospace;color:#5B5F7A">duration · mono 11/500</span><span style="font:500 11px 'JetBrains Mono',monospace">1h 15m · 8:00 pm → 9:15 pm</span><span style="font:500 11px 'JetBrains Mono',monospace;color:#5B5F7A">durations, axis</span>
+</div>
+</div>
+
+<div style="padding:22px;border-radius:20px;background:#1E1B4B;color:#E9E6FF;display:flex;flex-direction:column;gap:10px">
+<h2 style="margin:0;font-size:15px;font-weight:700;color:#fff">tailwind.config.js · theme.extend</h2>
+<pre style="margin:0;font:500 12px/1.6 'JetBrains Mono',monospace;white-space:pre-wrap;color:#E9E6FF">colors: {
+  ink: { DEFAULT: '#1E1B4B', muted: '#5B5F7A' },
+  accent: { DEFAULT: '#8B7CF6', to: '#6C9BFF', ink: '#5B47D6', strong: '#6650E0', 'strong-to': '#4572DB' },
+  app: { from: '#F1EDFF', to: '#E8EEFF' },
+  blob: { violet: '#A78BFA', sky: '#7DB4FF' },
+  type: {
+    client:   { DEFAULT: '#8B7CF6', ink: '#5B47D6' },
+    internal: { DEFAULT: '#6C9BFF', ink: '#2F5BC4' },
+    support:  { DEFAULT: '#2BB3A3', ink: '#0F766B' },
+    meeting:  { DEFAULT: '#E9A23B', ink: '#8A5A0B' },
+    other:    { DEFAULT: '#9AA0B8', ink: '#4E5370' },
+    calendar: { DEFAULT: '#F27FA5', ink: '#B2306A' },
+  },
+},
+// tints/bars via opacity modifiers: bg-type-client/20, bg-type-client/30 border-type-client/70
+borderRadius: { xs: '6px', sm: '10px', md: '14px', lg: '16px', xl: '20px' },
+backdropBlur: { glass: '24px', sheet: '30px' },
+boxShadow: {
+  sm: '0 2px 8px rgb(46 36 120 / .10)',  md: '0 8px 32px rgb(46 36 120 / .10)',
+  lg: '0 20px 50px rgb(46 36 120 / .22)', window: '0 30px 80px rgb(46 36 120 / .22)',
+  running: '0 0 0 4px rgb(139 124 246 / .14), 0 8px 24px rgb(108 155 255 / .28)',
+},
+fontFamily: { sans: ['Inter', 'system-ui'], mono: ['JetBrains Mono', 'monospace'] },
+fontSize: { meta: ['11.5px', '1.35'], body: ['13.5px', '1.3'], title: ['16px', '1.3'] },
+transitionTimingFunction: { spring: 'cubic-bezier(.34,1.56,.64,1)' },
+// focus: focus-visible:outline-2 outline-offset-2 outline-accent · glass: bg-white/55 border border-white/85 backdrop-blur-glass</pre>
+</div>
+</div>
+</x-dc>
+</body>
+</html>

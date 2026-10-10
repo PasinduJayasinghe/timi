@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..600,0..1,0&display=block">
+<style>
+body{margin:0;background:#E6E4F2;-webkit-font-smoothing:antialiased}
+a{color:#5B47D6}a:hover{color:#3F2FB0}
+input::placeholder{color:#6B6F88}
+@keyframes dbPulse{0%,100%{opacity:.45;transform:scaleY(.8)}50%{opacity:1;transform:scaleY(1)}}
+@keyframes dbToast{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+</style>
+</helmet>
+
+<section id="t1" style="padding:48px 56px 40px;font-family:Inter,system-ui,sans-serif;color:#1E1B4B">
+<div style="display:flex;align-items:baseline;gap:12px;margin-bottom:6px"><a href="#t1" style="font:600 11px 'JetBrains Mono',monospace;padding:3px 8px;background:#1E1B4B;color:#fff;border-radius:5px;text-decoration:none">1</a><h1 style="margin:0;font-size:22px;font-weight:700;letter-spacing:-.02em">Daybar — Windows</h1></div>
+<p style="margin:0 0 28px;max-width:760px;font-size:13px;line-height:1.55;color:#5B5F7A;text-wrap:pretty">Expanded window, wide mode and the collapsed mini bar. <a href="#1a">1a</a> is live: tick tasks, start/pause timers (one at a time — the previous one pauses and saves with a toast), drag rows to reorder, filter by type and collapse the timeline. Extra type choices: <b style="color:#8A5A0B">Meeting = amber, groups icon</b> (timers you start for meetings) and <b style="color:#4E5370">Other = slate, category icon</b>. Calendar events stay rose with a video icon. Also: <a href="Daybar Sheets & Popovers.dc.html">Sheets &amp; popovers</a> · <a href="Daybar Calendar & Log.dc.html">Calendar &amp; Log</a> · <a href="Daybar Alerts & System.dc.html">Alerts, settings, tray</a> · <a href="Daybar Tokens.dc.html">Tokens</a></p>
+
+<div style="display:flex;flex-wrap:wrap;gap:40px;align-items:flex-start">
+
+<!-- 1a interactive -->
+<div id="1a" style="display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;align-items:center;gap:8px;font-size:12px;color:#5B5F7A"><a href="#1a" style="font:600 10.5px 'JetBrains Mono',monospace;padding:3px 7px;background:rgba(30,27,75,.1);color:#1E1B4B;border-radius:5px;text-decoration:none">1a</a>Expanded 380×780 · Today · interactive</div>
+<div data-screen-label="Expanded · Today" style="position:relative;width:380px;height:780px;border-radius:20px;overflow:hidden;background:linear-gradient(160deg,#F1EDFF 0%,#E8EEFF 100%);box-shadow:0 30px 80px rgba(46,36,120,.22),inset 0 0 0 1px rgba(255,255,255,.7);display:flex;flex-direction:column">
+<div style="position:absolute;width:280px;height:280px;left:-90px;top:-70px;border-radius:50%;background:#A78BFA;opacity:.42;filter:blur(70px);pointer-events:none"></div>
+<div style="position:absolute;width:300px;height:300px;right:-120px;top:320px;border-radius:50%;background:#7DB4FF;opacity:.42;filter:blur(80px);pointer-events:none"></div>
+
+<div style="position:relative;z-index:1;height:48px;flex-shrink:0;display:flex;align-items:center;gap:2px;padding:0 8px 0 14px">
+<div title="Drag to move" style="flex:1;min-width:0;display:flex;align-items:center;gap:10px;height:100%;cursor:grab"><div style="width:18px;height:18px;border-radius:6px;background:linear-gradient(135deg,#8B7CF6,#6C9BFF);box-shadow:0 2px 8px rgba(108,124,246,.45)"></div><span style="font-size:13px;font-weight:600;letter-spacing:-.01em">Friday, 10 October</span></div>
+<button aria-label="Always on top (on)" title="Always on top" style="width:32px;height:32px;border-radius:10px;border:none;background:rgba(139,124,246,.16);display:grid;place-items:center;color:#5B47D6;cursor:pointer;padding:0" style-focus="outline:2px solid #8B7CF6;outline-offset:2px"><span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1;font-variation-settings:'FILL' 1">push_pin</span></button>
+<button aria-label="Wide mode" title="Wide mode" style="width:32px;height:32px;border-radius:10px;border:none;background:transparent;display:grid;place-items:center;color:#5B5F7A;cursor:pointer;padding:0" style-hover="background:rgba(255,255,255,.75);color:#1E1B4B" style-focus="outline:2px solid #8B7CF6;outline-offset:2px"><span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1">width</span></button>
+<button aria-label="Collapse to mini bar" title="Collapse to mini bar" style="width:32px;height:32px;border-radius:10px;border:none;background:transparent;display:grid;place-items:center;color:#5B5F7A;cursor:pointer;padding:0" style-hover="background:rgba(255,255,255,.75);color:#1E1B4B" style-focus="outline:2px solid #8B7CF6;outline-offset:2px"><span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1">close_fullscreen</span></button>
+<button aria-label="Close" title="Close" style="width:32px;height:32px;border-radius:10px;border:none;background:transparent;display:grid;place-items:center;color:#5B5F7A;cursor:pointer;padding:0" style-hover="background:rgba(242,127,165,.22);color:#B2306A" style-focus="outline:2px solid #8B7CF6;outline-offset:2px"><span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1">close</span></button>
+</div>
+
+<div style="position:relative;z-index:1;padding:0 12px 10px;display:flex;gap:6px;align-items:center;flex-shrink:0">
+<div role="tablist" style="flex:1;display:grid;grid-template-columns:repeat(3,1fr);padding:3px;border-radius:13px;background:rgba(255,255,255,.45);border:1px solid rgba(255,255,255,.8);backdrop-filter:blur(20px)">
+<button role="tab" aria-selected="true" style="height:32px;border-radius:10px;border:none;background:#fff;box-shadow:0 2px 8px rgba(46,36,120,.1);font:600 13px Inter,sans-serif;color:#1E1B4B;cursor:pointer" style-focus="outline:2px solid #8B7CF6;outline-offset:2px">Today</button>
+<a href="Daybar Calendar & Log.dc.html#3a" role="tab" style="height:32px;border-radius:10px;display:grid;place-items:center;font:500 13px Inter,sans-serif;color:#5B5F7A;text-decoration:none" style-hover="background:rgba(255,255,255,.6);color:#1E1B4B">Calendar</a>
+<a href="Daybar Calendar & Log.dc.html#3f" role="tab" style="height:32px;border-radius:10px;display:grid;place-items:center;font:500 13px Inter,sans-serif;color:#5B5F7A;text-decoration:none" style-hover="background:rgba(255,255,255,.6);color:#1E1B4B">Log</a>
+</div>
+<a href="Daybar Alerts & System.dc.html#4e" aria-label="Settings" title="Settings" style="width:38px;height:38px;border-radius:12px;display:grid;place-items:center;color:#5B5F7A;text-decoration:none;background:rgba(255,255,255,.45);border:1px solid rgba(255,255,255,.8)" style-hover="background:rgba(255,255,255,.8);color:#1E1B4B"><span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1">settings</span></a>
+</div>
+
+<div style="position:relative;z-index:1;padding:0 12px;display:flex;gap:8px;flex-shrink:0">
+<label style="flex:1;min-width:0;height:40px;display:flex;align-items:center;gap:8px;padding:0 12px;border-radius:14px;background:rgba(255,255,255,.62);border:1px solid rgba(255,255,255,.9);backdrop-filter:blur(20px);box-shadow:0 4px 16px rgba(46,36,120,.06)">
+<span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1;color:#5B47D6">add</span>
+<input value="{{ draft }}" onChange="{{ onDraft }}" onKeyDown="{{ onKey }}" placeholder="Add a task, press Enter" aria-label="Quick add task" style="flex:1;min-width:0;border:none;background:transparent;outline:none;font:400 13.5px Inter,sans-serif;color:#1E1B4B">
+</label>
+<a href="Daybar Sheets & Popovers.dc.html#2a" style="height:40px;padding:0 14px 0 10px;border-radius:14px;display:flex;align-items:center;gap:6px;background:linear-gradient(135deg,#6650E0,#4572DB);color:#fff;font:600 13px Inter,sans-serif;text-decoration:none;box-shadow:0 6px 18px rgba(91,71,214,.35)" style-hover="box-shadow:0 8px 24px rgba(91,71,214,.5);transform:translateY(-1px)"><span style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1;font-variation-settings:'FILL' 1">play_arrow</span>Start task</a>
+</div>
+
+<div role="toolbar" aria-label="Filter by type" style="position:relative;z-index:1;padding:10px 12px 4px;display:flex;gap:6px;flex-shrink:0">
+<sc-for list="{{ chips }}" as="c" hint-placeholder-count="6">
+<button onClick="{{ c.onClick }}" aria-pressed="{{ c.active }}" aria-label="{{ c.label }}" title="{{ c.label }}" style="height:32px;min-width:32px;padding:0 9px;border-radius:10px;display:flex;align-items:center;gap:5px;font:600 12px Inter,sans-serif;cursor:pointer;border:1px solid {{ c.border }};background:{{ c.bg }};color:{{ c.color }}" style-focus="outline:2px solid #8B7CF6;outline-offset:2px">
+<sc-if value="{{ c.hasIcon }}"><span style="font-family:'Material Symbols Rounded';font-size:16px;line-height:1">{{ c.icon }}</span></sc-if>
+<sc-if value="{{ c.showLabel }}"><span>{{ c.short }}</span></sc-if>
+<span style="font:500 11px 'JetBrains Mono',monospace;opacity:.85">{{ c.count }}</span>
+</button>
+</sc-for>
+</div>
+
+<div style="position:relative;z-index:1;flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;scrollbar-color:rgba(91,95,122,.3) transparent;padding:4px 10px 8px;display:flex;flex-direction:column;gap:6px">
+<sc-for list="{{ groups }}" as="g" hint-placeholder-count="1">
+<sc-if value="{{ g.showHead }}"><div style="display:flex;justify-content:space-between;align-items:center;padding:8px 6px 0;font-size:10.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#5B5F7A"><span>{{ g.label }}</span><span style="font:500 11px 'JetBrains Mono',monospace;letter-spacing:0">{{ g.total }}</span></div></sc-if>
+<sc-for list="{{ g.items }}" as="t" hint-placeholder-count="6">
+<div draggable="true" onDragStart="{{ t.onDragStart }}" onDragOver="{{ t.onDragOver }}" onDragEnd="{{ t.onDragEnd }}" style="position:relative;flex-shrink:0;display:flex;align-items:center;gap:2px;min-height:56px;padding:6px 8px 6px 0;border-radius:16px;background:{{ t.bg }};border:{{ t.border }};box-shadow:{{ t.shadow }};opacity:{{ t.opacity }};transition:box-shadow .3s,opacity .3s,background .3s">
+<span aria-hidden="true" title="Drag to reorder" style="font-family:'Material Symbols Rounded';font-size:16px;line-height:1;color:rgba(91,95,122,.45);cursor:grab;width:16px;text-align:center">drag_indicator</span>
+<button onClick="{{ t.onToggle }}" aria-label="{{ t.checkLabel }}" style="width:32px;height:32px;flex-shrink:0;border:none;background:transparent;border-radius:10px;display:grid;place-items:center;cursor:pointer;padding:0" style-focus="outline:2px solid #8B7CF6;outline-offset:1px">
+<span style="width:20px;height:20px;border-radius:50%;box-sizing:border-box;display:grid;place-items:center;border:{{ t.checkBorder }};background:{{ t.checkBg }};transform:{{ t.checkScale }};transition:transform .35s cubic-bezier(.34,1.8,.64,1),background .2s"><sc-if value="{{ t.isDone }}"><span style="font-family:'Material Symbols Rounded';font-size:14px;line-height:1;color:#fff;font-variation-settings:'wght' 600">check</span></sc-if></span>
+</button>
+<div title="{{ t.typeLabel }}" style="width:28px;height:28px;flex-shrink:0;border-radius:9px;display:grid;place-items:center;background:{{ t.tint }};color:{{ t.ink }};margin-right:8px"><span style="font-family:'Material Symbols Rounded';font-size:17px;line-height:1">{{ t.icon }}</span></div>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+<div style="font-size:13.5px;font-weight:500;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-decoration:{{ t.deco }};color:{{ t.titleColor }}">{{ t.title }}</div>
+<div style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:#5B5F7A;min-width:0">
+<span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0">{{ t.meta }}</span>
+<sc-if value="{{ t.hasReminder }}"><span title="Reminder" style="white-space:nowrap;flex-shrink:0;display:flex;align-items:center;gap:2px;padding:1px 6px 1px 4px;border-radius:6px;background:rgba(91,71,214,.1);color:#5B47D6;font-weight:600"><span style="font-family:'Material Symbols Rounded';font-size:13px;line-height:1;font-variation-settings:'FILL' 1">notifications</span>{{ t.reminder }}</span></sc-if>
+<sc-if value="{{ t.carried }}"><span style="white-space:nowrap;flex-shrink:0;display:flex;align-items:center;gap:2px;padding:1px 6px 1px 4px;border-radius:6px;background:rgba(91,95,122,.1);color:#4E5370;font-weight:500"><span style="font-family:'Material Symbols Rounded';font-size:13px;line-height:1">history</span>from yesterday</span></sc-if>
+<sc-if value="{{ t.hasEst }}"><span style="white-space:nowrap;flex-shrink:0;font:500 11px 'JetBrains Mono',monospace;color:#5B5F7A">est {{ t.est }}</span></sc-if>
+</div>
+</div>
+<sc-if value="{{ t.isRun }}"><div style="display:flex;align-items:center;gap:8px;flex-shrink:0"><span style="font:600 14px 'JetBrains Mono',monospace;color:#5B47D6;font-variant-numeric:tabular-nums">{{ t.timer }}</span><button onClick="{{ t.onPause }}" aria-label="Pause timer" style="width:32px;height:32px;border-radius:50%;border:none;display:grid;place-items:center;background:linear-gradient(135deg,#8B7CF6,#6C9BFF);color:#fff;cursor:pointer;box-shadow:0 4px 12px rgba(108,124,246,.45);padding:0" style-hover="transform:scale(1.06)" style-focus="outline:2px solid #5B47D6;outline-offset:2px"><span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1;font-variation-settings:'FILL' 1">pause</span></button></div></sc-if>
+<sc-if value="{{ t.isPaused }}"><div style="display:flex;align-items:center;gap:8px;flex-shrink:0"><div style="display:flex;flex-direction:column;align-items:flex-end;line-height:1.1"><span style="font:500 13px 'JetBrains Mono',monospace;color:#1E1B4B">{{ t.pausedStr }}</span><span style="font-size:10px;font-weight:600;color:#5B5F7A;text-transform:uppercase;letter-spacing:.05em">Paused</span></div><button onClick="{{ t.onPlay }}" aria-label="Resume timer" style="width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.7);border:1.5px solid rgba(91,71,214,.45);color:#5B47D6;cursor:pointer;padding:0" style-hover="background:#fff" style-focus="outline:2px solid #8B7CF6;outline-offset:2px"><span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1;font-variation-settings:'FILL' 1">play_arrow</span></button></div></sc-if>
+<sc-if value="{{ t.isTodo }}"><button onClick="{{ t.onPlay }}" aria-label="Start timer" style="width:32px;height:32px;flex-shrink:0;border-radius:50%;display:grid;place-items:center;background:transparent;border:1.5px solid rgba(91,95,122,.3);color:#5B5F7A;cursor:pointer;padding:0" style-hover="border-color:#5B47D6;color:#5B47D6;background:rgba(255,255,255,.7)" style-focus="outline:2px solid #8B7CF6;outline-offset:2px"><span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1;font-variation-settings:'FILL' 1">play_arrow</span></button></sc-if>
+<sc-if value="{{ t.isDone }}"><span style="flex-shrink:0;font:500 12px 'JetBrains Mono',monospace;color:#5B5F7A;padding-right:4px">{{ t.doneStr }}</span></sc-if>
+</div>
+</sc-for>
+</sc-for>
+</div>
+
+<div style="position:relative;z-index:1;height:40px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 14px;border-top:1px solid rgba(255,255,255,.7)">
+<div style="display:flex;align-items:center;gap:6px;font-size:12px;color:#5B5F7A"><span style="font-family:'Material Symbols Rounded';font-size:16px;line-height:1">schedule</span>Today<span style="white-space:nowrap;font:600 13px 'JetBrains Mono',monospace;color:#1E1B4B">{{ total }}</span></div>
+<div title="{{ syncTitle }}" style="height:26px;display:flex;align-items:center;gap:5px;padding:0 10px 0 8px;border-radius:13px;font-size:11.5px;font-weight:600;background:{{ syncBg }};color:{{ syncInk }}"><span style="font-family:'Material Symbols Rounded';font-size:15px;line-height:1">{{ syncIcon }}</span>{{ syncLabel }}</div>
+</div>
+
+<sc-if value="{{ tlOpen }}" hint-placeholder-val="{{ true }}">
+<div style="position:relative;z-index:1;margin:0 8px 8px;height:212px;flex-shrink:0;border-radius:18px;background:rgba(255,255,255,.55);backdrop-filter:blur(24px) saturate(140%);border:1px solid rgba(255,255,255,.85);box-shadow:0 8px 32px rgba(46,36,120,.1);display:flex;flex-direction:column;padding:6px 10px 10px">
+<div style="display:flex;align-items:center;gap:2px;height:34px">
+<span style="font-size:12px;font-weight:600;flex:1">Timeline</span>
+<button aria-label="Previous day" style="width:32px;height:32px;border-radius:10px;border:none;background:transparent;display:grid;place-items:center;color:#5B5F7A;cursor:pointer;padding:0" style-hover="background:rgba(255,255,255,.8);color:#1E1B4B" style-focus="outline:2px solid #8B7CF6;outline-offset:2px"><span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1">chevron_left</span></button>
+<button style="height:32px;padding:0 10px;border-radius:10px;border:none;background:rgba(255,255,255,.75);font:600 12px Inter,sans-serif;color:#1E1B4B;cursor:pointer" style-focus="outline:2px solid #8B7CF6;outline-offset:2px">Today</button>
+<button aria-label="Next day" style="width:32px;height:32px;border-radius:10px;border:none;background:transparent;display:grid;place-items:center;color:#5B5F7A;cursor:pointer;padding:0" style-hover="background:rgba(255,255,255,.8);color:#1E1B4B" style-focus="outline:2px solid #8B7CF6;outline-offset:2px"><span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1">chevron_right</span></button>
+<button onClick="{{ toggleTl }}" aria-label="Collapse timeline" style="width:32px;height:32px;border-radius:10px;border:none;background:transparent;display:grid;place-items:center;color:#5B5F7A;cursor:pointer;padding:0" style-hover="background:rgba(255,255,255,.8);color:#1E1B4B" style-focus="outline:2px solid #8B7CF6;outline-offset:2px"><span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1">expand_more</span></button>
+</div>
+<div style="flex:1;display:flex;gap:6px;min-height:0">
+<div style="width:24px;display:flex;flex-direction:column;gap:4px;padding-top:18px">
+<div title="Client project" style="height:24px;border-radius:7px;display:grid;place-items:center;background:rgba(139,124,246,.18);color:#5B47D6"><span style="font-family:'Material Symbols Rounded';font-size:15px;line-height:1">work</span></div>
+<div title="Internal project" style="height:24px;border-radius:7px;display:grid;place-items:center;background:rgba(108,155,255,.2);color:#2F5BC4"><span style="font-family:'Material Symbols Rounded';font-size:15px;line-height:1">folder</span></div>
+<div title="Support ticket" style="height:24px;border-radius:7px;display:grid;place-items:center;background:rgba(43,179,163,.18);color:#0F766B"><span style="font-family:'Material Symbols Rounded';font-size:15px;line-height:1">confirmation_number</span></div>
+<div title="Other" style="height:24px;border-radius:7px;display:grid;place-items:center;background:rgba(154,160,184,.22);color:#4E5370"><span style="font-family:'Material Symbols Rounded';font-size:15px;line-height:1">category</span></div>
+<div title="Meetings" style="height:24px;border-radius:7px;display:grid;place-items:center;background:rgba(242,127,165,.2);color:#B2306A"><span style="font-family:'Material Symbols Rounded';font-size:15px;line-height:1">videocam</span></div>
+</div>
+<div style="flex:1;min-width:0;position:relative">
+<div style="position:relative;height:14px;font:500 9.5px 'JetBrains Mono',monospace;color:#5B5F7A">
+<span style="position:absolute;left:0">7p</span><span style="position:absolute;left:22.22%;transform:translateX(-50%)">9p</span><span style="position:absolute;left:44.44%;transform:translateX(-50%)">11p</span><span style="position:absolute;left:66.67%;transform:translateX(-50%)">1a</span><span style="position:absolute;left:88.89%;transform:translateX(-50%)">3a</span><span style="position:absolute;right:0">4a</span>
+</div>
+<div style="position:absolute;inset:16px 0 0 0;display:grid;grid-template-columns:repeat(9,1fr);pointer-events:none"><div style="border-left:1px solid rgba(91,95,122,.14)"></div><div style="border-left:1px dashed rgba(91,95,122,.1)"></div><div style="border-left:1px solid rgba(91,95,122,.14)"></div><div style="border-left:1px dashed rgba(91,95,122,.1)"></div><div style="border-left:1px solid rgba(91,95,122,.14)"></div><div style="border-left:1px dashed rgba(91,95,122,.1)"></div><div style="border-left:1px solid rgba(91,95,122,.14)"></div><div style="border-left:1px dashed rgba(91,95,122,.1)"></div><div style="border-left:1px solid rgba(91,95,122,.14);border-right:1px solid rgba(91,95,122,.14)"></div></div>
+<div style="display:flex;flex-direction:column;gap:4px;margin-top:4px">
+<sc-for list="{{ tlRows }}" as="r" hint-placeholder-count="5">
+<div style="position:relative;height:24px;border-radius:7px;background:rgba(255,255,255,.3)">
+<sc-for list="{{ r.bars }}" as="b" hint-placeholder-count="1">
+<div title="{{ b.tip }}" style="position:absolute;top:0;height:24px;box-sizing:border-box;left:{{ b.left }};width:{{ b.width }};border-radius:7px;background:{{ b.bg }};border:{{ b.border }};display:flex;align-items:center;justify-content:center;font:600 9.5px 'JetBrains Mono',monospace;color:{{ b.ink }};overflow:visible;white-space:nowrap;cursor:pointer;transition:transform .2s,box-shadow .2s" style-hover="transform:translateY(-1px);box-shadow:0 4px 12px rgba(46,36,120,.2);z-index:2">{{ b.label }}{{ b.pulse }}</div>
+</sc-for>
+</div>
+</sc-for>
+</div>
+<div style="position:absolute;top:10px;bottom:-2px;left:{{ nowLeft }};width:2px;margin-left:-1px;border-radius:1px;background:#5B47D6;pointer-events:none;box-shadow:0 0 0 2px rgba(255,255,255,.6)"><div style="position:absolute;top:-3px;left:-3px;width:8px;height:8px;border-radius:50%;background:#5B47D6"></div></div>
+</div>
+<div style="width:42px;display:flex;flex-direction:column;gap:4px;padding-top:18px;font:500 10.5px 'JetBrains Mono',monospace;color:#1E1B4B;text-align:right">
+<sc-for list="{{ tlRows }}" as="r" hint-placeholder-count="5"><div style="height:24px;line-height:24px">{{ r.total }}</div></sc-for>
+</div>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ tlClosed }}" hint-placeholder-val="{{ false }}">
+<button onClick="{{ toggleTl }}" style="position:relative;z-index:1;margin:0 8px 8px;height:40px;flex-shrink:0;border-radius:14px;background:rgba(255,255,255,.55);backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,.85);box-shadow:0 8px 24px rgba(46,36,120,.08);display:flex;align-items:center;gap:8px;padding:0 6px 0 12px;font:600 12px Inter,sans-serif;color:#1E1B4B;cursor:pointer" style-focus="outline:2px solid #8B7CF6;outline-offset:2px"><span style="font-family:'Material Symbols Rounded';font-size:17px;line-height:1;color:#5B47D6">view_timeline</span>Timeline<span style="flex:1"></span><span style="white-space:nowrap;font:500 12px 'JetBrains Mono',monospace">{{ total }} today</span><span style="width:32px;height:32px;display:grid;place-items:center;font-family:'Material Symbols Rounded';font-size:18px;line-height:1;color:#5B5F7A">expand_less</span></button>
+</sc-if>
+
+<sc-if value="{{ toastOn }}" hint-placeholder-val="{{ false }}">{{ toastEl }}</sc-if>
+</div>
+</div>
+
+<!-- 1b empty -->
+<div id="1b" style="display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;align-items:center;gap:8px;font-size:12px;color:#5B5F7A"><a href="#1b" style="font:600 10.5px 'JetBrains Mono',monospace;padding:3px 7px;background:rgba(30,27,75,.1);color:#1E1B4B;border-radius:5px;text-decoration:none">1b</a>Empty state · new day, quick-add focused</div>
+<div data-screen-label="Expanded · Empty" style="position:relative;width:380px;height:780px;border-radius:20px;overflow:hidden;background:linear-gradient(160deg,#F1EDFF 0%,#E8EEFF 100%);box-shadow:0 30px 80px rgba(46,36,120,.22),inset 0 0 0 1px rgba(255,255,255,.7);display:flex;flex-direction:column">
+<div style="position:absolute;width:280px;height:280px;left:-90px;top:-70px;border-radius:50%;background:#A78BFA;opacity:.42;filter:blur(70px)"></div>
+<div style="position:absolute;width:300px;height:300px;right:-120px;top:320px;border-radius:50%;background:#7DB4FF;opacity:.42;filter:blur(80px)"></div>
+<div style="position:relative;z-index:1;height:48px;flex-shrink:0;display:flex;align-items:center;gap:2px;padding:0 8px 0 14px">
+<div style="flex:1;display:flex;align-items:center;gap:10px"><div style="width:18px;height:18px;border-radius:6px;background:linear-gradient(135deg,#8B7CF6,#6C9BFF)"></div><span style="font-size:13px;font-weight:600">Friday, 10 October</span></div>
+<span style="width:32px;height:32px;border-radius:10px;background:rgba(139,124,246,.16);display:grid;place-items:center;color:#5B47D6;font-family:'Material Symbols Rounded';font-size:18px;font-variation-settings:'FILL' 1">push_pin</span><span style="width:32px;height:32px;display:grid;place-items:center;color:#5B5F7A;font-family:'Material Symbols Rounded';font-size:18px">width</span><span style="width:32px;height:32px;display:grid;place-items:center;color:#5B5F7A;font-family:'Material Symbols Rounded';font-size:18px">close_fullscreen</span><span style="width:32px;height:32px;display:grid;place-items:center;color:#5B5F7A;font-family:'Material Symbols Rounded';font-size:18px">close</span>
+</div>
+<div style="position:relative;z-index:1;padding:0 12px 10px;display:flex;gap:6px">
+<div style="flex:1;display:grid;grid-template-columns:repeat(3,1fr);padding:3px;border-radius:13px;background:rgba(255,255,255,.45);border:1px solid rgba(255,255,255,.8)"><span style="height:32px;border-radius:10px;background:#fff;box-shadow:0 2px 8px rgba(46,36,120,.1);display:grid;place-items:center;font-size:13px;font-weight:600">Today</span><span style="display:grid;place-items:center;font-size:13px;font-weight:500;color:#5B5F7A">Calendar</span><span style="display:grid;place-items:center;font-size:13px;font-weight:500;color:#5B5F7A">Log</span></div>
+<span style="width:38px;height:38px;border-radius:12px;display:grid;place-items:center;color:#5B5F7A;background:rgba(255,255,255,.45);border:1px solid rgba(255,255,255,.8);font-family:'Material Symbols Rounded';font-size:18px">settings</span>
+</div>
+<div style="position:relative;z-index:1;padding:0 12px;display:flex;gap:8px">
+<div style="flex:1;height:40px;box-sizing:border-box;display:flex;align-items:center;gap:8px;padding:0 12px;border-radius:14px;background:rgba(255,255,255,.85);border:1px solid #fff;outline:2px solid #8B7CF6;outline-offset:2px;box-shadow:0 0 0 6px rgba(139,124,246,.14)"><span style="font-family:'Material Symbols Rounded';font-size:18px;color:#5B47D6">add</span><span style="width:1.5px;height:18px;background:#1E1B4B"></span><span style="white-space:nowrap;font-size:13.5px;color:#6B6F88;margin-left:-6px">Add a task, press Enter</span></div>
+<span style="height:40px;padding:0 14px 0 10px;border-radius:14px;display:flex;align-items:center;gap:6px;background:linear-gradient(135deg,#6650E0,#4572DB);color:#fff;font-size:13px;font-weight:600;box-shadow:0 6px 18px rgba(91,71,214,.35)"><span style="font-family:'Material Symbols Rounded';font-size:20px;font-variation-settings:'FILL' 1">play_arrow</span>Start task</span>
+</div>
+<div style="position:relative;z-index:1;flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 40px;gap:10px">
+<div style="font-size:22px;font-weight:700;letter-spacing:-.02em;line-height:1.2">A clean slate.</div>
+<div style="font-size:13.5px;line-height:1.55;color:#5B5F7A;text-wrap:pretty">Nothing was left over from yesterday. Type your first task above and press Enter — or hit Start task to get a timer going straight away.</div>
+<div style="display:flex;flex-direction:column;gap:8px;margin-top:10px;font-size:12px;color:#5B5F7A">
+<div style="display:flex;align-items:center;gap:8px"><span style="font:600 11px 'JetBrains Mono',monospace;padding:3px 6px;border-radius:6px;background:rgba(255,255,255,.7);border:1px solid rgba(91,95,122,.18);color:#1E1B4B">Ctrl Shift Space</span>Quick add from any app</div>
+<div style="display:flex;align-items:center;gap:8px"><span style="font-family:'Material Symbols Rounded';font-size:16px;color:#B2306A">videocam</span>Next meeting · Sprint planning at 12:30 am</div>
+</div>
+</div>
+<div style="position:relative;z-index:1;height:40px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;border-top:1px solid rgba(255,255,255,.7)"><div style="display:flex;align-items:center;gap:6px;font-size:12px;color:#5B5F7A"><span style="font-family:'Material Symbols Rounded';font-size:16px">schedule</span>Today<span style="white-space:nowrap;font:600 13px 'JetBrains Mono',monospace;color:#1E1B4B">0m</span></div><div style="height:26px;display:flex;align-items:center;gap:5px;padding:0 10px 0 8px;border-radius:13px;font-size:11.5px;font-weight:600;background:rgba(43,179,163,.16);color:#0F766B"><span style="font-family:'Material Symbols Rounded';font-size:15px">cloud_done</span>Saved</div></div>
+<div style="position:relative;z-index:1;margin:0 8px 8px;height:40px;border-radius:14px;background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.85);display:flex;align-items:center;gap:8px;padding:0 6px 0 12px;font-size:12px;font-weight:600"><span style="font-family:'Material Symbols Rounded';font-size:17px;color:#5B47D6">view_timeline</span>Timeline<span style="flex:1"></span><span style="font:500 12px 'JetBrains Mono',monospace">0m today</span><span style="width:32px;height:32px;display:grid;place-items:center;font-family:'Material Symbols Rounded';font-size:18px;color:#5B5F7A">expand_less</span></div>
+</div>
+</div>
+
+<!-- 1c row states -->
+<div id="1c" style="display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;align-items:center;gap:8px;font-size:12px;color:#5B5F7A"><a href="#1c" style="font:600 10.5px 'JetBrains Mono',monospace;padding:3px 7px;background:rgba(30,27,75,.1);color:#1E1B4B;border-radius:5px;text-decoration:none">1c</a>Task row states · reference</div>
+<div style="width:380px;box-sizing:border-box;padding:16px 12px;border-radius:20px;background:linear-gradient(160deg,#F1EDFF,#E8EEFF);box-shadow:0 20px 60px rgba(46,36,120,.15);display:flex;flex-direction:column;gap:6px">
+<div style="font-size:10.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#5B5F7A;padding:4px 6px 0">To do</div>
+<div style="display:flex;align-items:center;gap:2px;min-height:56px;padding:6px 8px 6px 0;border-radius:16px;background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.85)"><span style="font-family:'Material Symbols Rounded';font-size:16px;color:rgba(91,95,122,.45);width:16px">drag_indicator</span><span style="width:32px;height:32px;display:grid;place-items:center"><span style="width:20px;height:20px;box-sizing:border-box;border-radius:50%;border:1.5px solid rgba(91,95,122,.45)"></span></span><span style="width:28px;height:28px;border-radius:9px;display:grid;place-items:center;background:rgba(108,155,255,.2);color:#2F5BC4;margin-right:8px;font-family:'Material Symbols Rounded';font-size:17px">folder</span><div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:500">Update onboarding docs</div><div style="font-size:11.5px;color:#5B5F7A;display:flex;gap:6px">Dev Portal<span style="font:500 11px 'JetBrains Mono',monospace">est 45m</span></div></div><span style="width:32px;height:32px;box-sizing:border-box;border-radius:50%;border:1.5px solid rgba(91,95,122,.3);display:grid;place-items:center;color:#5B5F7A;font-family:'Material Symbols Rounded';font-size:18px;font-variation-settings:'FILL' 1">play_arrow</span></div>
+<div style="font-size:10.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#5B5F7A;padding:4px 6px 0">Hover + focus</div>
+<div style="display:flex;align-items:center;gap:2px;min-height:56px;padding:6px 8px 6px 0;border-radius:16px;background:rgba(255,255,255,.85);border:1px solid #fff;box-shadow:0 6px 20px rgba(46,36,120,.1)"><span style="font-family:'Material Symbols Rounded';font-size:16px;color:#5B5F7A;width:16px">drag_indicator</span><span style="width:32px;height:32px;display:grid;place-items:center"><span style="width:20px;height:20px;box-sizing:border-box;border-radius:50%;border:1.5px solid rgba(91,95,122,.45)"></span></span><span style="width:28px;height:28px;border-radius:9px;display:grid;place-items:center;background:rgba(108,155,255,.2);color:#2F5BC4;margin-right:8px;font-family:'Material Symbols Rounded';font-size:17px">folder</span><div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:500">Update onboarding docs</div><div style="font-size:11.5px;color:#5B5F7A">Dev Portal</div></div><span style="width:32px;height:32px;box-sizing:border-box;border-radius:50%;border:1.5px solid #5B47D6;outline:2px solid #8B7CF6;outline-offset:2px;background:#fff;display:grid;place-items:center;color:#5B47D6;font-family:'Material Symbols Rounded';font-size:18px;font-variation-settings:'FILL' 1">play_arrow</span></div>
+<div style="font-size:10.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#5B5F7A;padding:4px 6px 0">Timer running</div>
+<div style="display:flex;align-items:center;gap:2px;min-height:56px;padding:6px 8px 6px 0;border-radius:16px;background:linear-gradient(rgba(255,255,255,.9),rgba(255,255,255,.9)) padding-box,linear-gradient(135deg,#8B7CF6,#6C9BFF) border-box;border:1.5px solid transparent;box-shadow:0 0 0 4px rgba(139,124,246,.14),0 8px 24px rgba(108,155,255,.28)"><span style="font-family:'Material Symbols Rounded';font-size:16px;color:rgba(91,95,122,.45);width:16px">drag_indicator</span><span style="width:32px;height:32px;display:grid;place-items:center"><span style="width:20px;height:20px;box-sizing:border-box;border-radius:50%;border:1.5px solid rgba(91,95,122,.45)"></span></span><span style="width:28px;height:28px;border-radius:9px;display:grid;place-items:center;background:rgba(139,124,246,.18);color:#5B47D6;margin-right:8px;font-family:'Material Symbols Rounded';font-size:17px">work</span><div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Checkout flow — fix payment step</div><div style="font-size:11.5px;color:#5B5F7A">Client A · Storefront</div></div><span style="font:600 14px 'JetBrains Mono',monospace;color:#5B47D6;margin-right:8px">24:13</span><span style="width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#8B7CF6,#6C9BFF);color:#fff;font-family:'Material Symbols Rounded';font-size:18px;font-variation-settings:'FILL' 1">pause</span></div>
+<div style="font-size:10.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#5B5F7A;padding:4px 6px 0">Paused</div>
+<div style="display:flex;align-items:center;gap:2px;min-height:56px;padding:6px 8px 6px 0;border-radius:16px;background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.85)"><span style="font-family:'Material Symbols Rounded';font-size:16px;color:rgba(91,95,122,.45);width:16px">drag_indicator</span><span style="width:32px;height:32px;display:grid;place-items:center"><span style="width:20px;height:20px;box-sizing:border-box;border-radius:50%;border:1.5px solid rgba(91,95,122,.45)"></span></span><span style="width:28px;height:28px;border-radius:9px;display:grid;place-items:center;background:rgba(108,155,255,.2);color:#2F5BC4;margin-right:8px;font-family:'Material Symbols Rounded';font-size:17px">folder</span><div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:500">Draft release notes</div><div style="font-size:11.5px;color:#5B5F7A">SLE Hub</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;line-height:1.1;margin-right:8px"><span style="font:500 13px 'JetBrains Mono',monospace">40:00</span><span style="font-size:10px;font-weight:600;color:#5B5F7A;letter-spacing:.05em">PAUSED</span></div><span style="width:32px;height:32px;box-sizing:border-box;border-radius:50%;border:1.5px solid rgba(91,71,214,.45);background:rgba(255,255,255,.7);display:grid;place-items:center;color:#5B47D6;font-family:'Material Symbols Rounded';font-size:18px;font-variation-settings:'FILL' 1">play_arrow</span></div>
+<div style="font-size:10.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#5B5F7A;padding:4px 6px 0">Reminder due soon · carried over</div>
+<div style="display:flex;align-items:center;gap:2px;min-height:56px;padding:6px 8px 6px 0;border-radius:16px;background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.85)"><span style="font-family:'Material Symbols Rounded';font-size:16px;color:rgba(91,95,122,.45);width:16px">drag_indicator</span><span style="width:32px;height:32px;display:grid;place-items:center"><span style="width:20px;height:20px;box-sizing:border-box;border-radius:50%;border:1.5px solid rgba(91,95,122,.45)"></span></span><span style="width:28px;height:28px;border-radius:9px;display:grid;place-items:center;background:rgba(139,124,246,.18);color:#5B47D6;margin-right:8px;font-family:'Material Symbols Rounded';font-size:17px">work</span><div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Reply to Client B about API limits</div><div style="font-size:11.5px;color:#5B5F7A;display:flex;gap:6px;align-items:center">Client B<span style="display:flex;align-items:center;gap:2px;padding:1px 6px 1px 4px;border-radius:6px;background:rgba(91,71,214,.1);color:#5B47D6;font-weight:600"><span style="font-family:'Material Symbols Rounded';font-size:13px;font-variation-settings:'FILL' 1">notifications</span>11:55 pm</span></div></div><span style="width:32px;height:32px;box-sizing:border-box;border-radius:50%;border:1.5px solid rgba(91,95,122,.3);display:grid;place-items:center;color:#5B5F7A;font-family:'Material Symbols Rounded';font-size:18px;font-variation-settings:'FILL' 1">play_arrow</span></div>
+<div style="display:flex;align-items:center;gap:2px;min-height:56px;padding:6px 8px 6px 0;border-radius:16px;background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.85)"><span style="font-family:'Material Symbols Rounded';font-size:16px;color:rgba(91,95,122,.45);width:16px">drag_indicator</span><span style="width:32px;height:32px;display:grid;place-items:center"><span style="width:20px;height:20px;box-sizing:border-box;border-radius:50%;border:1.5px solid rgba(91,95,122,.45)"></span></span><span style="width:28px;height:28px;border-radius:9px;display:grid;place-items:center;background:rgba(43,179,163,.18);color:#0F766B;margin-right:8px;font-family:'Material Symbols Rounded';font-size:17px">confirmation_number</span><div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:500">#4821 Login loop on Safari</div><div style="font-size:11.5px;color:#5B5F7A;display:flex;gap:6px;align-items:center">Client C<span style="display:flex;align-items:center;gap:2px;padding:1px 6px 1px 4px;border-radius:6px;background:rgba(91,95,122,.1);color:#4E5370;font-weight:500"><span style="font-family:'Material Symbols Rounded';font-size:13px">history</span>from yesterday</span></div></div><span style="width:32px;height:32px;box-sizing:border-box;border-radius:50%;border:1.5px solid rgba(91,95,122,.3);display:grid;place-items:center;color:#5B5F7A;font-family:'Material Symbols Rounded';font-size:18px;font-variation-settings:'FILL' 1">play_arrow</span></div>
+<div style="font-size:10.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#5B5F7A;padding:4px 6px 0">Done</div>
+<div style="display:flex;align-items:center;gap:2px;min-height:56px;padding:6px 8px 6px 0;border-radius:16px;background:rgba(255,255,255,.3);border:1px solid rgba(255,255,255,.5);opacity:.62"><span style="font-family:'Material Symbols Rounded';font-size:16px;color:rgba(91,95,122,.45);width:16px">drag_indicator</span><span style="width:32px;height:32px;display:grid;place-items:center"><span style="width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,#8B7CF6,#6C9BFF);display:grid;place-items:center;color:#fff;font-family:'Material Symbols Rounded';font-size:14px">check</span></span><span style="width:28px;height:28px;border-radius:9px;display:grid;place-items:center;background:rgba(43,179,163,.18);color:#0F766B;margin-right:8px;font-family:'Material Symbols Rounded';font-size:17px">confirmation_number</span><div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:500;text-decoration:line-through;color:#5B5F7A">#4807 Export CSV encoding</div><div style="font-size:11.5px;color:#5B5F7A">Client A</div></div><span style="font:500 12px 'JetBrains Mono',monospace;color:#5B5F7A">35m</span></div>
+<div style="font-size:11.5px;line-height:1.5;color:#5B5F7A;padding:8px 6px 0;text-wrap:pretty">Complete: the checkbox springs to 1.25× and fills with the gradient, the title strikes through, the row fades to 62% and settles under the open tasks. With reduce-motion on, it simply swaps state.</div>
+</div>
+</div>
+
+<!-- 1d wide -->
+<div id="1d" style="display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;align-items:center;gap:8px;font-size:12px;color:#5B5F7A"><a href="#1d" style="font:600 10.5px 'JetBrains Mono',monospace;padding:3px 7px;background:rgba(30,27,75,.1);color:#1E1B4B;border-radius:5px;text-decoration:none">1d</a>Wide mode 760×600 · tasks left, calendar right, timeline across</div>
+<div data-screen-label="Wide mode" style="position:relative;width:760px;height:600px;border-radius:20px;overflow:hidden;background:linear-gradient(160deg,#F1EDFF 0%,#E8EEFF 100%);box-shadow:0 30px 80px rgba(46,36,120,.22),inset 0 0 0 1px rgba(255,255,255,.7);display:flex;flex-direction:column">
+<div style="position:absolute;width:340px;height:340px;left:-100px;top:-120px;border-radius:50%;background:#A78BFA;opacity:.42;filter:blur(80px)"></div>
+<div style="position:absolute;width:360px;height:360px;right:-100px;top:120px;border-radius:50%;background:#7DB4FF;opacity:.42;filter:blur(90px)"></div>
+<div style="position:relative;z-index:1;height:48px;flex-shrink:0;display:flex;align-items:center;gap:2px;padding:0 8px 0 14px">
+<div style="display:flex;align-items:center;gap:10px;margin-right:16px"><div style="width:18px;height:18px;border-radius:6px;background:linear-gradient(135deg,#8B7CF6,#6C9BFF)"></div><span style="font-size:13px;font-weight:600">Friday, 10 October</span></div>
+<div style="display:flex;padding:3px;border-radius:12px;background:rgba(255,255,255,.45);border:1px solid rgba(255,255,255,.8)"><span style="height:28px;padding:0 14px;border-radius:9px;background:#fff;box-shadow:0 2px 8px rgba(46,36,120,.1);display:grid;place-items:center;font-size:12.5px;font-weight:600">Today + Calendar</span><span style="height:28px;padding:0 14px;display:grid;place-items:center;font-size:12.5px;font-weight:500;color:#5B5F7A">Log</span></div>
+<div style="flex:1;height:100%"></div>
+<span style="width:32px;height:32px;display:grid;place-items:center;color:#5B5F7A;font-family:'Material Symbols Rounded';font-size:18px">settings</span><span style="width:32px;height:32px;border-radius:10px;background:rgba(139,124,246,.16);display:grid;place-items:center;color:#5B47D6;font-family:'Material Symbols Rounded';font-size:18px;font-variation-settings:'FILL' 1">push_pin</span><span title="Wide mode (on)" style="width:32px;height:32px;border-radius:10px;background:rgba(139,124,246,.16);display:grid;place-items:center;color:#5B47D6;font-family:'Material Symbols Rounded';font-size:18px">width</span><span style="width:32px;height:32px;display:grid;place-items:center;color:#5B5F7A;font-family:'Material Symbols Rounded';font-size:18px">close_fullscreen</span><span style="width:32px;height:32px;display:grid;place-items:center;color:#5B5F7A;font-family:'Material Symbols Rounded';font-size:18px">close</span>
+</div>
+<div style="position:relative;z-index:1;flex:1;min-height:0;display:grid;grid-template-columns:1fr 300px;gap:10px;padding:0 10px">
+<div style="min-height:0;border-radius:18px;background:rgba(255,255,255,.4);border:1px solid rgba(255,255,255,.8);backdrop-filter:blur(24px);display:flex;flex-direction:column;padding:10px;gap:8px;overflow:hidden">
+<div style="display:flex;gap:8px"><div style="flex:1;height:38px;display:flex;align-items:center;gap:8px;padding:0 12px;border-radius:13px;background:rgba(255,255,255,.7);border:1px solid #fff"><span style="font-family:'Material Symbols Rounded';font-size:18px;color:#5B47D6">add</span><span style="font-size:13px;color:#6B6F88">Add a task, press Enter</span></div><span style="height:38px;padding:0 14px 0 10px;border-radius:13px;display:flex;align-items:center;gap:6px;background:linear-gradient(135deg,#6650E0,#4572DB);color:#fff;font-size:13px;font-weight:600"><span style="font-family:'Material Symbols Rounded';font-size:20px;font-variation-settings:'FILL' 1">play_arrow</span>Start task</span></div>
+<div style="display:flex;gap:6px"><span style="height:28px;padding:0 9px;border-radius:9px;display:flex;align-items:center;gap:5px;background:#1E1B4B;color:#fff;font-size:12px;font-weight:600">All<span style="font:500 11px 'JetBrains Mono',monospace">8</span></span><span style="height:28px;padding:0 8px;border-radius:9px;display:flex;align-items:center;gap:4px;background:rgba(139,124,246,.14);color:#5B47D6;font:500 11px 'JetBrains Mono',monospace"><span style="font-family:'Material Symbols Rounded';font-size:15px">work</span>2</span><span style="height:28px;padding:0 8px;border-radius:9px;display:flex;align-items:center;gap:4px;background:rgba(108,155,255,.16);color:#2F5BC4;font:500 11px 'JetBrains Mono',monospace"><span style="font-family:'Material Symbols Rounded';font-size:15px">folder</span>2</span><span style="height:28px;padding:0 8px;border-radius:9px;display:flex;align-items:center;gap:4px;background:rgba(43,179,163,.14);color:#0F766B;font:500 11px 'JetBrains Mono',monospace"><span style="font-family:'Material Symbols Rounded';font-size:15px">confirmation_number</span>2</span><span style="height:28px;padding:0 8px;border-radius:9px;display:flex;align-items:center;gap:4px;background:rgba(233,162,59,.16);color:#8A5A0B;font:500 11px 'JetBrains Mono',monospace"><span style="font-family:'Material Symbols Rounded';font-size:15px">groups</span>1</span><span style="height:28px;padding:0 8px;border-radius:9px;display:flex;align-items:center;gap:4px;background:rgba(154,160,184,.2);color:#4E5370;font:500 11px 'JetBrains Mono',monospace"><span style="font-family:'Material Symbols Rounded';font-size:15px">category</span>1</span></div>
+<div style="display:flex;flex-direction:column;gap:5px;overflow:hidden">
+<div style="display:flex;align-items:center;gap:8px;height:46px;padding:0 8px;border-radius:14px;background:linear-gradient(rgba(255,255,255,.92),rgba(255,255,255,.92)) padding-box,linear-gradient(135deg,#8B7CF6,#6C9BFF) border-box;border:1.5px solid transparent;box-shadow:0 0 0 4px rgba(139,124,246,.14),0 8px 20px rgba(108,155,255,.25)"><span style="width:18px;height:18px;box-sizing:border-box;border-radius:50%;border:1.5px solid rgba(91,95,122,.45)"></span><span style="width:26px;height:26px;border-radius:8px;display:grid;place-items:center;background:rgba(139,124,246,.18);color:#5B47D6;font-family:'Material Symbols Rounded';font-size:16px">work</span><div style="flex:1;min-width:0;font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Checkout flow — fix payment step <span style="color:#5B5F7A;font-weight:400">· Client A</span></div><span style="font:600 13px 'JetBrains Mono',monospace;color:#5B47D6">24:13</span><span style="width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#8B7CF6,#6C9BFF);color:#fff;font-family:'Material Symbols Rounded';font-size:17px;font-variation-settings:'FILL' 1">pause</span></div>
+<div style="display:flex;align-items:center;gap:8px;height:46px;padding:0 8px;border-radius:14px;background:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.9)"><span style="width:18px;height:18px;box-sizing:border-box;border-radius:50%;border:1.5px solid rgba(91,95,122,.45)"></span><span style="width:26px;height:26px;border-radius:8px;display:grid;place-items:center;background:rgba(139,124,246,.18);color:#5B47D6;font-family:'Material Symbols Rounded';font-size:16px">work</span><div style="flex:1;min-width:0;font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Reply to Client B about API limits</div><span style="display:flex;align-items:center;gap:2px;padding:1px 6px 1px 4px;border-radius:6px;background:rgba(91,71,214,.1);color:#5B47D6;font-size:11px;font-weight:600"><span style="font-family:'Material Symbols Rounded';font-size:13px;font-variation-settings:'FILL' 1">notifications</span>11:55 pm</span><span style="width:30px;height:30px;box-sizing:border-box;border-radius:50%;border:1.5px solid rgba(91,95,122,.3);display:grid;place-items:center;color:#5B5F7A;font-family:'Material Symbols Rounded';font-size:17px;font-variation-settings:'FILL' 1">play_arrow</span></div>
+<div style="display:flex;align-items:center;gap:8px;height:46px;padding:0 8px;border-radius:14px;background:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.9)"><span style="width:18px;height:18px;box-sizing:border-box;border-radius:50%;border:1.5px solid rgba(91,95,122,.45)"></span><span style="width:26px;height:26px;border-radius:8px;display:grid;place-items:center;background:rgba(43,179,163,.18);color:#0F766B;font-family:'Material Symbols Rounded';font-size:16px">confirmation_number</span><div style="flex:1;min-width:0;font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">#4821 Login loop on Safari</div><span style="display:flex;align-items:center;gap:2px;padding:1px 6px 1px 4px;border-radius:6px;background:rgba(91,95,122,.1);color:#4E5370;font-size:11px;font-weight:500"><span style="font-family:'Material Symbols Rounded';font-size:13px">history</span>from yesterday</span><span style="font:500 12px 'JetBrains Mono',monospace">50:00</span><span style="width:30px;height:30px;box-sizing:border-box;border-radius:50%;border:1.5px solid rgba(91,71,214,.45);display:grid;place-items:center;color:#5B47D6;font-family:'Material Symbols Rounded';font-size:17px;font-variation-settings:'FILL' 1">play_arrow</span></div>
+<div style="display:flex;align-items:center;gap:8px;height:46px;padding:0 8px;border-radius:14px;background:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.9)"><span style="width:18px;height:18px;box-sizing:border-box;border-radius:50%;border:1.5px solid rgba(91,95,122,.45)"></span><span style="width:26px;height:26px;border-radius:8px;display:grid;place-items:center;background:rgba(108,155,255,.2);color:#2F5BC4;font-family:'Material Symbols Rounded';font-size:16px">folder</span><div style="flex:1;min-width:0;font-size:13px;font-weight:500">Draft release notes <span style="color:#5B5F7A;font-weight:400">· SLE Hub</span></div><span style="font:500 12px 'JetBrains Mono',monospace">40:00</span><span style="width:30px;height:30px;box-sizing:border-box;border-radius:50%;border:1.5px solid rgba(91,71,214,.45);display:grid;place-items:center;color:#5B47D6;font-family:'Material Symbols Rounded';font-size:17px;font-variation-settings:'FILL' 1">play_arrow</span></div>
+<div style="display:flex;align-items:center;gap:8px;height:46px;padding:0 8px;border-radius:14px;background:rgba(255,255,255,.3);opacity:.62"><span style="width:18px;height:18px;border-radius:50%;background:linear-gradient(135deg,#8B7CF6,#6C9BFF);display:grid;place-items:center;color:#fff;font-family:'Material Symbols Rounded';font-size:13px">check</span><span style="width:26px;height:26px;border-radius:8px;display:grid;place-items:center;background:rgba(43,179,163,.18);color:#0F766B;font-family:'Material Symbols Rounded';font-size:16px">confirmation_number</span><div style="flex:1;font-size:13px;font-weight:500;text-decoration:line-through;color:#5B5F7A">#4807 Export CSV encoding</div><span style="font:500 12px 'JetBrains Mono',monospace;color:#5B5F7A">35m</span></div>
+</div>
+</div>
+<div style="min-height:0;border-radius:18px;background:rgba(255,255,255,.4);border:1px solid rgba(255,255,255,.8);backdrop-filter:blur(24px);display:flex;flex-direction:column;padding:10px 12px;gap:8px;overflow:hidden">
+<div style="display:flex;align-items:center;gap:6px"><span style="font-size:12.5px;font-weight:600;flex:1">Calendar</span><span style="display:flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:#0F766B"><span style="width:6px;height:6px;border-radius:50%;background:#2BB3A3"></span>Connected</span></div>
+<div style="position:relative;flex:1;display:grid;grid-template-columns:34px 1fr;grid-template-rows:repeat(5,1fr);font:500 10px 'JetBrains Mono',monospace;color:#5B5F7A">
+<span>11p</span><span style="border-top:1px solid rgba(91,95,122,.14)"></span><span>12a</span><span style="border-top:1px solid rgba(91,95,122,.14)"></span><span>1a</span><span style="border-top:1px solid rgba(91,95,122,.14)"></span><span>2a</span><span style="border-top:1px solid rgba(91,95,122,.14)"></span><span>3a</span><span style="border-top:1px solid rgba(91,95,122,.14)"></span>
+<div style="position:absolute;left:34px;right:0;top:14%;height:2px;background:#5B47D6"><div style="position:absolute;left:-4px;top:-3px;width:8px;height:8px;border-radius:50%;background:#5B47D6"></div></div>
+<div style="position:absolute;left:34px;width:4px;top:6%;height:8%;border-radius:2px;background:linear-gradient(#8B7CF6,#6C9BFF)" title="Tracked: Checkout flow"></div>
+<div style="position:absolute;left:42px;right:0;top:30%;height:15%;box-sizing:border-box;border-radius:12px;background:rgba(242,127,165,.22);border:1px solid rgba(242,127,165,.6);padding:7px 9px;display:flex;flex-direction:column;gap:6px;font-family:Inter,sans-serif">
+<div style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:#1E1B4B"><span style="font-family:'Material Symbols Rounded';font-size:15px;color:#B2306A">videocam</span>Sprint planning · Client A</div>
+<div style="display:flex;align-items:center;gap:6px"><span style="font:500 10.5px 'JetBrains Mono',monospace;color:#5B5F7A;flex:1">12:30–1:15 · in 48m</span><span style="height:24px;padding:0 9px;border-radius:8px;background:#B2306A;color:#fff;font-size:11px;font-weight:600;display:flex;align-items:center">Join Meet</span></div>
+</div>
+<div style="position:absolute;left:42px;right:0;top:60%;height:10%;box-sizing:border-box;border-radius:10px;background:rgba(242,127,165,.16);border:1px solid rgba(242,127,165,.45);padding:5px 9px;display:flex;align-items:center;gap:5px;font:600 12px Inter,sans-serif;color:#1E1B4B"><span style="font-family:'Material Symbols Rounded';font-size:15px;color:#B2306A">videocam</span>1:1 with team lead<span style="flex:1"></span><span style="font:500 10.5px 'JetBrains Mono',monospace;color:#5B5F7A">2:00</span></div>
+</div>
+</div>
+</div>
+<div style="position:relative;z-index:1;margin:8px 10px 0;height:150px;flex-shrink:0;border-radius:18px;background:rgba(255,255,255,.55);backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,.85);box-shadow:0 8px 32px rgba(46,36,120,.1);display:flex;gap:8px;padding:8px 12px">
+<div style="width:84px;display:flex;flex-direction:column;gap:3px;padding-top:16px;font-size:11px;font-weight:600">
+<span style="height:20px;display:flex;align-items:center;gap:5px;color:#5B47D6"><span style="font-family:'Material Symbols Rounded';font-size:14px">work</span>Client</span><span style="height:20px;display:flex;align-items:center;gap:5px;color:#2F5BC4"><span style="font-family:'Material Symbols Rounded';font-size:14px">folder</span>Internal</span><span style="height:20px;display:flex;align-items:center;gap:5px;color:#0F766B"><span style="font-family:'Material Symbols Rounded';font-size:14px">confirmation_number</span>Support</span><span style="height:20px;display:flex;align-items:center;gap:5px;color:#4E5370"><span style="font-family:'Material Symbols Rounded';font-size:14px">category</span>Other</span><span style="height:20px;display:flex;align-items:center;gap:5px;color:#B2306A"><span style="font-family:'Material Symbols Rounded';font-size:14px">videocam</span>Meetings</span>
+</div>
+<div style="flex:1;position:relative">
+<div style="position:relative;height:14px;font:500 9.5px 'JetBrains Mono',monospace;color:#5B5F7A"><span style="position:absolute;left:0">7 pm</span><span style="position:absolute;left:11.11%">8</span><span style="position:absolute;left:22.22%">9</span><span style="position:absolute;left:33.33%">10</span><span style="position:absolute;left:44.44%">11</span><span style="position:absolute;left:55.56%">12 am</span><span style="position:absolute;left:66.67%">1</span><span style="position:absolute;left:77.78%">2</span><span style="position:absolute;left:88.89%">3</span></div>
+<div style="display:flex;flex-direction:column;gap:3px;margin-top:2px;font:600 10px Inter,sans-serif">
+<div style="position:relative;height:20px;border-radius:6px;background:rgba(255,255,255,.3)"><div style="position:absolute;left:11.11%;width:13.89%;height:20px;box-sizing:border-box;border-radius:6px;background:rgba(139,124,246,.3);border:1px solid rgba(139,124,246,.65);color:#3F2FB0;display:flex;align-items:center;padding:0 6px;white-space:nowrap;overflow:hidden"><span style="overflow:hidden;text-overflow:ellipsis">Checkout flow · 1h 15m</span></div><div style="position:absolute;left:47.78%;width:4.44%;height:20px;box-sizing:border-box;border-radius:6px;background:linear-gradient(90deg,rgba(139,124,246,.45),rgba(108,155,255,.55));border:1px solid #8B7CF6;box-shadow:0 0 12px rgba(139,124,246,.5)"></div></div>
+<div style="position:relative;height:20px;border-radius:6px;background:rgba(255,255,255,.3)"><div style="position:absolute;left:25%;width:7.41%;height:20px;box-sizing:border-box;border-radius:6px;background:rgba(108,155,255,.3);border:1px solid rgba(108,155,255,.7);color:#2448A8;display:flex;align-items:center;padding:0 6px;white-space:nowrap;overflow:hidden"><span style="overflow:hidden;text-overflow:ellipsis">Release notes</span></div></div>
+<div style="position:relative;height:20px;border-radius:6px;background:rgba(255,255,255,.3)"><div style="position:absolute;left:.93%;width:6.48%;height:20px;box-sizing:border-box;border-radius:6px;background:rgba(43,179,163,.28);border:1px solid rgba(43,179,163,.7);color:#0B5F56;display:flex;align-items:center;padding:0 6px;white-space:nowrap;overflow:hidden"><span style="overflow:hidden;text-overflow:ellipsis">#4807</span></div><div style="position:absolute;left:33.33%;width:9.26%;height:20px;box-sizing:border-box;border-radius:6px;background:rgba(43,179,163,.28);border:1px solid rgba(43,179,163,.7);color:#0B5F56;display:flex;align-items:center;padding:0 6px;white-space:nowrap;overflow:hidden"><span style="overflow:hidden;text-overflow:ellipsis">#4821 · 50m</span></div></div>
+<div style="position:relative;height:20px;border-radius:6px;background:rgba(255,255,255,.3)"><div style="position:absolute;left:42.59%;width:3.7%;height:20px;box-sizing:border-box;border-radius:6px;background:rgba(154,160,184,.3);border:1px solid rgba(154,160,184,.8)"></div></div>
+<div style="position:relative;height:20px;border-radius:6px;background:rgba(255,255,255,.3)"><div style="position:absolute;left:8.33%;width:2.78%;height:20px;box-sizing:border-box;border-radius:6px;background:rgba(242,127,165,.32);border:1px solid rgba(242,127,165,.8)"></div><div style="position:absolute;left:61.11%;width:8.33%;height:20px;box-sizing:border-box;border-radius:6px;background:rgba(242,127,165,.12);border:1px dashed rgba(242,127,165,.8);color:#8E2454;display:flex;align-items:center;padding:0 6px;white-space:nowrap;overflow:hidden"><span style="overflow:hidden;text-overflow:ellipsis">Sprint planning</span></div><div style="position:absolute;left:77.78%;width:5.56%;height:20px;box-sizing:border-box;border-radius:6px;background:rgba(242,127,165,.12);border:1px dashed rgba(242,127,165,.8);color:#8E2454;display:flex;align-items:center;padding:0 6px;white-space:nowrap;overflow:hidden"><span style="overflow:hidden;text-overflow:ellipsis">1:1</span></div></div>
+</div>
+<div style="position:absolute;top:10px;bottom:0;left:52.22%;width:2px;background:#5B47D6;box-shadow:0 0 0 2px rgba(255,255,255,.6)"><div style="position:absolute;top:-3px;left:-3px;width:8px;height:8px;border-radius:50%;background:#5B47D6"></div></div>
+</div>
+<div style="width:52px;display:flex;flex-direction:column;gap:3px;padding-top:16px;font:500 10.5px 'JetBrains Mono',monospace;text-align:right"><span style="height:20px;line-height:20px">1h 39m</span><span style="height:20px;line-height:20px">40m</span><span style="height:20px;line-height:20px">1h 25m</span><span style="height:20px;line-height:20px">20m</span><span style="height:20px;line-height:20px">15m</span></div>
+</div>
+<div style="position:relative;z-index:1;height:38px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 16px"><div style="display:flex;align-items:center;gap:6px;font-size:12px;color:#5B5F7A"><span style="font-family:'Material Symbols Rounded';font-size:16px">schedule</span>Today<span style="white-space:nowrap;font:600 13px 'JetBrains Mono',monospace;color:#1E1B4B">4h 19m</span></div><div style="height:26px;display:flex;align-items:center;gap:5px;padding:0 10px 0 8px;border-radius:13px;font-size:11.5px;font-weight:600;background:rgba(108,155,255,.18);color:#2F5BC4"><span style="font-family:'Material Symbols Rounded';font-size:15px">sync</span>Syncing</div></div>
+</div>
+</div>
+
+<!-- 1e mini bars -->
+<div id="1e" style="display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;align-items:center;gap:8px;font-size:12px;color:#5B5F7A"><a href="#1e" style="font:600 10.5px 'JetBrains Mono',monospace;padding:3px 7px;background:rgba(30,27,75,.1);color:#1E1B4B;border-radius:5px;text-decoration:none">1e</a>Collapsed mini bar 380×56 · running, meeting, paused, idle</div>
+<div style="display:flex;flex-direction:column;gap:18px;padding:24px;border-radius:20px;background:linear-gradient(135deg,#D9D6EC,#CFD9F0)">
+<div data-screen-label="Mini bar · running" style="position:relative;width:380px;height:56px;box-sizing:border-box;border-radius:18px;overflow:hidden;display:flex;align-items:center;gap:8px;padding:0 8px 0 10px;background:linear-gradient(rgba(248,246,255,.92),rgba(240,244,255,.92)) padding-box,linear-gradient(135deg,#8B7CF6,#6C9BFF) border-box;border:1.5px solid transparent;box-shadow:0 12px 32px rgba(46,36,120,.22),0 0 0 4px rgba(139,124,246,.12)">
+<span style="font-family:'Material Symbols Rounded';font-size:16px;color:rgba(91,95,122,.5);cursor:grab">drag_indicator</span>
+<span title="Client project" style="width:30px;height:30px;flex-shrink:0;border-radius:9px;display:grid;place-items:center;background:rgba(139,124,246,.2);color:#5B47D6;font-family:'Material Symbols Rounded';font-size:17px">work</span>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.2"><span style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Checkout flow — fix payment step</span><span style="font-size:11px;color:#5B5F7A">Client A · Storefront</span></div>
+<span style="font:600 15px 'JetBrains Mono',monospace;color:#5B47D6">24:13</span>
+<span style="width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#8B7CF6,#6C9BFF);color:#fff;font-family:'Material Symbols Rounded';font-size:18px;font-variation-settings:'FILL' 1">pause</span>
+<span title="Expand" style="width:32px;height:32px;border-radius:10px;display:grid;place-items:center;color:#5B5F7A;font-family:'Material Symbols Rounded';font-size:18px">open_in_full</span>
+</div>
+<div style="position:relative;width:380px;height:56px;box-sizing:border-box;border-radius:18px;display:flex;align-items:center;gap:8px;padding:0 8px 0 10px;background:linear-gradient(rgba(255,246,250,.92),rgba(248,244,255,.92)) padding-box,linear-gradient(135deg,#F27FA5,#8B7CF6) border-box;border:1.5px solid transparent;box-shadow:0 12px 32px rgba(46,36,120,.22)">
+<span style="font-family:'Material Symbols Rounded';font-size:16px;color:rgba(91,95,122,.5)">drag_indicator</span>
+<span title="Calendar meeting" style="width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:rgba(242,127,165,.22);color:#B2306A;font-family:'Material Symbols Rounded';font-size:17px">videocam</span>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.2"><span style="font-size:13px;font-weight:600">Sprint planning</span><span style="font-size:11px;color:#5B5F7A">Meeting timer · Client A</span></div>
+<span style="font:600 15px 'JetBrains Mono',monospace;color:#B2306A">08:41</span>
+<span style="width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#8B7CF6,#6C9BFF);color:#fff;font-family:'Material Symbols Rounded';font-size:18px;font-variation-settings:'FILL' 1">pause</span>
+<span style="width:32px;height:32px;display:grid;place-items:center;color:#5B5F7A;font-family:'Material Symbols Rounded';font-size:18px">open_in_full</span>
+</div>
+<div style="position:relative;width:380px;height:56px;box-sizing:border-box;border-radius:18px;display:flex;align-items:center;gap:8px;padding:0 8px 0 10px;background:rgba(248,246,255,.85);border:1px solid rgba(255,255,255,.9);box-shadow:0 12px 32px rgba(46,36,120,.18)">
+<span style="font-family:'Material Symbols Rounded';font-size:16px;color:rgba(91,95,122,.5)">drag_indicator</span>
+<span title="Internal project" style="width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:rgba(108,155,255,.2);color:#2F5BC4;font-family:'Material Symbols Rounded';font-size:17px">folder</span>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.2"><span style="font-size:13px;font-weight:600">Draft release notes</span><span style="font-size:11px;color:#5B5F7A">Paused · SLE Hub</span></div>
+<span style="font:500 15px 'JetBrains Mono',monospace;color:#5B5F7A">40:00</span>
+<span style="width:32px;height:32px;box-sizing:border-box;border-radius:50%;display:grid;place-items:center;border:1.5px solid rgba(91,71,214,.45);background:#fff;color:#5B47D6;font-family:'Material Symbols Rounded';font-size:18px;font-variation-settings:'FILL' 1">play_arrow</span>
+<span style="width:32px;height:32px;display:grid;place-items:center;color:#5B5F7A;font-family:'Material Symbols Rounded';font-size:18px">open_in_full</span>
+</div>
+<div style="position:relative;width:380px;height:56px;box-sizing:border-box;border-radius:18px;display:flex;align-items:center;gap:8px;padding:0 8px 0 14px;background:rgba(248,246,255,.85);border:1px solid rgba(255,255,255,.9);box-shadow:0 12px 32px rgba(46,36,120,.18)">
+<div style="width:18px;height:18px;border-radius:6px;background:linear-gradient(135deg,#8B7CF6,#6C9BFF)"></div>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.2"><span style="font-size:13px;font-weight:600">No timer running</span><span style="font-size:11px;color:#5B5F7A">Today <span style="font-family:'JetBrains Mono',monospace">4h 19m</span> · next: Sprint planning 12:30</span></div>
+<span style="height:32px;padding:0 12px 0 8px;border-radius:11px;display:flex;align-items:center;gap:4px;background:linear-gradient(135deg,#6650E0,#4572DB);color:#fff;font-size:12px;font-weight:600"><span style="font-family:'Material Symbols Rounded';font-size:18px;font-variation-settings:'FILL' 1">play_arrow</span>Start</span>
+<span style="width:32px;height:32px;display:grid;place-items:center;color:#5B5F7A;font-family:'Material Symbols Rounded';font-size:18px">open_in_full</span>
+</div>
+</div>
+</div>
+
+<!-- 1f timeline states -->
+<div id="1f" style="display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;align-items:center;gap:8px;font-size:12px;color:#5B5F7A"><a href="#1f" style="font:600 10.5px 'JetBrains Mono',monospace;padding:3px 7px;background:rgba(30,27,75,.1);color:#1E1B4B;border-radius:5px;text-decoration:none">1f</a>Timeline · bar hover tooltip and collapsed bar</div>
+<div style="display:flex;flex-direction:column;gap:18px;padding:24px 18px;border-radius:20px;background:linear-gradient(160deg,#F1EDFF,#E8EEFF)">
+<div style="position:relative;width:364px;height:212px;box-sizing:border-box;border-radius:18px;background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.85);box-shadow:0 8px 32px rgba(46,36,120,.1);padding:6px 10px 10px">
+<div style="height:34px;display:flex;align-items:center;font-size:12px;font-weight:600">Timeline</div>
+<div style="display:flex;gap:6px">
+<div style="width:24px;display:flex;flex-direction:column;gap:4px;padding-top:18px"><span style="height:24px;border-radius:7px;background:rgba(139,124,246,.18)"></span><span style="height:24px;border-radius:7px;background:rgba(108,155,255,.2)"></span><span style="height:24px;border-radius:7px;background:rgba(43,179,163,.18)"></span><span style="height:24px;border-radius:7px;background:rgba(154,160,184,.22)"></span><span style="height:24px;border-radius:7px;background:rgba(242,127,165,.2)"></span></div>
+<div style="flex:1;position:relative;padding-top:18px;display:flex;flex-direction:column;gap:4px">
+<div style="position:relative;height:24px;border-radius:7px;background:rgba(255,255,255,.3)"><div style="position:absolute;left:11.11%;width:13.89%;height:24px;box-sizing:border-box;border-radius:7px;background:rgba(139,124,246,.42);border:1.5px solid #8B7CF6;box-shadow:0 4px 12px rgba(91,71,214,.3);transform:translateY(-1px)"></div></div>
+<div style="height:24px;border-radius:7px;background:rgba(255,255,255,.3)"></div><div style="height:24px;border-radius:7px;background:rgba(255,255,255,.3)"></div><div style="height:24px;border-radius:7px;background:rgba(255,255,255,.3)"></div><div style="height:24px;border-radius:7px;background:rgba(255,255,255,.3)"></div>
+<div style="position:absolute;left:4%;top:50px;width:206px;box-sizing:border-box;padding:10px 12px;border-radius:14px;background:rgba(255,255,255,.96);border:1px solid #fff;box-shadow:0 14px 36px rgba(46,36,120,.22);display:flex;flex-direction:column;gap:6px;z-index:3">
+<div style="position:absolute;top:-5px;left:44px;width:10px;height:10px;background:#fff;transform:rotate(45deg)"></div>
+<div style="display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:#5B47D6"><span style="font-family:'Material Symbols Rounded';font-size:14px">work</span>Client project · Client A</div>
+<div style="font-size:13px;font-weight:600;line-height:1.3">Checkout flow — fix payment step</div>
+<div style="display:flex;justify-content:space-between;font:500 11.5px 'JetBrains Mono',monospace;color:#1E1B4B"><span>8:00 pm → 9:15 pm</span><span style="font-weight:600">1h 15m</span></div>
+<div style="font-size:11px;color:#5B5F7A">Click to open task</div>
+</div>
+</div>
+<div style="width:42px"></div>
+</div>
+</div>
+<div style="width:364px;height:40px;box-sizing:border-box;border-radius:14px;background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.85);box-shadow:0 8px 24px rgba(46,36,120,.08);display:flex;align-items:center;gap:8px;padding:0 6px 0 12px;font-size:12px;font-weight:600"><span style="font-family:'Material Symbols Rounded';font-size:17px;color:#5B47D6">view_timeline</span>Timeline<span style="flex:1"></span><span style="font:500 12px 'JetBrains Mono',monospace">4h 19m today</span><span style="width:32px;height:32px;display:grid;place-items:center;font-family:'Material Symbols Rounded';font-size:18px;color:#5B5F7A">expand_less</span></div>
+<div style="width:364px;font-size:11.5px;line-height:1.5;color:#5B5F7A;text-wrap:pretty">Past sessions: solid glass in type colour. Running session: gradient fill with a pulsing right edge that grows each minute. Future calendar meetings: dashed rose outline. Narrow bars drop their label; the tooltip always carries it.</div>
+</div>
+</div>
+
+</div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;groupByType&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Today list&quot;},&quot;syncState&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Saved&quot;,&quot;Syncing&quot;,&quot;Offline&quot;],&quot;default&quot;:&quot;Saved&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Footer&quot;}}">
+const T = {
+  client:{label:'Client project',short:'Client',icon:'work',ink:'#5B47D6',bink:'#3F2FB0',tint:'rgba(139,124,246,.18)',bar:'rgba(139,124,246,.3)',edge:'rgba(139,124,246,.65)'},
+  internal:{label:'Internal project',short:'Internal',icon:'folder',ink:'#2F5BC4',bink:'#2448A8',tint:'rgba(108,155,255,.2)',bar:'rgba(108,155,255,.3)',edge:'rgba(108,155,255,.7)'},
+  support:{label:'Support ticket',short:'Support',icon:'confirmation_number',ink:'#0F766B',bink:'#0B5F56',tint:'rgba(43,179,163,.18)',bar:'rgba(43,179,163,.28)',edge:'rgba(43,179,163,.7)'},
+  meeting:{label:'Meeting',short:'Meeting',icon:'groups',ink:'#8A5A0B',bink:'#6E4808',tint:'rgba(233,162,59,.2)',bar:'rgba(233,162,59,.3)',edge:'rgba(233,162,59,.8)'},
+  other:{label:'Other',short:'Other',icon:'category',ink:'#4E5370',bink:'#3D4160',tint:'rgba(154,160,184,.22)',bar:'rgba(154,160,184,.3)',edge:'rgba(154,160,184,.8)'},
+  calendar:{label:'Calendar meeting',short:'Meeting',icon:'videocam',ink:'#B2306A',bink:'#8E2454',tint:'rgba(242,127,165,.2)',bar:'rgba(242,127,165,.32)',edge:'rgba(242,127,165,.8)'}
+};
+const ORDER = ['client','internal','support','meeting','other'];
+const SPAN = 540*60;
+const pad = n => String(n).padStart(2,'0');
+const fmtT = s => { s=Math.max(0,Math.floor(s)); const h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60; return h?`${h}:${pad(m)}:${pad(x)}`:`${pad(m)}:${pad(x)}`; };
+const fmtD = s => { const m=Math.round(s/60), h=Math.floor(m/60); return h ? (m%60?`${h}h ${m%60}m`:`${h}h`) : `${m}m`; };
+const clock = sec => { let t=(19*60+Math.floor(sec/60))%1440, h=Math.floor(t/60), m=t%60; const ap=h>=12?'pm':'am'; h=h%12||12; return `${h}:${pad(m)} ${ap}`; };
+const pct = s => (s/SPAN*100).toFixed(3)+'%';
+
+class Component extends DCLogic {
+  state = {
+    tasks: [
+      {id:'t1',type:'client',title:'Checkout flow — fix payment step',meta:'Client A · Storefront',tracked:75*60},
+      {id:'t3',type:'client',title:'Reply to Client B about API limits',meta:'Client B · Integrations',tracked:0,reminder:'11:55 pm'},
+      {id:'t4',type:'support',title:'#4821 Login loop on Safari',meta:'Client C',tracked:50*60,carried:true},
+      {id:'t2',type:'internal',title:'Draft release notes',meta:'SLE Hub',tracked:40*60},
+      {id:'t6',type:'internal',title:'Update onboarding docs',meta:'Dev Portal',tracked:0,est:'45m'},
+      {id:'t8',type:'meeting',title:'Pair session — payments',meta:'Client A · with QA',tracked:0,est:'30m'},
+      {id:'t5',type:'support',title:'#4807 Export CSV encoding',meta:'Client A',tracked:35*60,done:true},
+      {id:'t7',type:'other',title:'Inbox & admin',meta:'Email, Slack, timesheet',tracked:20*60,done:true}
+    ],
+    sessions: [
+      {type:'support',title:'#4807 Export CSV encoding',s:5*60,e:40*60},
+      {type:'calendar',title:'Daily standup',s:45*60,e:60*60},
+      {type:'client',title:'Checkout flow — fix payment step',s:60*60,e:135*60},
+      {type:'internal',title:'Draft release notes',s:135*60,e:175*60},
+      {type:'support',title:'#4821 Login loop on Safari',s:180*60,e:230*60},
+      {type:'other',title:'Inbox & admin',s:230*60,e:250*60},
+      {type:'calendar',title:'Sprint planning · Client A',s:330*60,e:375*60,future:true},
+      {type:'calendar',title:'1:1 with team lead',s:420*60,e:450*60,future:true}
+    ],
+    runningId:'t1', runStart:258*60, now:282*60+13,
+    filter:'all', tlOpen:true, draft:'', toast:null, pop:null, dragId:null
+  };
+  componentDidMount(){ this.iv=setInterval(()=>this.setState(s=>({now:s.now+1})),1000); }
+  componentWillUnmount(){ clearInterval(this.iv); clearTimeout(this.tt); }
+
+  stopRunning(s){
+    if(!s.runningId) return s;
+    const t=s.tasks.find(x=>x.id===s.runningId); const dur=s.now-s.runStart;
+    const tasks=s.tasks.map(x=>x.id===s.runningId?{...x,tracked:x.tracked+dur}:x);
+    const sessions=dur>0?[...s.sessions,{type:t.type,title:t.title,s:s.runStart,e:s.now}]:s.sessions;
+    this.showToast(`Session saved · ${fmtD(Math.max(60,dur))} · ${T[t.type].label}`);
+    return {...s,tasks,sessions,runningId:null};
+  }
+  showToast(text){ clearTimeout(this.tt); setTimeout(()=>this.setState({toast:text}),0); this.tt=setTimeout(()=>this.setState({toast:null}),3200); }
+  start(id){ this.setState(s=>{ const n=this.stopRunning(s); return {...n,runningId:id,runStart:s.now,tasks:n.tasks.map(x=>x.id===id?{...x,done:false}:x)}; }); }
+  pause(){ this.setState(s=>this.stopRunning(s)); }
+  toggle(id){
+    this.setState(s=>{ let n=s.runningId===id?this.stopRunning(s):s; return {...n,pop:id,tasks:n.tasks.map(x=>x.id===id?{...x,done:!x.done}:x)}; });
+    clearTimeout(this.pt); this.pt=setTimeout(()=>this.setState({pop:null}),320);
+  }
+  move(dragId,overId){
+    if(!dragId||dragId===overId) return;
+    this.setState(s=>{ const a=[...s.tasks]; const i=a.findIndex(x=>x.id===dragId), j=a.findIndex(x=>x.id===overId); const [m]=a.splice(i,1); a.splice(j,0,m); return {tasks:a}; });
+  }
+
+  renderVals(){
+    const s=this.state, p=this.props;
+    const grouped=p.groupByType??false;
+    const runSec=s.runningId?s.now-s.runStart:0;
+    const runTask=s.tasks.find(x=>x.id===s.runningId);
+    const tasksSorted=[...s.tasks.filter(t=>!t.done),...s.tasks.filter(t=>t.done)];
+    const visible=tasksSorted.filter(t=>s.filter==='all'||t.type===s.filter);
+    const item=t=>{
+      const ty=T[t.type], isRun=t.id===s.runningId, isDone=!!t.done;
+      return {
+        ...t, icon:ty.icon, ink:ty.ink, tint:ty.tint, typeLabel:ty.label,
+        isRun, isDone, isPaused:!isRun&&!isDone&&t.tracked>0, isTodo:!isRun&&!isDone&&!t.tracked,
+        timer:fmtT(runSec), pausedStr:fmtT(t.tracked), doneStr:fmtD(t.tracked),
+        hasReminder:!!t.reminder&&!isDone, carried:!!t.carried&&!isDone, hasEst:!!t.est&&!isDone&&!t.tracked&&!isRun,
+        bg:isRun?'linear-gradient(rgba(255,255,255,.9),rgba(255,255,255,.9)) padding-box,linear-gradient(135deg,#8B7CF6,#6C9BFF) border-box':isDone?'rgba(255,255,255,.3)':'rgba(255,255,255,.55)',
+        border:isRun?'1.5px solid transparent':'1px solid rgba(255,255,255,.85)',
+        shadow:isRun?'0 0 0 4px rgba(139,124,246,.14),0 8px 24px rgba(108,155,255,.28)':'0 2px 10px rgba(46,36,120,.04)',
+        opacity:s.dragId===t.id?.45:isDone?.62:1,
+        deco:isDone?'line-through':'none', titleColor:isDone?'#5B5F7A':'#1E1B4B',
+        checkBorder:isDone?'none':'1.5px solid rgba(91,95,122,.45)',
+        checkBg:isDone?'linear-gradient(135deg,#8B7CF6,#6C9BFF)':'rgba(255,255,255,.6)',
+        checkScale:s.pop===t.id?'scale(1.25)':'scale(1)',
+        checkLabel:isDone?'Mark as not done':'Mark as done',
+        onToggle:()=>this.toggle(t.id), onPlay:()=>this.start(t.id), onPause:()=>this.pause(),
+        onDragStart:e=>{ e.dataTransfer.effectAllowed='move'; this.setState({dragId:t.id}); },
+        onDragOver:e=>{ e.preventDefault(); this.move(this.state.dragId,t.id); },
+        onDragEnd:()=>this.setState({dragId:null})
+      };
+    };
+    const trackedFor=type=>s.tasks.filter(t=>t.type===type).reduce((a,t)=>a+t.tracked,0)+(runTask&&runTask.type===type?runSec:0);
+    const groups=grouped
+      ? ORDER.map(k=>({showHead:true,label:T[k].label,total:fmtD(trackedFor(k)),items:visible.filter(t=>t.type===k).map(item)})).filter(g=>g.items.length)
+      : [{showHead:false,items:visible.map(item)}];
+
+    const chips=[{key:'all',short:'All',label:'All tasks'},...ORDER.map(k=>({key:k,short:T[k].short,label:T[k].label,icon:T[k].icon}))].map(c=>{
+      const active=s.filter===c.key, ty=T[c.key];
+      return {...c, hasIcon:!!c.icon, active, showLabel:c.key==='all'||active,
+        count:c.key==='all'?s.tasks.length:s.tasks.filter(t=>t.type===c.key).length,
+        bg:active?(ty?ty.tint.replace(/[\d.]+\)$/,'.32)'):'#1E1B4B'):'rgba(255,255,255,.5)',
+        border:active?(ty?ty.edge:'#1E1B4B'):'rgba(255,255,255,.85)',
+        color:active?(ty?ty.bink:'#fff'):(ty?ty.ink:'#1E1B4B'),
+        onClick:()=>this.setState({filter:c.key})};
+    });
+
+    const rowDefs=[['client'],['internal'],['support'],['other'],['meeting','calendar']];
+    const tlRows=rowDefs.map(types=>{
+      const bars=s.sessions.filter(x=>types.includes(x.type)).map(x=>{
+        const ty=T[x.type], d=x.e-x.s;
+        return {left:pct(x.s),width:pct(d),label:!x.future&&d>=40*60?fmtD(d):'',ink:ty.bink,
+          bg:x.future?'rgba(242,127,165,.1)':ty.bar, border:x.future?`1px dashed ${ty.edge}`:`1px solid ${ty.edge}`,
+          tip:`${x.title}\n${ty.label}\n${clock(x.s)} – ${clock(x.e)} · ${fmtD(d)}${x.future?' (upcoming)':''}`, pulse:null};
+      });
+      if(runTask&&types.includes(runTask.type)){
+        bars.push({left:pct(s.runStart),width:pct(Math.max(runSec,60)),label:'',ink:'#3F2FB0',
+          bg:'linear-gradient(90deg,rgba(139,124,246,.45),rgba(108,155,255,.6))',border:'1px solid #8B7CF6',
+          tip:`${runTask.title}\n${T[runTask.type].label} · running\n${clock(s.runStart)} – now · ${fmtD(runSec)}`,
+          pulse:React.createElement('span',{style:{position:'absolute',right:-3,top:2,bottom:2,width:5,borderRadius:3,background:'linear-gradient(#8B7CF6,#6C9BFF)',boxShadow:'0 0 10px #8B7CF6',animation:'dbPulse 1.6s ease-in-out infinite'}})});
+      }
+      const tot=s.sessions.filter(x=>types.includes(x.type)&&!x.future).reduce((a,x)=>a+x.e-x.s,0)+(runTask&&types.includes(runTask.type)?runSec:0);
+      return {bars,total:tot?fmtD(tot):'—'};
+    });
+    const total=s.sessions.filter(x=>!x.future).reduce((a,x)=>a+x.e-x.s,0)+runSec;
+
+    const sync={Saved:['cloud_done','Saved','rgba(43,179,163,.16)','#0F766B','All sessions saved and synced'],
+      Syncing:['sync','Syncing','rgba(108,155,255,.18)','#2F5BC4','Syncing 1 session…'],
+      Offline:['cloud_off','Offline','rgba(91,95,122,.12)','#4E5370','Saved on this device, will sync later']}[p.syncState??'Saved'];
+
+    return {
+      groups, chips, tlRows, total:fmtD(total), nowLeft:pct(s.now),
+      tlOpen:s.tlOpen, tlClosed:!s.tlOpen, toggleTl:()=>this.setState(x=>({tlOpen:!x.tlOpen})),
+      draft:s.draft, onDraft:e=>this.setState({draft:e.target.value}),
+      onKey:e=>{ if(e.key==='Enter'&&s.draft.trim()){ const type=s.filter==='all'?'other':s.filter; this.setState(x=>({draft:'',tasks:[{id:'n'+Date.now(),type,title:x.draft.trim(),meta:T[type].label,tracked:0},...x.tasks]})); } },
+      syncIcon:sync[0], syncLabel:sync[1], syncBg:sync[2], syncInk:sync[3], syncTitle:sync[4],
+      toastOn:!!s.toast,
+      toastEl:s.toast?React.createElement('div',{role:'status',key:s.toast,style:{position:'absolute',zIndex:5,left:16,right:16,bottom:s.tlOpen?236:64,display:'flex',alignItems:'center',gap:8,padding:'10px 14px',borderRadius:14,background:'rgba(255,255,255,.95)',border:'1px solid #fff',boxShadow:'0 14px 36px rgba(46,36,120,.22)',fontSize:13,fontWeight:500,color:'#1E1B4B',animation:'dbToast .35s cubic-bezier(.34,1.56,.64,1)'}},
+        React.createElement('span',{style:{fontFamily:"'Material Symbols Rounded'",fontSize:18,color:'#0F766B',fontVariationSettings:"'FILL' 1"}},'check_circle'), s.toast):null
+    };
+  }
+}
+</script>
+</body>
+</html>
