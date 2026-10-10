@@ -55,6 +55,7 @@ Done when: the timeline totals match the Log tab exactly.
 Goal: Timi behaves like a proper always-available desktop app.
 
 - [ ] Tray icon and menu: show, start or pause the timer, quick add, quit
+- [ ] Close hides Timi to the tray instead of quitting (until the tray exists, Close quits)
 - [ ] Start on login and a global shortcut for quick add
 - [ ] Remember window position and size, and allow only one running instance
 - [ ] Task reminders: Rust scheduler with native notifications ("Start timer" and "Snooze 10 min")
@@ -79,6 +80,7 @@ Goal: data backed up to the company and a clean installer.
 
 - [ ] Offline-first sync of sessions to the company Supabase project, with the sync status chip
 - [ ] Accessibility pass: keyboard use, focus, contrast and reduced motion
+- [ ] Reduce installer size: subset the icon font to the icons Timi uses, or switch to SVG icons (the full Material Symbols Rounded font is 5.4 MB)
 - [ ] NSIS installer built with `npm run tauri build`
 
 Done when: the installer works on a clean Windows user account.

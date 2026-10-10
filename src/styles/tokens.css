@@ -1,0 +1,152 @@
+/*
+ * Timi design tokens — source: docs/design/Daybar Tokens.dc.html.
+ * Values marked "from screens" are used in the design screens but are not on the token sheet.
+ * Tailwind's default palette, radii, shadows and type sizes are reset so only these tokens exist.
+ */
+
+@theme {
+  /* ---------- Colour ---------- */
+  --color-*: initial;
+
+  --color-white: #ffffff;
+  --color-transparent: transparent;
+  --color-current: currentColor;
+
+  /* Surface & text */
+  --color-ink: #1e1b4b;
+  --color-ink-muted: #5b5f7a;
+  --color-ink-placeholder: #6b6f88; /* from screens: input placeholder */
+  --color-ink-disabled: #9a9eb5; /* from screens: disabled icons, outside-month days */
+
+  --color-accent: #8b7cf6;
+  --color-accent-to: #6c9bff;
+  --color-accent-ink: #5b47d6; /* also the focus colour */
+  --color-accent-ink-hover: #3f2fb0; /* from screens: link hover */
+  --color-accent-strong: #6650e0;
+  --color-accent-strong-to: #4572db;
+
+  --color-app-from: #f1edff;
+  --color-app-to: #e8eeff;
+  --color-mini: #f8f6ff; /* from screens: mini bar surface */
+
+  --color-blob-violet: #a78bfa;
+  --color-blob-sky: #7db4ff;
+
+  /* Task types: base colours never carry text; inks are >= 5:1 on glass */
+  --color-type-client: #8b7cf6;
+  --color-type-client-ink: #5b47d6;
+  --color-type-internal: #6c9bff;
+  --color-type-internal-ink: #2f5bc4;
+  --color-type-support: #2bb3a3;
+  --color-type-support-ink: #0f766b;
+  --color-type-meeting: #e9a23b;
+  --color-type-meeting-ink: #8a5a0b;
+  --color-type-other: #9aa0b8;
+  --color-type-other-ink: #4e5370;
+  --color-type-calendar: #f27fa5;
+  --color-type-calendar-ink: #b2306a;
+
+  /* Status */
+  --color-status-success: #0f766b;
+  --color-status-syncing: #2f5bc4;
+  --color-status-offline: #4e5370;
+  --color-status-error: #b23a0a;
+
+  /* ---------- Radius ---------- */
+  --radius-*: initial;
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-full: 9999px;
+  --radius-tile: 9px; /* from screens: type icon tile, wide segmented item */
+  --radius-cta-sm: 11px; /* from screens: mini bar Start button */
+  --radius-control: 12px; /* from screens: settings button, wide segmented control */
+  --radius-tablist: 13px; /* from screens: tab list, wide quick add */
+  --radius-panel: 18px; /* from screens: timeline panel, wide panes, mini bar */
+
+  /* ---------- Blur ---------- */
+  --blur-*: initial;
+  --blur-glass: 24px;
+  --blur-sheet: 30px;
+  --blur-control: 20px; /* from screens: tab list and quick add */
+  --blur-blob-xs: 60px; /* from screens: calendar connect blob */
+  --blur-blob-sm: 70px;
+  --blur-blob-md: 80px;
+  --blur-blob-lg: 90px;
+
+  /* ---------- Shadow ---------- */
+  --shadow-*: initial;
+  --shadow-sm: 0 2px 8px rgb(46 36 120 / 0.1);
+  --shadow-md: 0 8px 32px rgb(46 36 120 / 0.1);
+  --shadow-lg: 0 20px 50px rgb(46 36 120 / 0.22);
+  --shadow-window: 0 30px 80px rgb(46 36 120 / 0.22);
+  --shadow-running: 0 0 0 4px rgb(139 124 246 / 0.14), 0 8px 24px rgb(108 155 255 / 0.28);
+  --shadow-window-edge: inset 0 0 0 1px rgb(255 255 255 / 0.7); /* from screens */
+  --shadow-input: 0 4px 16px rgb(46 36 120 / 0.06); /* from screens: quick add */
+  --shadow-focus-halo: 0 0 0 6px rgb(139 124 246 / 0.14); /* from screens: focused quick add */
+  --shadow-bar: 0 8px 24px rgb(46 36 120 / 0.08); /* from screens: collapsed timeline bar */
+  --shadow-cta: 0 6px 18px rgb(91 71 214 / 0.35); /* from screens: Start task */
+  --shadow-cta-hover: 0 8px 24px rgb(91 71 214 / 0.5); /* from screens: Start task hover */
+  --shadow-cta-lg: 0 8px 22px rgb(91 71 214 / 0.38); /* from screens: Connect Google Calendar */
+  --shadow-mark: 0 2px 8px rgb(108 124 246 / 0.45); /* from screens: title bar logo mark */
+
+  /* ---------- Typography ---------- */
+  --font-sans: "Inter Variable", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono Variable", monospace;
+  --font-icon: "Material Symbols Rounded Variable";
+
+  --text-*: initial;
+  --text-display: 22px;
+  --text-display--line-height: 1.2;
+  --text-display--font-weight: 700;
+  --text-display--letter-spacing: -0.02em;
+  --text-heading: 18px; /* from screens: calendar connect heading */
+  --text-heading--line-height: normal;
+  --text-heading--font-weight: 700;
+  --text-heading--letter-spacing: -0.01em;
+  --text-title: 16px;
+  --text-title--line-height: 1.3;
+  --text-title--font-weight: 700;
+  --text-body: 13.5px;
+  --text-body--line-height: 1.3;
+  --text-ui: 13px;
+  --text-ui--line-height: normal;
+  --text-ui-sm: 12.5px; /* from screens: wide mode switcher, pane titles */
+  --text-ui-sm--line-height: normal;
+  --text-caption: 12px; /* from screens: footer, hints, timeline bar */
+  --text-caption--line-height: normal;
+  --text-meta: 11.5px;
+  --text-meta--line-height: 1.35;
+  --text-label: 10.5px;
+  --text-label--line-height: normal;
+  --text-label--font-weight: 600;
+  --text-label--letter-spacing: 0.07em;
+  --text-timer-lg: 28px;
+  --text-timer-lg--line-height: normal;
+  --text-timer: 14px;
+  --text-timer--line-height: normal;
+  --text-duration: 11px;
+  --text-duration--line-height: normal;
+
+  --tracking-title: -0.01em; /* from screens: title bar date */
+
+  /* ---------- Motion ---------- */
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-soft: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* Gradients from the token sheet */
+@utility bg-app {
+  background-image: linear-gradient(160deg, var(--color-app-from) 0%, var(--color-app-to) 100%);
+}
+
+@utility bg-accent-gradient {
+  background-image: linear-gradient(135deg, var(--color-accent), var(--color-accent-to));
+}
+
+/* Buttons with labels: white text >= 4.6:1 */
+@utility bg-accent-gradient-strong {
+  background-image: linear-gradient(135deg, var(--color-accent-strong), var(--color-accent-strong-to));
+}
