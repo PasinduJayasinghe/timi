@@ -24,6 +24,13 @@ export function formatShortDate(date: Date): string {
   return `${part(parts, "weekday")} ${part(parts, "day")} ${part(parts, "month")}`;
 }
 
+/** Local calendar date as "YYYY-MM-DD", used as a task's list day. */
+export function toLocalDayKey(date: Date): string {
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${date.getFullYear()}-${month}-${day}`;
+}
+
 /** True when both dates fall on the same local calendar day. */
 export function isSameLocalDay(a: Date, b: Date): boolean {
   return (

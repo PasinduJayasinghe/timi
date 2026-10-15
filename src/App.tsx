@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { FooterBar } from "./components/FooterBar";
 import { Icon } from "./components/Icon";
 import { MiniBar } from "./components/MiniBar";
 import { panelId, tabId, Tabs, type TabItem } from "./components/Tabs";
 import { TimelineCollapsedBar } from "./components/TimelineCollapsedBar";
 import { TitleBar } from "./components/TitleBar";
+import { ToastProvider, ToastViewport, useToast } from "./components/Toast";
 import {
   BLOBS_CALENDAR,
   BLOBS_LOG,
@@ -16,10 +17,11 @@ import {
 } from "./components/WindowFrame";
 import { CalendarEmpty } from "./features/calendar/CalendarEmpty";
 import { LogEmpty } from "./features/log/LogEmpty";
-import { QuickAddRow } from "./features/today/QuickAddRow";
-import { TodayEmpty } from "./features/today/TodayEmpty";
+import { TodayView } from "./features/today/TodayView";
 import { WideShell, type WideView } from "./features/wide/WideShell";
 import { useLocalDate } from "./hooks/useLocalDate";
+import { useTodayTasks } from "./hooks/useTodayTasks";
+import { toLocalDayKey } from "./lib/date";
 import { closeApp, resizeForMode, setPinned, type WindowMode } from "./lib/window";
 
 type Tab = "today" | "calendar" | "log";
@@ -41,16 +43,35 @@ const TAB_BLOBS: Record<Tab, BlobLayout> = {
   log: BLOBS_LOG,
 };
 
-/** Phase 0 has no sessions yet. */
+/** No sessions until Phase 2. */
 const TODAY_TOTAL = "0m";
 
 function App() {
+  return (
+    <ToastProvider>
+      <Shell />
+    </ToastProvider>
+  );
+}
+
+function Shell() {
   const date = useLocalDate();
+  const showToast = useToast();
+  const onSaveError = useCallback((): void => {
+    showToast({ message: "Couldn’t save that change. Try again.", tone: "error" });
+  }, [showToast]);
+  const list = useTodayTasks(toLocalDayKey(date), onSaveError);
   const [tab, setTab] = useState<Tab>("today");
   const [mode, setMode] = useState<WindowMode>("expanded");
   const [lastOpenMode, setLastOpenMode] = useState<Exclude<WindowMode, "mini">>("expanded");
   // Matches alwaysOnTop: true in tauri.conf.json
   const [pinned, setPinnedState] = useState(true);
+
+  // Size the window to the starting mode, so a reload (e.g. in development) can't leave
+  // the expanded layout inside a mini-bar-sized window. Phase 4 remembers size and position.
+  useEffect(() => {
+    void resizeForMode("expanded");
+  }, []);
 
   const changeMode = (next: WindowMode): void => {
     setMode(next);
@@ -117,7 +138,8 @@ function App() {
     return (
       <WindowFrame blobs={wideView === "log" ? BLOBS_WIDE_LOG : BLOBS_WIDE}>
         {titleBar}
-        <WideShell view={wideView} date={date} total={TODAY_TOTAL} />
+        <WideShell view={wideView} date={date} total={TODAY_TOTAL} list={list} />
+        <ToastViewport bottomClass="bottom-12" />
       </WindowFrame>
     );
   }
@@ -147,10 +169,7 @@ function App() {
       >
         {tab === "today" && (
           <>
-            <div className="shrink-0 px-3">
-              <QuickAddRow autoFocus />
-            </div>
-            <TodayEmpty className="flex-1 px-10" />
+            <TodayView list={list} variant="expanded" />
             <FooterBar total={TODAY_TOTAL} />
             <TimelineCollapsedBar total={TODAY_TOTAL} />
           </>
@@ -158,6 +177,8 @@ function App() {
         {tab === "calendar" && <CalendarEmpty className="flex-1 p-7" />}
         {tab === "log" && <LogEmpty date={date} />}
       </div>
+      {/* 1a: 64px from the bottom, above the footer and collapsed timeline */}
+      <ToastViewport bottomClass={tab === "today" ? "bottom-16" : "bottom-4"} />
     </WindowFrame>
   );
 }

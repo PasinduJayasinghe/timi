@@ -1,9 +1,9 @@
 import { FooterBar } from "../../components/FooterBar";
 import { ROSE_BLOB } from "../../components/WindowFrame";
+import type { TodayTasks } from "../../hooks/useTodayTasks";
 import { CalendarEmpty } from "../calendar/CalendarEmpty";
 import { LogEmpty } from "../log/LogEmpty";
-import { QuickAddRow } from "../today/QuickAddRow";
-import { TodayEmpty } from "../today/TodayEmpty";
+import { TodayView } from "../today/TodayView";
 
 export type WideView = "today-calendar" | "log";
 
@@ -11,10 +11,11 @@ type WideShellProps = {
   view: WideView;
   date: Date;
   total: string;
+  list: TodayTasks;
 };
 
 /** Wide mode body (1d frame; 3g for Log). The timeline strip arrives with Phase 3. */
-export function WideShell({ view, date, total }: WideShellProps) {
+export function WideShell({ view, date, total, list }: WideShellProps) {
   if (view === "log") {
     return (
       <div role="tabpanel" id="panel-log" aria-labelledby="tab-log" className="relative z-1 flex min-h-0 flex-1 flex-col px-3 pb-3">
@@ -35,8 +36,7 @@ export function WideShell({ view, date, total }: WideShellProps) {
           aria-label="Today"
           className="flex min-h-0 flex-col gap-2 overflow-hidden rounded-panel border border-white/80 bg-white/40 p-2.5 backdrop-blur-glass"
         >
-          <QuickAddRow variant="wide" autoFocus />
-          <TodayEmpty className="flex-1 px-8" />
+          <TodayView list={list} variant="wide" />
         </section>
         <section
           aria-label="Calendar"

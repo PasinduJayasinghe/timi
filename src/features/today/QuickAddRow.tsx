@@ -5,6 +5,8 @@ type QuickAddRowProps = {
   /** "expanded" is 1a/1b; "wide" is the denser 1d row. */
   variant?: "expanded" | "wide";
   autoFocus?: boolean;
+  /** Called with the trimmed title when Enter is pressed. */
+  onAdd: (title: string) => void;
 };
 
 const ROW_CLASS = {
@@ -22,8 +24,8 @@ const BUTTON_CLASS = {
   wide: "h-9.5 rounded-tablist text-ui",
 } as const;
 
-/** Quick add field and Start task button. Phase 0: typing works, Enter and Start do nothing yet. */
-export function QuickAddRow({ variant = "expanded", autoFocus = false }: QuickAddRowProps) {
+/** Quick add field and Start task button. Enter adds a task; Start task arrives with Phase 2. */
+export function QuickAddRow({ variant = "expanded", autoFocus = false, onAdd }: QuickAddRowProps) {
   const [draft, setDraft] = useState("");
 
   return (
@@ -38,7 +40,12 @@ export function QuickAddRow({ variant = "expanded", autoFocus = false }: QuickAd
             setDraft(event.currentTarget.value);
           }}
           onKeyDown={(event) => {
-            if (event.key === "Enter") event.preventDefault();
+            if (event.key !== "Enter") return;
+            event.preventDefault();
+            const title = draft.trim();
+            if (title === "") return;
+            onAdd(title);
+            setDraft("");
           }}
           autoFocus={autoFocus}
           placeholder="Add a task, press Enter"

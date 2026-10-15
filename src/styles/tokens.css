@@ -46,11 +46,21 @@
   --color-type-calendar: #f27fa5;
   --color-type-calendar-ink: #b2306a;
 
+  /* from screens: deeper type inks for text on active chips and timeline bars (1a script "bink") */
+  --color-type-client-ink-strong: #3f2fb0;
+  --color-type-internal-ink-strong: #2448a8;
+  --color-type-support-ink-strong: #0b5f56;
+  --color-type-meeting-ink-strong: #6e4808;
+  --color-type-other-ink-strong: #3d4160;
+  --color-type-calendar-ink-strong: #8e2454;
+
   /* Status */
   --color-status-success: #0f766b;
   --color-status-syncing: #2f5bc4;
   --color-status-offline: #4e5370;
   --color-status-error: #b23a0a;
+  --color-status-error-edge: #c2410c; /* from screens: field error border (2c), alert border (3c) */
+  --color-status-error-surface: #fff1eb; /* from screens: error alert background (3c) */
 
   /* ---------- Radius ---------- */
   --radius-*: initial;
@@ -91,6 +101,10 @@
   --shadow-cta-hover: 0 8px 24px rgb(91 71 214 / 0.5); /* from screens: Start task hover */
   --shadow-cta-lg: 0 8px 22px rgb(91 71 214 / 0.38); /* from screens: Connect Google Calendar */
   --shadow-mark: 0 2px 8px rgb(108 124 246 / 0.45); /* from screens: title bar logo mark */
+  --shadow-row: 0 2px 10px rgb(46 36 120 / 0.04); /* from screens: task row (1a) */
+  --shadow-row-hover: 0 6px 20px rgb(46 36 120 / 0.1); /* from screens: task row hover (1c) */
+  --shadow-toast: 0 14px 36px rgb(46 36 120 / 0.18); /* from screens: toast (2e) */
+  --shadow-picker: 0 16px 40px rgb(46 36 120 / 0.22); /* from screens: picker list (2b) */
 
   /* ---------- Typography ---------- */
   --font-sans: "Inter Variable", system-ui, sans-serif;
@@ -135,6 +149,32 @@
   /* ---------- Motion ---------- */
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
   --ease-soft: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  /* check-pop: scale 1 → 1.25 → 1 · 320ms (token sheet) */
+  --animate-check-pop: check-pop 320ms var(--ease-spring);
+  /* toast entrance from the 1a script (dbToast .35s spring) */
+  --animate-toast-in: toast-in 350ms var(--ease-spring);
+
+  @keyframes check-pop {
+    0%,
+    100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.25);
+    }
+  }
+
+  @keyframes toast-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px) scale(0.98);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
 }
 
 /* Gradients from the token sheet */
