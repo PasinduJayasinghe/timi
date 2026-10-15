@@ -94,7 +94,9 @@ function FieldLabel({ children }: { children: ReactNode }) {
   return <span className="text-meta font-semibold text-ink-muted">{children}</span>;
 }
 
-const CHIP = "flex h-6.5 items-center rounded-[8px] text-caption";
+const CHIP_SHAPE = "flex h-6.5 items-center rounded-[8px] text-caption";
+// target-32: the design draws these chips 26px tall; the click area is 32px (Phase 6b)
+const CHIP = `target-32 ${CHIP_SHAPE}`;
 const NEUTRAL_CHIP = `${CHIP} bg-ink-muted/8 px-2.25 font-medium hover:bg-ink-muted/14`;
 
 /** Task details popover (2d). Reminder, Sessions, the timer button and the "…" menu arrive in later phases. */
@@ -338,7 +340,7 @@ export function TaskDetailsPopover({
               </button>
             ) : (
               <span
-                className={`${CHIP} gap-0.5 border-[1.5px] bg-white px-2 font-mono ${
+                className={`${CHIP_SHAPE} gap-0.5 border-[1.5px] bg-white px-2 font-mono ${
                   ticketError ? "border-status-error-edge" : "border-accent"
                 }`}
               >

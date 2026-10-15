@@ -1,10 +1,10 @@
 import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
-import { Icon } from "../../../components/Icon";
+import { Icon, type IconName } from "../../../components/Icon";
 
 export type PickerOption = {
   id: string;
   label: string;
-  icon?: string;
+  icon?: IconName;
   iconClass?: string;
 };
 

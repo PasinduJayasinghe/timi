@@ -108,7 +108,7 @@ export function TaskRow({
           done ? "bg-accent-gradient text-white" : "border-[1.5px] border-ink-muted/45 bg-white/60"
         } ${popping ? "animate-check-pop" : ""}`}
       >
-        {done && <Icon name="check" size={wide ? 13 : 14} className="[font-variation-settings:'wght'_600]" />}
+        {done && <Icon name="check_bold" size={wide ? 13 : 14} />}
       </span>
     </button>
   );

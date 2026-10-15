@@ -1,3 +1,7 @@
+import { ICONS, type IconName } from "./icons";
+
+export type { IconName } from "./icons";
+
 /** Icon sizes used in the design, in px. Listed as full class names so Tailwind can see them. */
 const SIZE_CLASS = {
   13: "text-[13px]",
@@ -15,17 +19,24 @@ const SIZE_CLASS = {
 export type IconSize = keyof typeof SIZE_CLASS;
 
 type IconProps = {
-  /** Material Symbols Rounded ligature name, e.g. "push_pin". */
-  name: string;
+  /** A Material Symbols Rounded icon from components/icons.ts, e.g. "push_pin". */
+  name: IconName;
   size?: IconSize;
   fill?: boolean;
   className?: string;
 };
 
+/** Material Symbols Rounded icon, drawn as inline SVG in the current text colour (Phase 6b). */
 export function Icon({ name, size = 18, fill = false, className = "" }: IconProps) {
+  const [outline, filled] = ICONS[name];
   return (
-    <span aria-hidden="true" className={`icon ${SIZE_CLASS[size]} ${fill ? "icon-fill" : ""} ${className}`}>
-      {name}
-    </span>
+    <svg
+      aria-hidden="true"
+      focusable="false"
+      viewBox="0 -960 960 960"
+      className={`icon ${SIZE_CLASS[size]} ${className}`}
+    >
+      <path d={fill ? filled : outline} />
+    </svg>
   );
 }

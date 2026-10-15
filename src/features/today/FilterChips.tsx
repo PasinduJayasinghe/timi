@@ -1,4 +1,4 @@
-import { Icon } from "../../components/Icon";
+import { Icon, type IconName } from "../../components/Icon";
 import type { Task } from "../../data/types";
 import { TASK_TYPES, TYPE_STYLES, type TaskType } from "../../lib/taskTypes";
 
@@ -14,7 +14,7 @@ type FilterChipsProps = {
 /** Filter by type (1a toolbar; 1d in wide mode). Counts include done tasks, as in the 1a script. */
 export function FilterChips({ tasks, filter, onChange, variant }: FilterChipsProps) {
   const wide = variant === "wide";
-  const items: Array<{ key: TaskFilter; short: string; label: string; icon?: string; count: number }> = [
+  const items: Array<{ key: TaskFilter; short: string; label: string; icon?: IconName; count: number }> = [
     { key: "all", short: "All", label: "All tasks", count: tasks.length },
     ...TASK_TYPES.map((type) => ({
       key: type,
@@ -46,7 +46,7 @@ export function FilterChips({ tasks, filter, onChange, variant }: FilterChipsPro
               onChange(item.key);
             }}
             className={`flex items-center border text-caption font-semibold ${colours} ${
-              wide ? "h-7 gap-1 rounded-tile px-2" : "h-8 min-w-8 gap-1.25 rounded-sm px-2.25"
+              wide ? "target-32 h-7 gap-1 rounded-tile px-2" : "h-8 min-w-8 gap-1.25 rounded-sm px-2.25"
             }`}
           >
             {item.icon && <Icon name={item.icon} size={wide ? 15 : 16} />}

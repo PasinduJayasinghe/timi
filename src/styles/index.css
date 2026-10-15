@@ -1,21 +1,6 @@
 @import "tailwindcss";
 @import "./tokens.css";
 
-/*
- * Icon font, self-hosted from the Fontsource package. Declared here instead of importing
- * Fontsource's CSS so it uses font-display: block (as the design does): with "swap" the
- * ligature names ("push_pin") would flash as text while the font loads.
- * Full axes (FILL, wght, opsz, GRAD): the design fills some icons and sizes them optically.
- */
-@font-face {
-  font-family: "Material Symbols Rounded Variable";
-  font-style: normal;
-  font-weight: 100 700;
-  font-display: block;
-  src: url("../../node_modules/@fontsource-variable/material-symbols-rounded/files/material-symbols-rounded-latin-full-normal.woff2")
-    format("woff2-variations");
-}
-
 @layer base {
   html,
   body,
@@ -58,21 +43,27 @@
   }
 }
 
-/* Material Symbols Rounded glyph, rendered by ligature */
+/* Material Symbols Rounded icon as inline SVG (components/icons.ts): 1em square, current text colour */
 @utility icon {
-  font-family: var(--font-icon);
-  font-style: normal;
-  line-height: 1;
-  letter-spacing: normal;
-  text-transform: none;
   display: inline-block;
-  white-space: nowrap;
-  overflow-wrap: normal;
-  direction: ltr;
-  font-feature-settings: "liga";
-  -webkit-font-smoothing: antialiased;
+  flex-shrink: 0;
+  width: 1em;
+  height: 1em;
+  line-height: 1;
+  fill: currentColor;
+  vertical-align: -0.125em;
 }
 
-@utility icon-fill {
-  font-variation-settings: "FILL" 1;
+/*
+ * A 32px-tall click target for controls the design draws shorter (3a Day/Week, 3g "Back to
+ * today", 1d wide filter chips, 2d popover chips): an invisible area centred on the control.
+ * It doesn't change the look.
+ */
+@utility target-32 {
+  position: relative;
+  &::after {
+    content: "";
+    position: absolute;
+    inset: calc((100% - 32px) / 2) 0;
+  }
 }

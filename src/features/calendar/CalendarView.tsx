@@ -48,7 +48,7 @@ function ViewSwitch({ view, onChange }: { view: View; onChange: (view: View) => 
             onClick={() => {
               onChange(option);
             }}
-            className={`h-7 rounded-[8px] px-3.5 text-caption ${
+            className={`target-32 h-7 rounded-[8px] px-3.5 text-caption ${
               active ? "bg-white font-semibold shadow-sm" : "font-medium text-ink-muted hover:text-ink"
             }`}
           >

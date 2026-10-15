@@ -1,10 +1,10 @@
 import { useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
-import { Icon } from "../../components/Icon";
+import { Icon, type IconName } from "../../components/Icon";
 
 export type TooltipContent = {
   /** First line: type icon and label, e.g. "Client project · Client A". */
-  icon: string;
+  icon: IconName;
   ink: string;
   heading: string;
   title: string;

@@ -1,3 +1,4 @@
+import type { IconName } from "../components/Icon";
 import type { SummaryKey } from "./sessionMath";
 
 export type SummaryStyle = {
@@ -5,7 +6,7 @@ export type SummaryStyle = {
   label: string;
   /** Full name: timeline row tile tooltip (1a). */
   title: string;
-  icon: string;
+  icon: IconName;
   ink: string;
   /** Row tile background (1a). */
   tint: string;

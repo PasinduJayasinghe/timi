@@ -1,11 +1,13 @@
-﻿export const TASK_TYPES = ["client", "internal", "support", "meeting", "other"] as const;
+import type { IconName } from "../components/Icon";
+
+export const TASK_TYPES = ["client", "internal", "support", "meeting", "other"] as const;
 
 export type TaskType = (typeof TASK_TYPES)[number];
 
 export type TaskTypeStyle = {
   label: string;
   short: string;
-  icon: string;
+  icon: IconName;
   /** Text colour for the type (icons, labels). */
   ink: string;
   /** Icon tile and soft chip background. */

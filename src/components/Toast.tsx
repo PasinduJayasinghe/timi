@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { Icon } from "./Icon";
+import { Icon, type IconName } from "./Icon";
 
 /**
  * success: green check (2e "Session saved"); accent: violet icon (2e "Switching timers");
@@ -10,7 +10,7 @@ export type ToastTone = "success" | "accent" | "neutral" | "error";
 export type ToastMessage = {
   message: ReactNode;
   tone?: ToastTone;
-  icon?: string;
+  icon?: IconName;
   action?: { label: string; onClick: () => void };
   /** Longer messages wrap with the icon at the top (2e "Switching timers"). */
   multiline?: boolean;
@@ -80,7 +80,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   return <ToastContext.Provider value={value}>{children}</ToastContext.Provider>;
 }
 
-const TONE_ICON: Record<ToastTone, { icon: string; className: string }> = {
+const TONE_ICON: Record<ToastTone, { icon: IconName; className: string }> = {
   success: { icon: "check_circle", className: "text-status-success" },
   accent: { icon: "swap_horiz", className: "text-accent-ink" },
   neutral: { icon: "info", className: "text-status-offline" },

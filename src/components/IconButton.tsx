@@ -1,10 +1,10 @@
 import type { ButtonHTMLAttributes } from "react";
-import { Icon, type IconSize } from "./Icon";
+import { Icon, type IconName, type IconSize } from "./Icon";
 
 type Variant = "default" | "active" | "danger";
 
 type IconButtonProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "children"> & {
-  icon: string;
+  icon: IconName;
   label: string;
   variant?: Variant;
   iconSize?: IconSize;

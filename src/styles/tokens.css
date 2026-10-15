@@ -130,7 +130,6 @@
   /* ---------- Typography ---------- */
   --font-sans: "Inter Variable", system-ui, sans-serif;
   --font-mono: "JetBrains Mono Variable", monospace;
-  --font-icon: "Material Symbols Rounded Variable";
 
   --text-*: initial;
   --text-display: 22px;

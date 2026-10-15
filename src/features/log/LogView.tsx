@@ -134,7 +134,7 @@ export function LogView({ variant, todayKey, timer }: LogViewProps) {
           onClick={() => {
             goTo(0);
           }}
-          className="h-7 rounded-tile bg-accent/12 px-2.5 text-caption font-semibold text-accent-ink hover:bg-accent/20"
+          className="target-32 h-7 rounded-tile bg-accent/12 px-2.5 text-caption font-semibold text-accent-ink hover:bg-accent/20"
         >
           Back to today
         </button>

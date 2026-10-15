@@ -6,5 +6,7 @@ export default defineConfig({
     environment: "node",
     // A zone with daylight saving, so date tests cover 23- and 25-hour days
     env: { TZ: "Europe/London" },
+    // The contrast test reads the design tokens as text (tokens.css?raw)
+    css: { include: [/tokens\.css/] },
   },
 });

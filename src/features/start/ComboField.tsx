@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Icon } from "../../components/Icon";
+import { Icon, type IconName } from "../../components/Icon";
 import {
   PICKER_PANEL,
   PickerOptions,
@@ -15,7 +15,7 @@ type ComboFieldProps = {
   label: string;
   /** e.g. " (optional)". */
   hint?: string;
-  icon: string;
+  icon: IconName;
   /** Icon colour, the task type's ink (2a). */
   iconClass: string;
   placeholder: string;
