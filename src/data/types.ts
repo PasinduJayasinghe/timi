@@ -12,7 +12,7 @@ export type Task = {
   ticketNumber: string | null;
   notes: string;
   estimateMinutes: number | null;
-  /** Local calendar date the task is listed on, "YYYY-MM-DD". */
+  /** Work day the task is listed on, "YYYY-MM-DD" (the day starts at 6 am; see lib/date.ts). */
   listDay: string;
   /** Previous list day when the task was carried over. */
   carriedFrom: string | null;

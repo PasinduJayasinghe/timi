@@ -1,4 +1,5 @@
 import type { Session } from "../data/types";
+import type { TaskType } from "./taskTypes";
 
 /** A running session writes its "last seen" time this often. */
 export const HEARTBEAT_MS = 60_000;
@@ -31,11 +32,15 @@ export const SUMMARY_KEYS = ["client", "internal", "support", "meetings", "other
 
 export type SummaryKey = (typeof SUMMARY_KEYS)[number];
 
+/** The summary group (Log totals, timeline row) a task type counts under. */
+export function summaryKey(type: TaskType): SummaryKey {
+  return type === "meeting" ? "meetings" : type;
+}
+
 export function totalsBySummary(sessions: readonly Session[], nowMs: number): Record<SummaryKey, number> {
   const totals: Record<SummaryKey, number> = { client: 0, internal: 0, support: 0, meetings: 0, other: 0 };
   for (const session of sessions) {
-    const key: SummaryKey = session.taskType === "meeting" ? "meetings" : session.taskType;
-    totals[key] += sessionSeconds(session, nowMs);
+    totals[summaryKey(session.taskType)] += sessionSeconds(session, nowMs);
   }
   return totals;
 }

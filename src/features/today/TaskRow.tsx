@@ -1,4 +1,4 @@
-import { useState, type DragEvent, type KeyboardEvent, type Ref } from "react";
+import { useState, type DragEvent, type KeyboardEvent } from "react";
 import { Icon } from "../../components/Icon";
 import { LiveDuration } from "../../components/LiveDuration";
 import type { Task } from "../../data/types";
@@ -25,8 +25,6 @@ type TaskRowProps = {
   onDragStart: () => void;
   onDragOver: () => void;
   onDragEnd: () => void;
-  /** The title button, so focus can return to it when the popover closes. */
-  titleRef?: Ref<HTMLButtonElement>;
 };
 
 /** Task row: 1a/1c in the expanded window, 1d compact row in wide mode. */
@@ -43,7 +41,6 @@ export function TaskRow({
   onDragStart,
   onDragOver,
   onDragEnd,
-  titleRef,
 }: TaskRowProps) {
   const [popping, setPopping] = useState(false);
   const style = TYPE_STYLES[task.type];
@@ -214,7 +211,6 @@ export function TaskRow({
         <span className="-mx-1.5 shrink-0">{check}</span>
         {tile}
         <button
-          ref={titleRef}
           type="button"
           onClick={(event) => {
             onOpenDetails(event.currentTarget);
@@ -253,7 +249,6 @@ export function TaskRow({
       {check}
       {tile}
       <button
-        ref={titleRef}
         type="button"
         onClick={(event) => {
           onOpenDetails(event.currentTarget);

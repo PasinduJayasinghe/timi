@@ -5,7 +5,10 @@ import { ROSE_BLOB } from "../../components/WindowFrame";
 import type { Workday } from "../../hooks/useWorkday";
 import { CalendarEmpty } from "../calendar/CalendarEmpty";
 import { LogView } from "../log/LogView";
+import { TimelineStrip } from "../timeline/TimelinePanel";
+import type { TimelineRowsProps } from "../timeline/TimelineRows";
 import { TodayView } from "../today/TodayView";
+import type { TaskDetails } from "../today/useTaskDetails";
 
 export type WideView = "today-calendar" | "log";
 
@@ -14,13 +17,16 @@ type WideShellProps = {
   todayKey: string;
   total: LiveTotal;
   work: Workday;
+  details: TaskDetails;
+  /** What timeline bars do when clicked. */
+  barActions: Pick<TimelineRowsProps, "canOpen" | "onOpen">;
   onStartTask: () => void;
   /** The Start task sheet, shown inside the Today pane. */
   sheet: ReactNode;
 };
 
-/** Wide mode body (1d frame; 3g for Log). The timeline strip arrives with Phase 3. */
-export function WideShell({ view, todayKey, total, work, onStartTask, sheet }: WideShellProps) {
+/** Wide mode body (1d frame, with the timeline strip; 3g for Log). */
+export function WideShell({ view, todayKey, total, work, details, barActions, onStartTask, sheet }: WideShellProps) {
   if (view === "log") {
     return (
       <div
@@ -46,7 +52,7 @@ export function WideShell({ view, todayKey, total, work, onStartTask, sheet }: W
           aria-label="Today"
           className="relative flex min-h-0 flex-col gap-2 overflow-hidden rounded-panel border border-white/80 bg-white/40 p-2.5 backdrop-blur-glass"
         >
-          <TodayView work={work} variant="wide" onStartTask={onStartTask} />
+          <TodayView work={work} variant="wide" onStartTask={onStartTask} details={details} />
           {sheet}
         </section>
         <section
@@ -60,6 +66,7 @@ export function WideShell({ view, todayKey, total, work, onStartTask, sheet }: W
           <CalendarEmpty className="flex-1 px-1" />
         </section>
       </div>
+      <TimelineStrip todayKey={todayKey} timer={work.timer} {...barActions} />
       <FooterBar total={total} variant="wide" />
     </>
   );

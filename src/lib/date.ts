@@ -24,7 +24,13 @@ export function formatShortDate(date: Date): string {
   return `${part(parts, "weekday")} ${part(parts, "day")} ${part(parts, "month")}`;
 }
 
-/** Local calendar date as "YYYY-MM-DD", used as a task's list day. */
+/**
+ * A work day starts at 6 am, so a night shift (7 pm – 4 am) counts as one day: in the Today list,
+ * the Log, the timeline, totals and carry-over. Day keys ("YYYY-MM-DD") name the date it starts on.
+ */
+export const DAY_START_HOUR = 6;
+
+/** Local calendar date as "YYYY-MM-DD". */
 export function toLocalDayKey(date: Date): string {
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
@@ -43,11 +49,23 @@ export function addDays(key: string, count: number): string {
   return toLocalDayKey(new Date(date.getFullYear(), date.getMonth(), date.getDate() + count));
 }
 
-/** A local day as UTC ISO bounds [start, end). Days with a clock change are 23 or 25 hours long. */
-export function localDayRange(key: string): { start: string; end: string } {
+/** Local time when a work day starts: 6 am on its date. */
+export function dayStartOf(key: string): Date {
+  const date = fromLocalDayKey(key);
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate(), DAY_START_HOUR);
+}
+
+/** The work day a moment belongs to: before 6 am counts as the previous date. */
+export function workDayKey(date: Date): string {
+  if (date.getHours() >= DAY_START_HOUR) return toLocalDayKey(date);
+  return toLocalDayKey(new Date(date.getFullYear(), date.getMonth(), date.getDate() - 1));
+}
+
+/** A work day as UTC ISO bounds [start, end). Days with a clock change are 23 or 25 hours long. */
+export function workDayRange(key: string): { start: string; end: string } {
   return {
-    start: fromLocalDayKey(key).toISOString(),
-    end: fromLocalDayKey(addDays(key, 1)).toISOString(),
+    start: dayStartOf(key).toISOString(),
+    end: dayStartOf(addDays(key, 1)).toISOString(),
   };
 }
 
@@ -63,17 +81,7 @@ export function relativeDayLabel(key: string, todayKey: string): string {
   return `${part(parts, "day")} ${part(parts, "month")}`;
 }
 
-/** True when both dates fall on the same local calendar day. */
-export function isSameLocalDay(a: Date, b: Date): boolean {
-  return (
-    a.getFullYear() === b.getFullYear() &&
-    a.getMonth() === b.getMonth() &&
-    a.getDate() === b.getDate()
-  );
-}
-
-/** Milliseconds from `now` until the next local midnight. */
-export function msUntilNextLocalMidnight(now: Date): number {
-  const next = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
-  return next.getTime() - now.getTime();
+/** Milliseconds from `now` until the next work day starts (the next 6 am). */
+export function msUntilNextDayStart(now: Date): number {
+  return dayStartOf(addDays(workDayKey(now), 1)).getTime() - now.getTime();
 }

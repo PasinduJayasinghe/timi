@@ -5,7 +5,7 @@ import { createClient, createProject, listClients, listProjects } from "../../da
 import { recentTasks, type RecentTask } from "../../data/sessions";
 import type { Task } from "../../data/types";
 import type { TaskDraft } from "../../hooks/useTodayTasks";
-import { relativeDayLabel, toLocalDayKey } from "../../lib/date";
+import { relativeDayLabel, workDayKey } from "../../lib/date";
 import { parseEstimate } from "../../lib/estimate";
 import { displayMeta, displayTitle, isValidTicketNumber } from "../../lib/taskDisplay";
 import { TYPE_STYLES } from "../../lib/taskTypes";
@@ -495,7 +495,7 @@ export function StartTaskSheet({ variant, todayKey, runningTaskId, onStart, onRe
                   <div className="flex min-w-0 flex-1 flex-col leading-[1.2]">
                     <span className="truncate text-ui-sm font-medium">{title}</span>
                     <span className="truncate text-duration text-ink-muted">
-                      {displayMeta(task)} · {relativeDayLabel(toLocalDayKey(new Date(lastStartedAt)), todayKey)}
+                      {displayMeta(task)} · {relativeDayLabel(workDayKey(new Date(lastStartedAt)), todayKey)}
                     </span>
                   </div>
                   <button

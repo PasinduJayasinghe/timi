@@ -3,7 +3,7 @@ import type { ToastMessage } from "../components/Toast";
 import { nowIso, queueWrite, writesSettled } from "../data/db";
 import * as sessionStore from "../data/sessions";
 import type { Session, Task } from "../data/types";
-import { localDayRange } from "../lib/date";
+import { workDayRange } from "../lib/date";
 import { formatDuration } from "../lib/duration";
 import { HEARTBEAT_MS, isStale, secondsByTask, sessionSeconds } from "../lib/sessionMath";
 import { displayTitle, sessionDisplay } from "../lib/taskDisplay";
@@ -100,7 +100,7 @@ export function useTimer(
     const id = ++loadId.current;
     try {
       await writesSettled();
-      const range = localDayRange(day);
+      const range = workDayRange(day);
       const [open, sessions] = await Promise.all([
         sessionStore.getRunning(),
         sessionStore.listBetween(range.start, range.end),

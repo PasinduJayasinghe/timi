@@ -12,7 +12,7 @@ import { Picker, type PickerOption } from "./pickers/Picker";
 
 type TaskDetailsPopoverProps = {
   task: Task;
-  /** The row the popover points at. */
+  /** What the popover points at: a task row or a timeline bar. */
   anchor: HTMLElement;
   onClose: () => void;
   onUpdate: (patch: TaskPatch, names?: NamePatch) => void;
@@ -24,12 +24,23 @@ type OpenPicker = "type" | "client" | "project" | null;
 const NONE_ID = "__none__";
 const GAP = 10;
 const EDGE = 8;
+/** Width beside a narrow anchor such as a timeline bar: the popover's width on an expanded-window row. */
+const NARROW_WIDTH = 348;
+/** Arrow position on a row (2d: 56px from the popover's left edge). */
+const ROW_ARROW_LEFT = 56;
 
-/** Places the popover under the row (or above it when there isn't room), inset 4px from the row (2d). */
+type Placement = { style: CSSProperties; arrow: "top" | "bottom" | null; arrowLeft: number };
+
+/**
+ * Places the popover under its anchor (or above it when there isn't room). On a row it is inset
+ * 4px from the row (2d); beside a narrower anchor, such as a timeline bar, it is centred on the
+ * anchor, kept inside the window, and its arrow points at the anchor.
+ */
 function usePlacement(anchor: HTMLElement, popover: RefObject<HTMLDivElement | null>) {
-  const [placement, setPlacement] = useState<{ style: CSSProperties; arrow: "top" | "bottom" | null }>({
+  const [placement, setPlacement] = useState<Placement>({
     style: { visibility: "hidden" },
     arrow: null,
+    arrowLeft: ROW_ARROW_LEFT,
   });
 
   useLayoutEffect(() => {
@@ -39,15 +50,24 @@ function usePlacement(anchor: HTMLElement, popover: RefObject<HTMLDivElement | n
       const row = anchor.getBoundingClientRect();
       const height = element.offsetHeight;
       const viewport = window.innerHeight;
-      const horizontal = { left: row.left + 4, width: row.width - 8 };
+      let horizontal = { left: row.left + 4, width: row.width - 8 };
+      let arrowLeft = ROW_ARROW_LEFT;
+      if (horizontal.width < NARROW_WIDTH) {
+        const width = Math.min(NARROW_WIDTH, window.innerWidth - 2 * EDGE);
+        const center = row.left + row.width / 2;
+        const left = Math.min(Math.max(center - width / 2, EDGE), window.innerWidth - EDGE - width);
+        horizontal = { left, width };
+        // The arrow is 12px wide; keep it clear of the rounded corners
+        arrowLeft = Math.min(Math.max(center - left - 6, 16), width - 28);
+      }
 
       if (row.bottom + GAP + height <= viewport - EDGE) {
-        setPlacement({ style: { ...horizontal, top: row.bottom + GAP }, arrow: "top" });
+        setPlacement({ style: { ...horizontal, top: row.bottom + GAP }, arrow: "top", arrowLeft });
       } else if (row.top - GAP - height >= EDGE) {
-        setPlacement({ style: { ...horizontal, top: row.top - GAP - height }, arrow: "bottom" });
+        setPlacement({ style: { ...horizontal, top: row.top - GAP - height }, arrow: "bottom", arrowLeft });
       } else {
         const top = Math.max(EDGE, viewport - EDGE - height);
-        setPlacement({ style: { ...horizontal, top, maxHeight: viewport - 2 * EDGE }, arrow: null });
+        setPlacement({ style: { ...horizontal, top, maxHeight: viewport - 2 * EDGE }, arrow: null, arrowLeft });
       }
     };
 
@@ -76,7 +96,7 @@ const NEUTRAL_CHIP = `${CHIP} bg-ink-muted/8 px-2.25 font-medium hover:bg-ink-mu
 /** Task details popover (2d). Reminder, Sessions, the timer button and the "…" menu arrive in later phases. */
 export function TaskDetailsPopover({ task, anchor, onClose, onUpdate, onDelete }: TaskDetailsPopoverProps) {
   const ref = useRef<HTMLDivElement>(null);
-  const { style, arrow } = usePlacement(anchor, ref);
+  const { style, arrow, arrowLeft } = usePlacement(anchor, ref);
   const typeStyle = TYPE_STYLES[task.type];
   const fields = TYPE_FIELDS[task.type];
 
@@ -238,7 +258,8 @@ export function TaskDetailsPopover({ task, anchor, onClose, onUpdate, onDelete }
       {arrow && (
         <div
           aria-hidden="true"
-          className={`absolute left-14 size-3 rotate-45 bg-white ${arrow === "top" ? "-top-1.5" : "-bottom-1.5"}`}
+          style={{ left: arrowLeft }}
+          className={`absolute size-3 rotate-45 bg-white ${arrow === "top" ? "-top-1.5" : "-bottom-1.5"}`}
         />
       )}
 

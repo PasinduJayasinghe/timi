@@ -1,21 +1,21 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { createPortal } from "react-dom";
+import { useEffect, useMemo, useState } from "react";
 import { LoadError } from "../../components/LoadError";
-import { useToast } from "../../components/Toast";
 import { orderTasks } from "../../hooks/useTodayTasks";
 import type { Workday } from "../../hooks/useWorkday";
 import { TYPE_STYLES } from "../../lib/taskTypes";
 import { FilterChips, type TaskFilter } from "./FilterChips";
 import { QuickAddRow } from "./QuickAddRow";
-import { TaskDetailsPopover } from "./TaskDetailsPopover";
 import { TaskRow, type RowTimer, type RowVariant } from "./TaskRow";
 import { TodayEmpty } from "./TodayEmpty";
+import type { TaskDetails } from "./useTaskDetails";
 
 type TodayViewProps = {
   work: Workday;
   variant: RowVariant;
   /** Opens the Start task sheet (2a). */
   onStartTask: () => void;
+  /** The task details popover, shared with the timeline. */
+  details: TaskDetails;
 };
 
 /** Loading rows appear only if loading takes longer than this, to avoid a flash. */
@@ -38,16 +38,11 @@ function useDelayedFlag(active: boolean, delay: number): boolean {
   return shown;
 }
 
-type OpenDetails = { taskId: string; anchor: HTMLElement };
-
 /** Today tab content: quick add, filter chips and the task list with its states. */
-export function TodayView({ work, variant, onStartTask }: TodayViewProps) {
+export function TodayView({ work, variant, onStartTask, details }: TodayViewProps) {
   const { list, timer } = work;
   const wide = variant === "wide";
-  const toast = useToast();
   const [filter, setFilter] = useState<TaskFilter>("all");
-  const [details, setDetails] = useState<OpenDetails | null>(null);
-  const titleRefs = useRef(new Map<string, HTMLButtonElement>());
 
   // Drag preview: the order while dragging, before it is saved
   const [dragId, setDragId] = useState<string | null>(null);
@@ -58,32 +53,6 @@ export function TodayView({ work, variant, onStartTask }: TodayViewProps) {
   const displayOrder = preview ? preview.flatMap((id) => byId.get(id) ?? []) : ordered;
   const visible = displayOrder.filter((task) => filter === "all" || task.type === filter);
   const showLoading = useDelayedFlag(list.status === "loading", LOADING_DELAY_MS);
-
-  const detailsTask = details ? byId.get(details.taskId) : undefined;
-
-  const closeDetails = (): void => {
-    if (!details) return;
-    const button = titleRefs.current.get(details.taskId);
-    setDetails(null);
-    button?.focus();
-  };
-
-  const remove = (id: string): void => {
-    setDetails(null);
-    const removed = work.remove(id);
-    if (!removed) return;
-    toast({
-      message: "Task deleted",
-      tone: "neutral",
-      icon: "delete",
-      action: {
-        label: "Undo",
-        onClick: () => {
-          list.restore(removed);
-        },
-      },
-    });
-  };
 
   /** Keyboard reorder: swap with the next visible task in the same group. */
   const moveBy = (id: string, delta: -1 | 1): void => {
@@ -185,22 +154,18 @@ export function TodayView({ work, variant, onStartTask }: TodayViewProps) {
                 work.startTask(task.id);
               }}
               onPause={timer.pause}
-              titleRef={(element) => {
-                if (element) titleRefs.current.set(task.id, element);
-                else titleRefs.current.delete(task.id);
-              }}
               onToggleDone={() => {
                 work.toggleDone(task.id);
               }}
-              onOpenDetails={(anchor) => {
-                const row = anchor.closest<HTMLElement>("[data-task-row]") ?? anchor;
-                setDetails((prev) => (prev?.taskId === task.id ? null : { taskId: task.id, anchor: row }));
+              onOpenDetails={(opener) => {
+                const row = opener.closest<HTMLElement>("[data-task-row]") ?? opener;
+                details.toggle(task.id, row, opener);
               }}
               onMoveBy={(delta) => {
                 moveBy(task.id, delta);
               }}
               onDragStart={() => {
-                setDetails(null);
+                details.close();
                 setDragId(task.id);
                 setPreview(ordered.map((t) => t.id));
               }}
@@ -219,24 +184,6 @@ export function TodayView({ work, variant, onStartTask }: TodayViewProps) {
     <>
       <div className={wide ? "" : "relative z-1 shrink-0 px-3"}>{quickAdd}</div>
       {body}
-      {/* Portal: the wide-mode panes use backdrop-filter, which would trap a fixed-position popover */}
-      {details &&
-        detailsTask &&
-        createPortal(
-          <TaskDetailsPopover
-            key={detailsTask.id}
-            task={detailsTask}
-            anchor={details.anchor}
-            onClose={closeDetails}
-            onUpdate={(patch, names) => {
-              list.update(detailsTask.id, patch, names);
-            }}
-            onDelete={() => {
-              remove(detailsTask.id);
-            }}
-          />,
-          document.body,
-        )}
     </>
   );
 }

@@ -3,10 +3,11 @@ import {
   addDays,
   formatShortDate,
   formatTitleDate,
-  localDayRange,
-  msUntilNextLocalMidnight,
+  msUntilNextDayStart,
   relativeDayLabel,
   toLocalDayKey,
+  workDayKey,
+  workDayRange,
 } from "./date";
 
 // vitest.config.ts runs these tests in Europe/London, which has daylight saving.
@@ -28,15 +29,40 @@ describe("toLocalDayKey", () => {
   });
 });
 
-describe("msUntilNextLocalMidnight", () => {
-  const HOUR = 3_600_000;
-
-  it("is 23 hours on the day clocks go forward", () => {
-    expect(msUntilNextLocalMidnight(new Date(2026, 2, 29, 0, 0))).toBe(23 * HOUR);
+describe("workDayKey", () => {
+  it("starts the work day at 6 am", () => {
+    expect(workDayKey(new Date(2026, 9, 10, 6, 0))).toBe("2026-10-10");
+    expect(workDayKey(new Date(2026, 9, 10, 5, 59, 59))).toBe("2026-10-09");
   });
 
-  it("is 25 hours on the day clocks go back", () => {
-    expect(msUntilNextLocalMidnight(new Date(2026, 9, 25, 0, 0))).toBe(25 * HOUR);
+  it("keeps a night shift on the date it started", () => {
+    expect(workDayKey(new Date(2026, 9, 10, 19, 0))).toBe("2026-10-10");
+    expect(workDayKey(new Date(2026, 9, 11, 0, 45))).toBe("2026-10-10");
+    expect(workDayKey(new Date(2026, 9, 11, 3, 5))).toBe("2026-10-10");
+  });
+
+  it("crosses month ends and clock changes", () => {
+    expect(workDayKey(new Date(2026, 10, 1, 2, 0))).toBe("2026-10-31");
+    // 01:30 on the night clocks go back happens twice; both belong to the 24th
+    expect(workDayKey(new Date(2026, 9, 25, 1, 30))).toBe("2026-10-24");
+    expect(workDayKey(new Date(2026, 2, 29, 3, 0))).toBe("2026-03-28");
+  });
+});
+
+describe("msUntilNextDayStart", () => {
+  const HOUR = 3_600_000;
+
+  it("counts to the next 6 am", () => {
+    expect(msUntilNextDayStart(new Date(2026, 9, 11, 7, 0))).toBe(23 * HOUR);
+    expect(msUntilNextDayStart(new Date(2026, 9, 11, 1, 30))).toBe(4.5 * HOUR);
+  });
+
+  it("is 23 hours across the night clocks go forward", () => {
+    expect(msUntilNextDayStart(new Date(2026, 2, 28, 6, 0))).toBe(23 * HOUR);
+  });
+
+  it("is 25 hours across the night clocks go back", () => {
+    expect(msUntilNextDayStart(new Date(2026, 9, 24, 6, 0))).toBe(25 * HOUR);
   });
 });
 
@@ -63,22 +89,22 @@ describe("addDays", () => {
   });
 });
 
-describe("localDayRange", () => {
+describe("workDayRange", () => {
   const hours = (range: { start: string; end: string }): number =>
     (Date.parse(range.end) - Date.parse(range.start)) / 3_600_000;
 
-  it("starts and ends at local midnight", () => {
+  it("runs from 6 am to 6 am the next day", () => {
     // British Summer Time is UTC+1
-    expect(localDayRange("2026-10-10")).toEqual({
-      start: "2026-10-09T23:00:00.000Z",
-      end: "2026-10-10T23:00:00.000Z",
+    expect(workDayRange("2026-10-10")).toEqual({
+      start: "2026-10-10T05:00:00.000Z",
+      end: "2026-10-11T05:00:00.000Z",
     });
   });
 
-  it("is 23 or 25 hours long on clock-change days", () => {
-    expect(hours(localDayRange("2026-03-29"))).toBe(23);
-    expect(hours(localDayRange("2026-10-25"))).toBe(25);
-    expect(hours(localDayRange("2026-10-26"))).toBe(24);
+  it("is 23 or 25 hours long when the clocks change overnight", () => {
+    expect(hours(workDayRange("2026-03-28"))).toBe(23);
+    expect(hours(workDayRange("2026-10-24"))).toBe(25);
+    expect(hours(workDayRange("2026-10-25"))).toBe(24);
   });
 });
 

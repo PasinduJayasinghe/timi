@@ -113,6 +113,11 @@
   --shadow-cta-xl: 0 10px 28px rgb(91 71 214 / 0.4); /* from screens: Start client task (2a) */
   --shadow-cta-xl-hover: 0 12px 32px rgb(91 71 214 / 0.55); /* from screens: Start client task hover (2a) */
   --shadow-copy: 0 8px 22px rgb(91 71 214 / 0.3); /* from screens: Copy for timesheet (3f) */
+  --shadow-now: 0 0 0 2px rgb(255 255 255 / 0.6); /* from screens: timeline now line (1a) */
+  --shadow-bar-hover: 0 4px 12px rgb(46 36 120 / 0.2); /* from screens: timeline bar hover (1a) */
+  --shadow-running-bar: 0 0 12px rgb(139 124 246 / 0.5); /* from screens: running bar, wide strip (1d) */
+  --shadow-pulse: 0 0 10px rgb(139 124 246); /* from screens: running bar's pulsing edge (1a) */
+  --shadow-tooltip: 0 14px 36px rgb(46 36 120 / 0.22); /* from screens: timeline tooltip (1f) */
 
   /* ---------- Typography ---------- */
   --font-sans: "Inter Variable", system-ui, sans-serif;
@@ -171,6 +176,8 @@
   /* Start task sheet: slides up over a fading backdrop (drafted; turned off with reduce motion) */
   --animate-sheet-in: sheet-in 320ms var(--ease-soft);
   --animate-fade-in: fade-in 200ms var(--ease-soft);
+  /* Running bar's right edge (1a script "dbPulse 1.6s ease-in-out infinite"; off with reduce motion) */
+  --animate-pulse-edge: pulse-edge 1.6s ease-in-out infinite;
 
   @keyframes check-pop {
     0%,
@@ -190,6 +197,16 @@
     to {
       opacity: 1;
       transform: none;
+    }
+  }
+
+  @keyframes pulse-edge {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.35;
     }
   }
 
@@ -241,4 +258,13 @@
     linear-gradient(color-mix(in srgb, var(--color-mini) 92%, transparent), color-mix(in srgb, var(--color-mini-to) 92%, transparent))
       padding-box,
     linear-gradient(135deg, var(--color-accent), var(--color-accent-to)) border-box;
+}
+
+/* Running session bar on the timeline (1a/1d) */
+@utility bg-running-bar {
+  background-image: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--color-accent) 45%, transparent),
+    color-mix(in srgb, var(--color-accent-to) 60%, transparent)
+  );
 }

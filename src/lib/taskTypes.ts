@@ -18,6 +18,8 @@ export type TaskTypeStyle = {
   pickerActive: string;
   /** Type chip in the details popover (2d: type colour at 16%). */
   chipSoft: string;
+  /** Past session bar on the timeline (1a script: fill, edge and text). */
+  bar: string;
 };
 
 /**
@@ -35,6 +37,7 @@ export const TYPE_STYLES: Record<TaskType, TaskTypeStyle> = {
     chipWide: "bg-type-client/14 text-type-client-ink",
     pickerActive: "bg-type-client/14",
     chipSoft: "bg-type-client/16",
+    bar: "bg-type-client/30 border-type-client/65 text-type-client-ink-strong",
   },
   internal: {
     label: "Internal project",
@@ -46,6 +49,7 @@ export const TYPE_STYLES: Record<TaskType, TaskTypeStyle> = {
     chipWide: "bg-type-internal/16 text-type-internal-ink",
     pickerActive: "bg-type-internal/14",
     chipSoft: "bg-type-internal/16",
+    bar: "bg-type-internal/30 border-type-internal/70 text-type-internal-ink-strong",
   },
   support: {
     label: "Support ticket",
@@ -57,6 +61,7 @@ export const TYPE_STYLES: Record<TaskType, TaskTypeStyle> = {
     chipWide: "bg-type-support/14 text-type-support-ink",
     pickerActive: "bg-type-support/14",
     chipSoft: "bg-type-support/16",
+    bar: "bg-type-support/28 border-type-support/70 text-type-support-ink-strong",
   },
   meeting: {
     label: "Meeting",
@@ -68,6 +73,7 @@ export const TYPE_STYLES: Record<TaskType, TaskTypeStyle> = {
     chipWide: "bg-type-meeting/16 text-type-meeting-ink",
     pickerActive: "bg-type-meeting/14",
     chipSoft: "bg-type-meeting/16",
+    bar: "bg-type-meeting/30 border-type-meeting/80 text-type-meeting-ink-strong",
   },
   other: {
     label: "Other",
@@ -79,6 +85,7 @@ export const TYPE_STYLES: Record<TaskType, TaskTypeStyle> = {
     chipWide: "bg-type-other/20 text-type-other-ink",
     pickerActive: "bg-type-other/14",
     chipSoft: "bg-type-other/16",
+    bar: "bg-type-other/30 border-type-other/80 text-type-other-ink-strong",
   },
 };
 

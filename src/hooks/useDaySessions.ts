@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { writesSettled } from "../data/db";
 import * as sessionStore from "../data/sessions";
 import type { Session } from "../data/types";
-import { localDayRange } from "../lib/date";
+import { workDayRange } from "../lib/date";
 import type { ListStatus } from "./useTodayTasks";
 
 export type DaySessions = {
@@ -23,7 +23,7 @@ export function useDaySessions(day: string | null): DaySessions {
     setStatus("loading");
     try {
       await writesSettled();
-      const range = localDayRange(day);
+      const range = workDayRange(day);
       const list = await sessionStore.listBetween(range.start, range.end);
       if (id !== loadId.current) return;
       setSessions(list);

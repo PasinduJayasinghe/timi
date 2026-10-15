@@ -19,11 +19,14 @@ import {
 import { CalendarEmpty } from "./features/calendar/CalendarEmpty";
 import { LogView } from "./features/log/LogView";
 import { StartTaskSheet } from "./features/start/StartTaskSheet";
+import { TimelinePanel } from "./features/timeline/TimelinePanel";
 import { TodayView } from "./features/today/TodayView";
+import { useTaskDetails } from "./features/today/useTaskDetails";
 import { WideShell, type WideView } from "./features/wide/WideShell";
-import { useLocalDate } from "./hooks/useLocalDate";
+import { useStoredFlag } from "./hooks/useStoredFlag";
+import { useTodayKey } from "./hooks/useTodayKey";
 import { useWorkday } from "./hooks/useWorkday";
-import { toLocalDayKey } from "./lib/date";
+import { fromLocalDayKey } from "./lib/date";
 import { totalSeconds } from "./lib/sessionMath";
 import { closeApp, resizeForMode, setPinned, type WindowMode } from "./lib/window";
 
@@ -55,15 +58,19 @@ function App() {
 }
 
 function Shell() {
-  const date = useLocalDate();
+  const todayKey = useTodayKey();
+  // The title bar shows the work day, so a night shift keeps its date after midnight
+  const date = useMemo(() => fromLocalDayKey(todayKey), [todayKey]);
   const showToast = useToast();
   const onSaveError = useCallback((): void => {
     showToast({ message: "Couldn’t save that change. Try again.", tone: "error" });
   }, [showToast]);
-  const todayKey = toLocalDayKey(date);
   const work = useWorkday(todayKey, onSaveError, showToast);
   const { running, todaySessions, trackedByTask } = work.timer;
+  const details = useTaskDetails(work);
   const [sheetOpen, setSheetOpen] = useState(false);
+  // 1a shows the timeline open; the last choice is remembered
+  const [timelineOpen, setTimelineOpen] = useStoredFlag("timi.timelineOpen", true);
   const [tab, setTab] = useState<Tab>("today");
   const [mode, setMode] = useState<WindowMode>("expanded");
   const [lastOpenMode, setLastOpenMode] = useState<Exclude<WindowMode, "mini">>("expanded");
@@ -77,6 +84,8 @@ function Shell() {
   }, []);
 
   const changeMode = (next: WindowMode): void => {
+    // The popover's anchor won't survive the layout change
+    details.close();
     setMode(next);
     if (next !== "mini") setLastOpenMode(next);
     void resizeForMode(next);
@@ -99,6 +108,14 @@ function Shell() {
     setTab("today");
     if (mode === "mini") changeMode(lastOpenMode);
     setSheetOpen(true);
+  };
+
+  // Timeline bars open the task details popover when the task is on today's list
+  const barActions = {
+    canOpen: (taskId: string): boolean => work.list.tasks.some((task) => task.id === taskId),
+    onOpen: (taskId: string, bar: HTMLElement): void => {
+      details.toggle(taskId, bar, bar);
+    },
   };
 
   const togglePin = async (): Promise<void> => {
@@ -193,10 +210,14 @@ function Shell() {
           todayKey={todayKey}
           total={todayTotal}
           work={work}
+          details={details}
+          barActions={barActions}
           onStartTask={openSheet}
           sheet={wideView === "today-calendar" && sheet}
         />
-        <ToastViewport bottomClass="bottom-12" />
+        {/* Above the footer, and above the timeline strip in Today + Calendar (drafted) */}
+        <ToastViewport bottomClass={wideView === "log" ? "bottom-12" : "bottom-51"} />
+        {details.popover}
       </WindowFrame>
     );
   }
@@ -226,17 +247,34 @@ function Shell() {
       >
         {tab === "today" && (
           <>
-            <TodayView work={work} variant="expanded" onStartTask={openSheet} />
+            <TodayView work={work} variant="expanded" onStartTask={openSheet} details={details} />
             <FooterBar total={todayTotal} />
-            <TimelineCollapsedBar total={todayTotal} />
+            {timelineOpen ? (
+              <TimelinePanel
+                todayKey={todayKey}
+                timer={work.timer}
+                onCollapse={() => {
+                  setTimelineOpen(false);
+                }}
+                {...barActions}
+              />
+            ) : (
+              <TimelineCollapsedBar
+                total={todayTotal}
+                onExpand={() => {
+                  setTimelineOpen(true);
+                }}
+              />
+            )}
           </>
         )}
         {tab === "calendar" && <CalendarEmpty className="flex-1 p-7" />}
         {tab === "log" && <LogView variant="expanded" todayKey={todayKey} timer={work.timer} />}
       </div>
-      {/* 1a: 64px from the bottom, above the footer and collapsed timeline */}
-      <ToastViewport bottomClass={tab === "today" ? "bottom-16" : "bottom-4"} />
+      {/* 1a script: 236px from the bottom with the timeline open, 64px with it collapsed */}
+      <ToastViewport bottomClass={tab !== "today" ? "bottom-4" : timelineOpen ? "bottom-59" : "bottom-16"} />
       {sheet}
+      {details.popover}
     </WindowFrame>
   );
 }

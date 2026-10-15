@@ -8,7 +8,8 @@ import { useNow } from "../../hooks/useNow";
 import type { Timer } from "../../hooks/useTimer";
 import { addDays, formatShortDate, fromLocalDayKey } from "../../lib/date";
 import { formatDuration, formatTimeOfDay, formatTimeRange } from "../../lib/duration";
-import { sessionSeconds, SUMMARY_KEYS, totalSeconds, totalsBySummary, type SummaryKey } from "../../lib/sessionMath";
+import { sessionSeconds, SUMMARY_KEYS, totalSeconds, totalsBySummary } from "../../lib/sessionMath";
+import { SUMMARY_STYLES as SUMMARY } from "../../lib/summaryStyles";
 import { displayTitle, sessionDisplay, whereLabel } from "../../lib/taskDisplay";
 import { TYPE_STYLES } from "../../lib/taskTypes";
 import { buildTimesheet } from "../../lib/timesheet";
@@ -22,15 +23,6 @@ type LogViewProps = {
   timer: Timer;
 };
 
-/** Summary groups (3f): meetings use the calendar colour and icon, as in the design. */
-const SUMMARY: Record<SummaryKey, { label: string; icon: string; ink: string; bar: string }> = {
-  client: { label: "Client", icon: "work", ink: "text-type-client-ink", bar: "bg-type-client" },
-  internal: { label: "Internal", icon: "folder", ink: "text-type-internal-ink", bar: "bg-type-internal" },
-  support: { label: "Support", icon: "confirmation_number", ink: "text-type-support-ink", bar: "bg-type-support" },
-  meetings: { label: "Meetings", icon: "videocam", ink: "text-type-calendar-ink", bar: "bg-type-calendar" },
-  other: { label: "Other", icon: "category", ink: "text-type-other-ink", bar: "bg-type-other" },
-};
-
 type CopyState = { kind: "idle" } | { kind: "copied"; rows: number } | { kind: "failed" };
 
 const COPIED_MS = 2200;
@@ -38,7 +30,7 @@ const COPIED_MS = 2200;
 /** Log tab (3f; 3g in wide mode): one day's sessions, totals per type and "Copy for timesheet". */
 export function LogView({ variant, todayKey, timer }: LogViewProps) {
   const wide = variant === "wide";
-  // Days back from today, so the Log follows the date over midnight
+  // Days back from today, so the Log moves on when a new work day starts
   const [offset, setOffset] = useState(0);
   const day = addDays(todayKey, offset);
   const isToday = offset === 0;
@@ -261,7 +253,7 @@ function NarrowTable({ sessions, now }: TableProps) {
       <div className="flex shrink-0 flex-col gap-1.5 border-t border-ink-muted/12 bg-white/40 px-3 py-2.5">
         <div aria-hidden="true" className="flex h-2 gap-0.5 overflow-hidden rounded-[4px]">
           {SUMMARY_KEYS.filter((key) => totals[key] > 0).map((key) => (
-            <span key={key} className={SUMMARY[key].bar} style={{ flexGrow: totals[key] }} />
+            <span key={key} className={SUMMARY[key].solid} style={{ flexGrow: totals[key] }} />
           ))}
         </div>
         <div className="grid grid-cols-2 gap-x-3.5 gap-y-1 text-meta">

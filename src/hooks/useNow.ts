@@ -1,21 +1,21 @@
 import { useEffect, useState } from "react";
 
 /**
- * The current time in ms, re-rendering once a second while `active`.
+ * The current time in ms, re-rendering every `intervalMs` (default once a second) while `active`.
  * The interval only triggers a render: elapsed time is always worked out from stored timestamps.
  */
-export function useNow(active: boolean): number {
+export function useNow(active: boolean, intervalMs = 1000): number {
   const [, setRenders] = useState(0);
 
   useEffect(() => {
     if (!active) return;
     const intervalId = window.setInterval(() => {
       setRenders((count) => count + 1);
-    }, 1000);
+    }, intervalMs);
     return () => {
       window.clearInterval(intervalId);
     };
-  }, [active]);
+  }, [active, intervalMs]);
 
   return Date.now();
 }
