@@ -13,26 +13,31 @@ export type DaySessions = {
 
 /** Sessions that started on a past day, for the Log. Pass null to load nothing (today comes from the timer). */
 export function useDaySessions(day: string | null): DaySessions {
+  const range = day === null ? null : workDayRange(day);
+  return useSessionsBetween(range?.start ?? null, range?.end ?? null);
+}
+
+/** Sessions that started in [start, end) (UTC ISO), e.g. a week. Pass nulls to load nothing. */
+export function useSessionsBetween(start: string | null, end: string | null): DaySessions {
   const [status, setStatus] = useState<ListStatus>("loading");
   const [sessions, setSessions] = useState<Session[]>([]);
   const loadId = useRef(0);
 
   const load = useCallback(async (): Promise<void> => {
     const id = ++loadId.current;
-    if (day === null) return;
+    if (start === null || end === null) return;
     setStatus("loading");
     try {
       await writesSettled();
-      const range = workDayRange(day);
-      const list = await sessionStore.listBetween(range.start, range.end);
+      const list = await sessionStore.listBetween(start, end);
       if (id !== loadId.current) return;
       setSessions(list);
       setStatus("ready");
     } catch (error) {
-      console.error("[log] load failed", error);
+      console.error("[sessions] load failed", error);
       if (id === loadId.current) setStatus("error");
     }
-  }, [day]);
+  }, [start, end]);
 
   useEffect(() => {
     void load();

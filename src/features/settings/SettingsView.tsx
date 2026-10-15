@@ -13,9 +13,12 @@ import { useToast } from "../../components/Toast";
 import type { Settings } from "../../data/settings";
 import { quickAddShortcutRegistered } from "../../lib/desktop";
 import { QUICK_REMINDERS, reminderLength } from "../../lib/reminder";
+import type { CalendarState } from "../../hooks/useCalendar";
 import { Picker } from "../today/pickers/Picker";
+import { CalendarSettings } from "./CalendarSettings";
 
 type SettingsViewProps = {
+  calendar: CalendarState;
   settings: Settings;
   onChange: <K extends keyof Settings>(name: K, value: Settings[K]) => void;
   /** Back to the app. */
@@ -48,8 +51,8 @@ function Row({
   );
 }
 
-/** Settings (4e), General section. Meetings and Google Calendar arrive with Phase 5. */
-export function SettingsView({ settings, onChange, onBack, onClose, variant }: SettingsViewProps) {
+/** Settings (4e): General and Google Calendar. Meetings arrives with Phase 5b. */
+export function SettingsView({ calendar, settings, onChange, onBack, onClose, variant }: SettingsViewProps) {
   const toast = useToast();
   // Null while loading
   const [startOnLogin, setStartOnLogin] = useState<boolean | null>(null);
@@ -192,6 +195,8 @@ export function SettingsView({ settings, onChange, onBack, onClose, variant }: S
             </Row>
           </div>
         </section>
+
+        <CalendarSettings calendar={calendar} />
 
         <p className="m-0 text-center text-duration text-ink-muted">
           Timi{version ? ` ${version}` : ""} · all data stored locally first

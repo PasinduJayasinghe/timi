@@ -1,22 +1,24 @@
 import { useState } from "react";
 import { Icon } from "../../components/Icon";
+import { openMeet, type CalendarEvent } from "../../data/calendar";
 import type { Session } from "../../data/types";
 import { useNow } from "../../hooks/useNow";
 import { formatDuration, formatTimeOfDay } from "../../lib/duration";
 import { sessionSeconds, totalsBySummary } from "../../lib/sessionMath";
 import { SUMMARY_STYLES } from "../../lib/summaryStyles";
-import { displayTitle, sessionDisplay } from "../../lib/taskDisplay";
+import { displayTitle, sessionDisplay, whoLabel } from "../../lib/taskDisplay";
 import { TYPE_STYLES } from "../../lib/taskTypes";
 import {
   axisHours,
   axisLabels,
   axisPercent,
   barPosition,
+  rangePosition,
   rowOf,
   TIMELINE_ROWS,
   timelineAxis,
 } from "../../lib/timeline";
-import { TimelineTooltip } from "./TimelineTooltip";
+import { TimelineTooltip, type TooltipContent } from "./TimelineTooltip";
 
 export type TimelineRowsProps = {
   /** "expanded" is the 1a panel; "wide" is the 1d strip. */
@@ -27,21 +29,60 @@ export type TimelineRowsProps = {
   /** Whether a bar's task can be opened, i.e. it is on today's list. */
   canOpen: (taskId: string) => boolean;
   onOpen: (taskId: string, bar: HTMLElement) => void;
+  /** Calendar meetings still to come, shown dashed in the Meetings row (1f). Not counted in totals. */
+  meetings?: readonly CalendarEvent[];
 };
+
+function sessionTooltip(session: Session, now: number, openable: boolean): TooltipContent {
+  const task = sessionDisplay(session);
+  const style = TYPE_STYLES[task.type];
+  const who = whoLabel(task);
+  return {
+    icon: style.icon,
+    ink: style.ink,
+    heading: who ? `${style.label} · ${who}` : style.label,
+    title: displayTitle(task),
+    range: `${formatTimeOfDay(session.startedAt)} → ${session.endedAt ? formatTimeOfDay(session.endedAt) : "now"}`,
+    duration: formatDuration(sessionSeconds(session, now)),
+    footer: openable ? "Click to open task" : null,
+  };
+}
+
+/** Upcoming calendar meeting (1a script: "Calendar meeting", "(upcoming)"). */
+function eventTooltip(event: CalendarEvent): TooltipContent {
+  const iso = (ms: number): string => new Date(ms).toISOString();
+  return {
+    icon: "videocam",
+    ink: "text-type-calendar-ink",
+    heading: "Calendar meeting · upcoming",
+    title: event.title,
+    range: `${formatTimeOfDay(iso(event.startMs))} → ${formatTimeOfDay(iso(event.endMs))}`,
+    duration: formatDuration((event.endMs - event.startMs) / 1000),
+    footer: event.meetUrl ? "Click to join Google Meet" : null,
+  };
+}
 
 /** Expanded bars show their duration from 40 minutes (1a script); wide bars show a label from 5% of the axis (1d). */
 const EXPANDED_LABEL_SECONDS = 40 * 60;
 const WIDE_LABEL_PERCENT = 5;
 
 /** Row labels, hour axis, one track per row with its session bars, the now line and row totals. */
-export function TimelineRows({ variant, dayKey, sessions, isToday, canOpen, onOpen }: TimelineRowsProps) {
+export function TimelineRows({
+  variant,
+  dayKey,
+  sessions,
+  isToday,
+  canOpen,
+  onOpen,
+  meetings = [],
+}: TimelineRowsProps) {
   const wide = variant === "wide";
   const running = sessions.some((session) => session.endedAt === null);
   // Once a second while a bar grows; otherwise often enough to move the now line
   const now = useNow(isToday, running ? 1000 : 30_000);
-  const [hover, setHover] = useState<{ session: Session; bar: HTMLElement } | null>(null);
+  const [hover, setHover] = useState<{ content: TooltipContent; bar: HTMLElement } | null>(null);
 
-  const axis = timelineAxis(dayKey, sessions, now);
+  const axis = timelineAxis(dayKey, sessions, now, meetings);
   const totals = totalsBySummary(sessions, now);
   const nowPercent = isToday ? axisPercent(now, axis) : null;
   const labels = axisLabels(axis, variant);
@@ -134,13 +175,13 @@ export function TimelineRows({ variant, dayKey, sessions, isToday, canOpen, onOp
                         session.endedAt ? formatTimeOfDay(session.endedAt) : "now"
                       }, ${formatDuration(seconds)}`}
                       onMouseEnter={(event) => {
-                        setHover({ session, bar: event.currentTarget });
+                        setHover({ content: sessionTooltip(session, now, openable), bar: event.currentTarget });
                       }}
                       onMouseLeave={() => {
                         setHover(null);
                       }}
                       onFocus={(event) => {
-                        setHover({ session, bar: event.currentTarget });
+                        setHover({ content: sessionTooltip(session, now, openable), bar: event.currentTarget });
                       }}
                       onBlur={() => {
                         setHover(null);
@@ -164,6 +205,44 @@ export function TimelineRows({ variant, dayKey, sessions, isToday, canOpen, onOp
                           className="absolute -right-0.75 inset-y-0.5 w-[5px] animate-pulse-edge rounded-[3px] bg-accent-gradient shadow-pulse"
                         />
                       )}
+                    </button>
+                  );
+                })}
+              {key === "meetings" &&
+                meetings.map((meeting) => {
+                  const { left, width } = rangePosition(meeting.startMs, meeting.endMs, axis);
+                  const content = eventTooltip(meeting);
+                  const label = wide && width >= WIDE_LABEL_PERCENT ? meeting.title : "";
+                  const { meetUrl } = meeting;
+                  return (
+                    <button
+                      key={meeting.id}
+                      type="button"
+                      aria-label={`${meeting.title}, upcoming meeting, ${content.range}${meetUrl ? ", join Google Meet" : ""}`}
+                      onMouseEnter={(event) => {
+                        setHover({ content, bar: event.currentTarget });
+                      }}
+                      onMouseLeave={() => {
+                        setHover(null);
+                      }}
+                      onFocus={(event) => {
+                        setHover({ content, bar: event.currentTarget });
+                      }}
+                      onBlur={() => {
+                        setHover(null);
+                      }}
+                      onClick={() => {
+                        if (!meetUrl) return;
+                        openMeet(meetUrl).catch((error: unknown) => {
+                          console.error("[timeline] join failed", error);
+                        });
+                      }}
+                      style={{ left: `${left}%`, width: `${width}%` }}
+                      className={`absolute inset-y-0 flex min-w-1 items-center overflow-hidden border border-dashed border-type-calendar/80 bg-type-calendar/10 whitespace-nowrap text-type-calendar-ink-strong transition-[transform,box-shadow] duration-200 hover:z-2 hover:-translate-y-px hover:shadow-bar-hover focus-visible:z-2 ${rowRadius} ${
+                        wide ? "justify-start px-1.5 text-micro" : ""
+                      } ${meetUrl ? "cursor-pointer" : "cursor-default"}`}
+                    >
+                      {label && <span className="truncate">{label}</span>}
                     </button>
                   );
                 })}
@@ -198,14 +277,7 @@ export function TimelineRows({ variant, dayKey, sessions, isToday, canOpen, onOp
         ))}
       </div>
 
-      {hover && (
-        <TimelineTooltip
-          session={hover.session}
-          anchor={hover.bar}
-          now={now}
-          openable={canOpen(hover.session.taskId)}
-        />
-      )}
+      {hover && <TimelineTooltip content={hover.content} anchor={hover.bar} />}
     </div>
   );
 }

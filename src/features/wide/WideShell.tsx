@@ -2,8 +2,10 @@ import type { ReactNode } from "react";
 import { FooterBar } from "../../components/FooterBar";
 import type { LiveTotal } from "../../components/LiveDuration";
 import { ROSE_BLOB } from "../../components/WindowFrame";
+import type { CalendarEvent } from "../../data/calendar";
+import type { CalendarState } from "../../hooks/useCalendar";
 import type { Workday } from "../../hooks/useWorkday";
-import { CalendarEmpty } from "../calendar/CalendarEmpty";
+import { CalendarPane } from "../calendar/CalendarPane";
 import { LogView } from "../log/LogView";
 import { TimelineStrip } from "../timeline/TimelinePanel";
 import type { TimelineRowsProps } from "../timeline/TimelineRows";
@@ -18,8 +20,11 @@ type WideShellProps = {
   total: LiveTotal;
   work: Workday;
   details: TaskDetails;
-  /** What timeline bars do when clicked. */
-  barActions: Pick<TimelineRowsProps, "canOpen" | "onOpen">;
+  calendar: CalendarState;
+  /** Today's calendar events (the pane), and the ones still to come (the timeline strip). */
+  todayEvents: readonly CalendarEvent[];
+  /** What timeline bars do when clicked, and upcoming meetings on the strip. */
+  barActions: Pick<TimelineRowsProps, "canOpen" | "onOpen" | "meetings">;
   onStartTask: () => void;
   /** The Start task sheet, shown inside the Today pane. */
   sheet: ReactNode;
@@ -33,6 +38,8 @@ export function WideShell({
   total,
   work,
   details,
+  calendar,
+  todayEvents,
   barActions,
   onStartTask,
   sheet,
@@ -76,11 +83,11 @@ export function WideShell({
           aria-label="Calendar"
           className="relative flex min-h-0 flex-col gap-2 overflow-hidden rounded-panel border border-white/80 bg-white/40 px-3 py-2.5 backdrop-blur-glass"
         >
-          <div aria-hidden="true" className={`${ROSE_BLOB} -top-15 -right-15`} />
-          <div className="relative flex items-center gap-1.5">
-            <span className="flex-1 text-ui-sm font-semibold">Calendar</span>
-          </div>
-          <CalendarEmpty className="flex-1 px-1" />
+          {/* 3c rose blob, while not connected */}
+          {calendar.status?.connected === false && (
+            <div aria-hidden="true" className={`${ROSE_BLOB} -top-15 -right-15`} />
+          )}
+          <CalendarPane calendar={calendar} events={todayEvents} sessions={work.timer.todaySessions} />
         </section>
       </div>
       <TimelineStrip todayKey={todayKey} timer={work.timer} {...barActions} />

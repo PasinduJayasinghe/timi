@@ -1,3 +1,4 @@
+mod calendar;
 mod reminders;
 mod tray;
 
@@ -107,6 +108,8 @@ pub fn run() {
         )
         .plugin(tauri_plugin_autostart::Builder::new().build())
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
+        // Rust only: opens the Google sign-in page and Meet links (no web view permission)
+        .plugin(tauri_plugin_opener::init())
         .manage(reminders::Reminders::default())
         .manage(ShortcutStatus::default())
         .invoke_handler(tauri::generate_handler![
@@ -114,11 +117,20 @@ pub fn run() {
             quick_add_shortcut_registered,
             reminders::set_reminders,
             tray::set_tray_state,
+            calendar::calendar_status,
+            calendar::calendar_connect,
+            calendar::calendar_disconnect,
+            calendar::calendar_sync,
+            calendar::calendar_events,
+            calendar::calendar_set_included,
+            calendar::open_meet,
         ])
         .setup(|app| {
             let handle = app.handle();
             tray::create(handle)?;
             reminders::start(handle.clone());
+            app.manage(calendar::Calendar::new(handle));
+            calendar::start(handle.clone());
 
             let registered = app
                 .global_shortcut()

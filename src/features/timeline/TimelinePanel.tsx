@@ -8,7 +8,8 @@ import type { ListStatus } from "../../hooks/useTodayTasks";
 import { addDays, formatShortDate, fromLocalDayKey } from "../../lib/date";
 import { TimelineRows, type TimelineRowsProps } from "./TimelineRows";
 
-type BarActions = Pick<TimelineRowsProps, "canOpen" | "onOpen">;
+/** What bars do when clicked, and today's upcoming calendar meetings (shown on today only). */
+type BarActions = Pick<TimelineRowsProps, "canOpen" | "onOpen" | "meetings">;
 
 /** Couldn't load a day's sessions (drafted; the panel is too small for the full 3c alert). */
 function TimelineError({ onRetry }: { onRetry: () => void }) {
@@ -117,7 +118,14 @@ export function TimelinePanel({ todayKey, timer, onCollapse, ...actions }: Timel
           className="hover:bg-white/80"
         />
       </div>
-      <DayRows view={view} dayKey={day} isToday={isToday} variant="expanded" {...actions} />
+      <DayRows
+        view={view}
+        dayKey={day}
+        isToday={isToday}
+        variant="expanded"
+        {...actions}
+        meetings={isToday ? actions.meetings : undefined}
+      />
     </section>
   );
 }

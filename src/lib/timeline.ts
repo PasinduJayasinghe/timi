@@ -32,7 +32,13 @@ function ceilHour(ms: number): number {
  * The axis for a work day: the working hours, widened to whole hours to include every session,
  * and kept inside the work day (6 am to 6 am).
  */
-export function timelineAxis(dayKey: string, sessions: readonly Session[], nowMs: number): TimelineAxis {
+export function timelineAxis(
+  dayKey: string,
+  sessions: readonly Session[],
+  nowMs: number,
+  /** Other things to fit, e.g. calendar events. */
+  extra: readonly { startMs: number; endMs: number }[] = [],
+): TimelineAxis {
   const date = fromLocalDayKey(dayKey);
   const at = (minutes: number): number =>
     new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, minutes).getTime();
@@ -44,6 +50,10 @@ export function timelineAxis(dayKey: string, sessions: readonly Session[], nowMs
     const sessionEnd = session.endedAt ? Date.parse(session.endedAt) : Math.max(nowMs, sessionStart + MIN_RUNNING_MS);
     startMs = Math.min(startMs, floorHour(sessionStart));
     endMs = Math.max(endMs, ceilHour(sessionEnd));
+  }
+  for (const span of extra) {
+    startMs = Math.min(startMs, floorHour(span.startMs));
+    endMs = Math.max(endMs, ceilHour(span.endMs));
   }
   return {
     startMs: Math.max(startMs, dayStartOf(dayKey).getTime()),
@@ -60,6 +70,14 @@ export function barPosition(
   const span = axis.endMs - axis.startMs;
   const startMs = Date.parse(session.startedAt);
   const endMs = session.endedAt ? Date.parse(session.endedAt) : Math.max(nowMs, startMs + MIN_RUNNING_MS);
+  const from = Math.max(startMs, axis.startMs);
+  const to = Math.min(endMs, axis.endMs);
+  return { left: ((from - axis.startMs) / span) * 100, width: (Math.max(0, to - from) / span) * 100 };
+}
+
+/** Where a time range (e.g. a calendar event) sits on the axis, as percentages of its width. */
+export function rangePosition(startMs: number, endMs: number, axis: TimelineAxis): { left: number; width: number } {
+  const span = axis.endMs - axis.startMs;
   const from = Math.max(startMs, axis.startMs);
   const to = Math.min(endMs, axis.endMs);
   return { left: ((from - axis.startMs) / span) * 100, width: (Math.max(0, to - from) / span) * 100 };

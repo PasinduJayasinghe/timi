@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Session } from "../data/types";
-import { axisLabels, axisPercent, barPosition, rowOf, timelineAxis } from "./timeline";
+import { axisLabels, axisPercent, barPosition, rangePosition, rowOf, timelineAxis } from "./timeline";
 import type { TaskType } from "./taskTypes";
 
 // Local times (vitest runs in Europe/London)
@@ -40,6 +40,11 @@ describe("timelineAxis", () => {
     expect(timelineAxis("2026-10-10", [session(at(11, 3, 30), null)], at(11, 4, 20)).endMs).toBe(at(11, 5));
   });
 
+  it("widens for calendar events too", () => {
+    const axis = timelineAxis("2026-10-10", [], 0, [{ startMs: at(11, 4, 30), endMs: at(11, 5, 15) }]);
+    expect(axis).toEqual({ startMs: at(10, 19), endMs: at(11, 6) });
+  });
+
   it("stays inside the work day (6 am to 6 am)", () => {
     const axis = timelineAxis("2026-10-10", [session(at(10, 6, 15), at(10, 7)), session(at(11, 5, 30), at(11, 7))], 0);
     expect(axis).toEqual({ startMs: at(10, 6), endMs: at(11, 6) });
@@ -64,6 +69,16 @@ describe("barPosition", () => {
   it("clips at the ends of the axis", () => {
     const bar = barPosition(session(at(11, 3, 30), at(11, 5)), axis, 0);
     expect(bar.left + bar.width).toBeCloseTo(100, 5);
+  });
+});
+
+describe("rangePosition", () => {
+  it("places and clips a time range", () => {
+    const axis = { startMs: at(10, 19), endMs: at(11, 4) };
+    const event = rangePosition(at(11, 0, 30), at(11, 1, 15), axis);
+    expect(event.left).toBeCloseTo((330 / 540) * 100, 5);
+    expect(event.width).toBeCloseTo((45 / 540) * 100, 5);
+    expect(rangePosition(at(10, 18), at(10, 19, 30), axis)).toEqual({ left: 0, width: (30 / 540) * 100 });
   });
 });
 

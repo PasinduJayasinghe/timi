@@ -9,6 +9,7 @@ import { TitleBar } from "./components/TitleBar";
 import { ToastProvider, ToastViewport, useToast } from "./components/Toast";
 import {
   BLOBS_CALENDAR,
+  BLOBS_CALENDAR_CONNECTED,
   BLOBS_LOG,
   BLOBS_TODAY,
   BLOBS_WIDE,
@@ -16,7 +17,7 @@ import {
   WindowFrame,
   type BlobLayout,
 } from "./components/WindowFrame";
-import { CalendarEmpty } from "./features/calendar/CalendarEmpty";
+import { CalendarView } from "./features/calendar/CalendarView";
 import { LogView } from "./features/log/LogView";
 import { SettingsView } from "./features/settings/SettingsView";
 import { StartTaskSheet } from "./features/start/StartTaskSheet";
@@ -25,12 +26,13 @@ import { TodayView } from "./features/today/TodayView";
 import { useTaskDetails } from "./features/today/useTaskDetails";
 import { WideShell, type WideView } from "./features/wide/WideShell";
 import { DEFAULT_SETTINGS } from "./data/settings";
+import { useCalendar, useCalendarEvents } from "./hooks/useCalendar";
 import { useDesktop } from "./hooks/useDesktop";
 import { useSettings } from "./hooks/useSettings";
 import { useStoredChoice, useStoredFlag } from "./hooks/useStoredFlag";
 import { useTodayKey } from "./hooks/useTodayKey";
 import { useWorkday } from "./hooks/useWorkday";
-import { fromLocalDayKey } from "./lib/date";
+import { fromLocalDayKey, workDayRange } from "./lib/date";
 import { totalSeconds } from "./lib/sessionMath";
 import { hideToTray, resizeForMode, setPinned, type WindowMode } from "./lib/window";
 
@@ -78,6 +80,11 @@ function Shell() {
   const work = useWorkday(todayKey, settingsState.settings?.carryOver, onSaveError, showToast);
   const { running, todaySessions, trackedByTask } = work.timer;
   const details = useTaskDetails(work, settings.defaultReminderMinutes);
+  const calendar = useCalendar();
+  const todayRange = workDayRange(todayKey);
+  const todayEvents = useCalendarEvents(calendar, Date.parse(todayRange.start), Date.parse(todayRange.end)).events;
+  // Meetings still to come today: dashed on the timeline (1f), not counted in totals
+  const upcomingMeetings = todayEvents.filter((event) => event.endMs > Date.now());
   const [sheetOpen, setSheetOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   // Bumped to focus quick add (Ctrl+Shift+Space or the tray)
@@ -193,6 +200,7 @@ function Shell() {
     return (
       <WindowFrame blobs={wide ? BLOBS_WIDE_LOG : BLOBS_LOG}>
         <SettingsView
+          calendar={calendar}
           variant={wide ? "wide" : "expanded"}
           settings={settings}
           onChange={settingsState.update}
@@ -272,7 +280,9 @@ function Shell() {
           total={todayTotal}
           work={work}
           details={details}
-          barActions={barActions}
+          calendar={calendar}
+          todayEvents={todayEvents}
+          barActions={{ ...barActions, meetings: upcomingMeetings }}
           onStartTask={openSheet}
           sheet={wideView === "today-calendar" && sheet}
           focusQuickAdd={quickAddFocus}
@@ -285,7 +295,7 @@ function Shell() {
   }
 
   return (
-    <WindowFrame blobs={TAB_BLOBS[tab]}>
+    <WindowFrame blobs={tab === "calendar" && calendar.status?.connected ? BLOBS_CALENDAR_CONNECTED : TAB_BLOBS[tab]}>
       {titleBar}
 
       <div className="relative z-1 flex shrink-0 items-center gap-1.5 px-3 pb-2.5">
@@ -325,6 +335,7 @@ function Shell() {
                   setTimelineOpen(false);
                 }}
                 {...barActions}
+                meetings={upcomingMeetings}
               />
             ) : (
               <TimelineCollapsedBar
@@ -336,7 +347,7 @@ function Shell() {
             )}
           </>
         )}
-        {tab === "calendar" && <CalendarEmpty className="flex-1 p-7" />}
+        {tab === "calendar" && <CalendarView calendar={calendar} todayKey={todayKey} timer={work.timer} />}
         {tab === "log" && <LogView variant="expanded" todayKey={todayKey} timer={work.timer} />}
       </div>
       {/* 1a script: 236px from the bottom with the timeline open, 64px with it collapsed */}

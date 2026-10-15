@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local secrets: Google OAuth client for Calendar sign-in (see .env.example)
+.env
+.env.*
+!.env.example

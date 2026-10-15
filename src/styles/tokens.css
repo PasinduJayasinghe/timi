@@ -119,6 +119,10 @@
   --shadow-pulse: 0 0 10px rgb(139 124 246); /* from screens: running bar's pulsing edge (1a) */
   --shadow-tooltip: 0 14px 36px rgb(46 36 120 / 0.22); /* from screens: timeline tooltip (1f) */
   --shadow-knob: 0 1px 4px rgb(30 27 75 / 0.3); /* from screens: switch knob (4e) */
+  --shadow-meeting: 0 10px 26px rgb(178 48 106 / 0.14); /* from screens: next meeting card (3a) */
+  --shadow-month: 0 18px 44px rgb(46 36 120 / 0.24); /* from screens: month picker (3b) */
+  --shadow-connected: 0 0 0 3px rgb(43 179 163 / 0.2); /* from screens: connected dot (3a) */
+  --shadow-running-block: 0 0 14px rgb(139 124 246 / 0.45); /* from screens: running block, day view (3a) */
 
   /* ---------- Typography ---------- */
   --font-sans: "Inter Variable", system-ui, sans-serif;
@@ -267,5 +271,14 @@
     90deg,
     color-mix(in srgb, var(--color-accent) 45%, transparent),
     color-mix(in srgb, var(--color-accent-to) 60%, transparent)
+  );
+}
+
+/* Running session block in the calendar day view (3a): top-to-bottom gradient */
+@utility bg-running-block {
+  background-image: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-accent) 45%, transparent),
+    color-mix(in srgb, var(--color-accent-to) 55%, transparent)
   );
 }

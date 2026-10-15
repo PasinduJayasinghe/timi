@@ -27,6 +27,12 @@ export const BLOBS_CALENDAR: BlobLayout = {
   rose: "-right-15 top-9",
 };
 
+/** 3a Calendar, connected: no rose blob. */
+export const BLOBS_CALENDAR_CONNECTED: BlobLayout = {
+  violet: BLOBS_CALENDAR.violet,
+  sky: BLOBS_CALENDAR.sky,
+};
+
 /** 3f Log (expanded). */
 export const BLOBS_LOG: BlobLayout = {
   violet: BLOBS_TODAY.violet,

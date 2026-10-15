@@ -1,19 +1,24 @@
 import { useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { Icon } from "../../components/Icon";
-import type { Session } from "../../data/types";
-import { formatDuration, formatTimeOfDay } from "../../lib/duration";
-import { sessionSeconds } from "../../lib/sessionMath";
-import { displayTitle, sessionDisplay, whoLabel } from "../../lib/taskDisplay";
-import { TYPE_STYLES } from "../../lib/taskTypes";
+
+export type TooltipContent = {
+  /** First line: type icon and label, e.g. "Client project · Client A". */
+  icon: string;
+  ink: string;
+  heading: string;
+  title: string;
+  /** "8:00 pm → 9:15 pm". */
+  range: string;
+  duration: string;
+  /** e.g. "Click to open task". */
+  footer: string | null;
+};
 
 type TimelineTooltipProps = {
-  session: Session;
+  content: TooltipContent;
   /** The bar it describes. */
   anchor: HTMLElement;
-  now: number;
-  /** Shows "Click to open task" when the bar opens the task. */
-  openable: boolean;
 };
 
 const WIDTH = 206;
@@ -21,7 +26,7 @@ const GAP = 10;
 const EDGE = 8;
 
 /** Bar tooltip (1f), above the bar unless there isn't room. Portalled so the panel can't clip it. */
-export function TimelineTooltip({ session, anchor, now, openable }: TimelineTooltipProps) {
+export function TimelineTooltip({ content, anchor }: TimelineTooltipProps) {
   const ref = useRef<HTMLDivElement>(null);
   const [placement, setPlacement] = useState<{ style: CSSProperties; arrowLeft: number; below: boolean }>({
     style: { visibility: "hidden" },
@@ -43,11 +48,7 @@ export function TimelineTooltip({ session, anchor, now, openable }: TimelineTool
       arrowLeft: Math.min(Math.max(center - left - 5, 12), WIDTH - 22),
       below,
     });
-  }, [anchor, session]);
-
-  const task = sessionDisplay(session);
-  const style = TYPE_STYLES[task.type];
-  const who = whoLabel(task);
+  }, [anchor, content.title]);
 
   return createPortal(
     <div
@@ -61,18 +62,16 @@ export function TimelineTooltip({ session, anchor, now, openable }: TimelineTool
         style={{ left: placement.arrowLeft }}
         className={`absolute size-2.5 rotate-45 bg-white ${placement.below ? "-top-1.25" : "-bottom-1.25"}`}
       />
-      <div className={`flex items-center gap-1.5 text-duration font-semibold ${style.ink}`}>
-        <Icon name={style.icon} size={14} />
-        {who ? `${style.label} · ${who}` : style.label}
+      <div className={`flex items-center gap-1.5 text-duration font-semibold ${content.ink}`}>
+        <Icon name={content.icon} size={14} />
+        {content.heading}
       </div>
-      <div className="text-ui leading-[1.3] font-semibold">{displayTitle(task)}</div>
+      <div className="text-ui leading-[1.3] font-semibold">{content.title}</div>
       <div className="flex justify-between font-mono text-meta font-medium">
-        <span>
-          {formatTimeOfDay(session.startedAt)} → {session.endedAt ? formatTimeOfDay(session.endedAt) : "now"}
-        </span>
-        <span className="font-semibold">{formatDuration(sessionSeconds(session, now))}</span>
+        <span>{content.range}</span>
+        <span className="font-semibold">{content.duration}</span>
       </div>
-      {openable && <div className="text-duration text-ink-muted">Click to open task</div>}
+      {content.footer && <div className="text-duration text-ink-muted">{content.footer}</div>}
     </div>,
     document.body,
   );
