@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "alarm",
+  "description": "Phase 5b: the meeting alarm window. It acts through Timi's own commands, so it needs only events and dragging.",
+  "windows": ["alarm"],
+  "permissions": ["core:event:allow-listen", "core:event:allow-unlisten", "core:window:allow-start-dragging"]
+}

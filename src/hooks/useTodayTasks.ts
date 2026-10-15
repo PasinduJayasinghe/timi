@@ -25,7 +25,12 @@ function groupOf(tasks: readonly Task[], task: Task): Task[] {
 
 /** Fields for a new task. Anything left out starts empty. */
 export type TaskDraft = Pick<Task, "title" | "type"> &
-  Partial<Pick<Task, "clientId" | "clientName" | "projectId" | "projectName" | "ticketNumber" | "estimateMinutes">>;
+  Partial<
+    Pick<
+      Task,
+      "clientId" | "clientName" | "projectId" | "projectName" | "ticketNumber" | "estimateMinutes" | "calendarEventId"
+    >
+  >;
 
 export type TodayTasks = {
   status: ListStatus;
@@ -106,6 +111,7 @@ export function useTodayTasks(day: string, carryOver: boolean | undefined, onSav
         notes: "",
         estimateMinutes: draft.estimateMinutes ?? null,
         remindAt: null,
+        calendarEventId: draft.calendarEventId ?? null,
         listDay: day,
         carriedFrom: null,
         position: topPosition(tasksRef.current.map((t) => t.position)),

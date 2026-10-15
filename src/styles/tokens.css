@@ -29,6 +29,8 @@
   --color-app-to: #e8eeff;
   --color-mini: #f8f6ff; /* from screens: mini bar surface */
   --color-mini-to: #f0f4ff; /* from screens: running mini bar surface (1e) */
+  --color-alarm: #fff0f6; /* from screens: meeting alarm window gradient (4a) */
+  --color-meeting-mini: #fff6fa; /* from screens: meeting timer mini bar surface (1e) */
 
   --color-blob-violet: #a78bfa;
   --color-blob-sky: #7db4ff;
@@ -123,6 +125,7 @@
   --shadow-month: 0 18px 44px rgb(46 36 120 / 0.24); /* from screens: month picker (3b) */
   --shadow-connected: 0 0 0 3px rgb(43 179 163 / 0.2); /* from screens: connected dot (3a) */
   --shadow-running-block: 0 0 14px rgb(139 124 246 / 0.45); /* from screens: running block, day view (3a) */
+  --shadow-join: 0 10px 24px rgb(178 48 106 / 0.35); /* from screens: Join Google Meet, alarm (4a) */
 
   /* ---------- Typography ---------- */
   --font-sans: "Inter Variable", system-ui, sans-serif;
@@ -281,4 +284,25 @@
     color-mix(in srgb, var(--color-accent) 45%, transparent),
     color-mix(in srgb, var(--color-accent-to) 55%, transparent)
   );
+}
+
+/* Meeting alarm window (4a, 4b) */
+@utility bg-alarm {
+  background-image: linear-gradient(160deg, var(--color-alarm) 0%, var(--color-app-from) 60%, var(--color-app-to) 100%);
+}
+
+/* Mini bar while a calendar meeting timer runs (1e): rose to violet border */
+@utility bg-meeting-mini {
+  background:
+    linear-gradient(
+        color-mix(in srgb, var(--color-meeting-mini) 92%, transparent),
+        color-mix(in srgb, var(--color-mini) 92%, transparent)
+      )
+      padding-box,
+    linear-gradient(135deg, var(--color-type-calendar), var(--color-accent)) border-box;
+}
+
+/* Alarm progress bar (4a) */
+@utility bg-alarm-progress {
+  background-image: linear-gradient(90deg, var(--color-type-calendar), var(--color-accent));
 }

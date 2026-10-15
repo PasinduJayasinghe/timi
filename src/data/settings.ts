@@ -6,16 +6,28 @@ export type Settings = {
   carryOver: boolean;
   /** The quick reminder highlighted first in the Reminder picker, in minutes. */
   defaultReminderMinutes: number;
+  /** "Alert before meeting" (4e): 1, 5, 10 or 15 minutes. */
+  meetingAlertMinutes: number;
+  /** "Alarm sound: Gentle chime" (4e). */
+  meetingChime: boolean;
+  /** "Always start automatically when I join" (4b). */
+  autoStartMeetingTimer: boolean;
 };
 
 export const DEFAULT_SETTINGS: Settings = {
   carryOver: true,
   defaultReminderMinutes: 30,
+  meetingAlertMinutes: 5,
+  meetingChime: true,
+  autoStartMeetingTimer: false,
 };
 
 const KEYS: Record<keyof Settings, string> = {
   carryOver: "carry_over",
   defaultReminderMinutes: "default_reminder_minutes",
+  meetingAlertMinutes: "meeting_alert_minutes",
+  meetingChime: "meeting_chime",
+  autoStartMeetingTimer: "auto_start_meeting_timer",
 };
 
 type SettingRow = { key: string; value: string };

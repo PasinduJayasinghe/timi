@@ -1,8 +1,9 @@
 import type { MouseEvent } from "react";
 import type { Session, Task } from "../data/types";
 import { formatClock } from "../lib/duration";
-import { displayMeta, displayTitle, sessionDisplay, type DisplayFields } from "../lib/taskDisplay";
-import { TYPE_STYLES } from "../lib/taskTypes";
+import { shortTime } from "../lib/calendar";
+import { displayMeta, displayTitle, sessionDisplay, whoLabel, type DisplayFields } from "../lib/taskDisplay";
+import { styleOf } from "../lib/taskTypes";
 import { Icon } from "./Icon";
 import { IconButton } from "./IconButton";
 import { LiveDuration, type LiveTotal } from "./LiveDuration";
@@ -23,6 +24,8 @@ type MiniBarProps = {
   /** Idle Start: expands the window and opens the Start task sheet. */
   onStart: () => void;
   onExpand: () => void;
+  /** Today's next meeting, for the idle bar (1e: "· next: Sprint planning 12:30"). */
+  nextMeeting: { title: string; startMs: number } | null;
 };
 
 /** Buttons inside the drag area must not start a window drag. */
@@ -31,7 +34,7 @@ const stopDrag = (event: MouseEvent): void => {
 };
 
 function TypeTile({ task }: { task: DisplayFields }) {
-  const style = TYPE_STYLES[task.type];
+  const style = styleOf(task);
   return (
     <span
       title={style.label}
@@ -47,7 +50,7 @@ function TypeTile({ task }: { task: DisplayFields }) {
  * hint arrive with Phase 5. The design's 85% surface sits on the app gradient here, so the
  * desktop doesn't show through the transparent window.
  */
-export function MiniBar({ state, total, onPause, onResume, onStart, onExpand }: MiniBarProps) {
+export function MiniBar({ state, total, onPause, onResume, onStart, onExpand, nextMeeting }: MiniBarProps) {
   const expand = <IconButton icon="open_in_full" label="Expand" onClick={onExpand} onMouseDown={stopDrag} />;
 
   if (state.kind === "idle") {
@@ -60,11 +63,12 @@ export function MiniBar({ state, total, onPause, onResume, onStart, onExpand }: 
           <LogoMark />
           <div className="flex min-w-0 flex-1 flex-col leading-[1.2]">
             <span className="truncate text-ui font-semibold">No timer running</span>
-            <span className="text-duration text-ink-muted">
+            <span className="truncate text-duration text-ink-muted">
               Today{" "}
               <span className="font-mono">
                 <LiveDuration {...total} />
               </span>
+              {nextMeeting && ` · next: ${nextMeeting.title} ${shortTime(nextMeeting.startMs)}`}
             </span>
           </div>
           <button
@@ -84,14 +88,22 @@ export function MiniBar({ state, total, onPause, onResume, onStart, onExpand }: 
 
   const running = state.kind === "running";
   const task = running ? sessionDisplay(state.session) : state.task;
-  const meta = running ? displayMeta(task) : `Paused · ${displayMeta(task)}`;
+  // 1e: a meeting timer started from a calendar event gets the rose variant
+  const meeting = running && state.session.calendarEventId !== null;
+  const who = whoLabel(task);
+  let meta = running ? displayMeta(task) : `Paused · ${displayMeta(task)}`;
+  if (meeting) meta = who ? `Meeting timer · ${who}` : "Meeting timer";
 
   return (
     <div className="h-full w-full overflow-hidden rounded-panel bg-app">
       <div
         onMouseDown={handleDragMouseDown}
         className={`flex h-full w-full cursor-grab items-center gap-2 rounded-panel pr-2 pl-2.5 text-ink ${
-          running ? "border-[1.5px] border-transparent bg-running-mini" : "border border-white/90 bg-mini/85"
+          meeting
+            ? "border-[1.5px] border-transparent bg-meeting-mini"
+            : running
+              ? "border-[1.5px] border-transparent bg-running-mini"
+              : "border border-white/90 bg-mini/85"
         }`}
       >
         <Icon name="drag_indicator" size={16} className="text-ink-muted/50" />
@@ -102,7 +114,11 @@ export function MiniBar({ state, total, onPause, onResume, onStart, onExpand }: 
         </div>
         {running ? (
           <>
-            <span className="font-mono text-[15px] font-semibold text-accent-ink tabular-nums">
+            <span
+              className={`font-mono text-[15px] font-semibold tabular-nums ${
+                meeting ? "text-type-calendar-ink" : "text-accent-ink"
+              }`}
+            >
               <LiveDuration baseSeconds={0} runningSince={state.session.startedAt} format="clock" />
             </span>
             <button

@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+  alarmProgress,
+  formatCountdown,
   formatSpan,
   formatWeekTotal,
   hourLabel,
@@ -89,6 +91,34 @@ describe("formatWeekTotal", () => {
     [4 * 3600 + 59 * 60, "4h9"],
   ])("%i seconds → %s", (seconds, text) => {
     expect(formatWeekTotal(seconds)).toBe(text);
+  });
+});
+
+describe("formatCountdown", () => {
+  it.each([
+    [298_000, "4:58"],
+    [60_000, "1:00"],
+    [500, "0:01"],
+    [0, "0:00"],
+    [-30_000, "0:00"],
+    [3_725_000, "1:02:05"],
+  ])("%i ms → %s", (ms, text) => {
+    expect(formatCountdown(ms)).toBe(text);
+  });
+});
+
+describe("alarmProgress", () => {
+  const start = at(11, 0, 30);
+
+  it("runs from 0 at the alert to 1 at the start", () => {
+    expect(alarmProgress(start, 5, start - 5 * 60_000)).toBe(0);
+    expect(alarmProgress(start, 5, start - 150_000)).toBeCloseTo(0.5, 5);
+    expect(alarmProgress(start, 5, start)).toBe(1);
+  });
+
+  it("stays within 0 and 1", () => {
+    expect(alarmProgress(start, 5, start - 10 * 60_000)).toBe(0);
+    expect(alarmProgress(start, 5, start + 60_000)).toBe(1);
   });
 });
 

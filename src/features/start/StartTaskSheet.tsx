@@ -8,7 +8,7 @@ import type { TaskDraft } from "../../hooks/useTodayTasks";
 import { relativeDayLabel, workDayKey } from "../../lib/date";
 import { parseEstimate } from "../../lib/estimate";
 import { displayMeta, displayTitle, isValidTicketNumber } from "../../lib/taskDisplay";
-import { TYPE_STYLES } from "../../lib/taskTypes";
+import { styleOf, TYPE_STYLES } from "../../lib/taskTypes";
 import type { PickerOption } from "../today/pickers/Picker";
 import { ComboField, type CatalogRef } from "./ComboField";
 
@@ -479,7 +479,7 @@ export function StartTaskSheet({ variant, todayKey, runningTaskId, onStart, onRe
           <div className="flex min-h-0 flex-col gap-1">
             <span className="text-label tracking-[0.07em] text-ink-muted uppercase">Recent</span>
             {recent.map(({ task, lastStartedAt }) => {
-              const taskStyle = TYPE_STYLES[task.type];
+              const taskStyle = styleOf(task);
               const title = displayTitle(task);
               return (
                 <div

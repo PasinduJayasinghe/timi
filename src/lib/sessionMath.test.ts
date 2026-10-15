@@ -18,6 +18,7 @@ function session(taskId: string, type: TaskType, start: number, end: number | nu
     ticketNumber: null,
     clientName: null,
     projectName: null,
+    calendarEventId: null,
   };
 }
 

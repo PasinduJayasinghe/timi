@@ -1,9 +1,14 @@
+import { Icon } from "../../components/Icon";
+import { formatTimeOfDay } from "../../lib/duration";
+
 type TodayEmptyProps = {
   className?: string;
+  /** Today's next meeting, if any (1b). */
+  nextMeeting?: { title: string; startMs: number } | null;
 };
 
-/** 1b empty state: new day, nothing carried over. The "Next meeting" line arrives with Phase 5. */
-export function TodayEmpty({ className = "" }: TodayEmptyProps) {
+/** 1b empty state: new day, nothing carried over. */
+export function TodayEmpty({ className = "", nextMeeting = null }: TodayEmptyProps) {
   return (
     <div className={`flex flex-col justify-center gap-2.5 ${className}`}>
       <h2 className="m-0 text-display">A clean slate.</h2>
@@ -18,6 +23,12 @@ export function TodayEmpty({ className = "" }: TodayEmptyProps) {
           </kbd>
           Quick add from any app
         </div>
+        {nextMeeting && (
+          <div className="flex items-center gap-2">
+            <Icon name="videocam" size={16} className="text-type-calendar-ink" />
+            Next meeting · {nextMeeting.title} at {formatTimeOfDay(new Date(nextMeeting.startMs).toISOString())}
+          </div>
+        )}
       </div>
     </div>
   );

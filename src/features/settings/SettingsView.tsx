@@ -16,6 +16,7 @@ import { QUICK_REMINDERS, reminderLength } from "../../lib/reminder";
 import type { CalendarState } from "../../hooks/useCalendar";
 import { Picker } from "../today/pickers/Picker";
 import { CalendarSettings } from "./CalendarSettings";
+import { MeetingSettings } from "./MeetingSettings";
 
 type SettingsViewProps = {
   calendar: CalendarState;
@@ -51,7 +52,7 @@ function Row({
   );
 }
 
-/** Settings (4e): General and Google Calendar. Meetings arrives with Phase 5b. */
+/** Settings (4e): General, Meetings and Google Calendar. */
 export function SettingsView({ calendar, settings, onChange, onBack, onClose, variant }: SettingsViewProps) {
   const toast = useToast();
   // Null while loading
@@ -195,6 +196,8 @@ export function SettingsView({ calendar, settings, onChange, onBack, onClose, va
             </Row>
           </div>
         </section>
+
+        <MeetingSettings settings={settings} onChange={onChange} />
 
         <CalendarSettings calendar={calendar} />
 

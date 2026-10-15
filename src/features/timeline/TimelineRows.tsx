@@ -7,7 +7,7 @@ import { formatDuration, formatTimeOfDay } from "../../lib/duration";
 import { sessionSeconds, totalsBySummary } from "../../lib/sessionMath";
 import { SUMMARY_STYLES } from "../../lib/summaryStyles";
 import { displayTitle, sessionDisplay, whoLabel } from "../../lib/taskDisplay";
-import { TYPE_STYLES } from "../../lib/taskTypes";
+import { styleOf } from "../../lib/taskTypes";
 import {
   axisHours,
   axisLabels,
@@ -35,7 +35,7 @@ export type TimelineRowsProps = {
 
 function sessionTooltip(session: Session, now: number, openable: boolean): TooltipContent {
   const task = sessionDisplay(session);
-  const style = TYPE_STYLES[task.type];
+  const style = styleOf(task);
   const who = whoLabel(task);
   return {
     icon: style.icon,
@@ -166,7 +166,7 @@ export function TimelineRows({
                   }
                   const surface = isRunning
                     ? `border-accent bg-running-bar text-accent-ink-hover ${wide ? "shadow-running-bar" : ""}`
-                    : TYPE_STYLES[session.taskType].bar;
+                    : styleOf(sessionDisplay(session)).bar;
                   return (
                     <button
                       key={session.id}

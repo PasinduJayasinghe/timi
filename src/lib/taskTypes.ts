@@ -89,6 +89,28 @@ export const TYPE_STYLES: Record<TaskType, TaskTypeStyle> = {
   },
 };
 
+/**
+ * A meeting timer started from a Google Calendar event (4b) shows in the calendar style: rose,
+ * videocam, "Meeting" (1e, 3g). It is still a meeting task, counted under Meetings.
+ */
+export const CALENDAR_MEETING_STYLE: TaskTypeStyle = {
+  label: "Calendar meeting",
+  short: "Meeting",
+  icon: "videocam",
+  ink: "text-type-calendar-ink",
+  tint: "bg-type-calendar/20",
+  chipActive: "bg-type-calendar/32 border-type-calendar/80 text-type-calendar-ink-strong",
+  chipWide: "bg-type-calendar/16 text-type-calendar-ink",
+  pickerActive: "bg-type-calendar/14",
+  chipSoft: "bg-type-calendar/16",
+  bar: "bg-type-calendar/32 border-type-calendar/80 text-type-calendar-ink-strong",
+};
+
+/** The style a task or session shows in: its type's, or the calendar style for meeting timers. */
+export function styleOf(item: { type: TaskType; calendarEventId?: string | null }): TaskTypeStyle {
+  return item.calendarEventId ? CALENDAR_MEETING_STYLE : TYPE_STYLES[item.type];
+}
+
 /** Which catalog fields each type uses (from the 2a sheet; meeting and other from the 1a data). */
 export type TypeFields = {
   client: "required" | "optional" | "none";

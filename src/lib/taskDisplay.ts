@@ -1,7 +1,8 @@
 import type { Session, Task } from "../data/types";
 import { TYPE_FIELDS, TYPE_STYLES, type TaskType } from "./taskTypes";
 
-export type DisplayFields = Pick<Task, "type" | "title" | "ticketNumber" | "clientName" | "projectName">;
+export type DisplayFields = Pick<Task, "type" | "title" | "ticketNumber" | "clientName" | "projectName"> &
+  Partial<Pick<Task, "calendarEventId">>;
 
 /** A session's task fields, for the display helpers below. */
 export function sessionDisplay(session: Session): DisplayFields {
@@ -11,6 +12,7 @@ export function sessionDisplay(session: Session): DisplayFields {
     ticketNumber: session.ticketNumber,
     clientName: session.clientName,
     projectName: session.projectName,
+    calendarEventId: session.calendarEventId,
   };
 }
 

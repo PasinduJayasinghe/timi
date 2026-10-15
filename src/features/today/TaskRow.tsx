@@ -5,7 +5,7 @@ import type { Task } from "../../data/types";
 import { formatClock, formatDuration, formatTimeOfDay } from "../../lib/duration";
 import { formatMinutes } from "../../lib/estimate";
 import { displayMeta, displayTitle } from "../../lib/taskDisplay";
-import { TYPE_STYLES } from "../../lib/taskTypes";
+import { styleOf } from "../../lib/taskTypes";
 
 export type RowVariant = "expanded" | "wide";
 
@@ -43,7 +43,7 @@ export function TaskRow({
   onDragEnd,
 }: TaskRowProps) {
   const [popping, setPopping] = useState(false);
-  const style = TYPE_STYLES[task.type];
+  const style = styleOf(task);
   const done = Boolean(task.completedAt);
   const running = timer.kind === "running";
   const tracked = timer.kind === "stopped" ? timer.trackedSeconds : 0;

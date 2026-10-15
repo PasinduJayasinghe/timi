@@ -28,6 +28,7 @@ import { WideShell, type WideView } from "./features/wide/WideShell";
 import { DEFAULT_SETTINGS } from "./data/settings";
 import { useCalendar, useCalendarEvents } from "./hooks/useCalendar";
 import { useDesktop } from "./hooks/useDesktop";
+import { useMeetings } from "./hooks/useMeetings";
 import { useSettings } from "./hooks/useSettings";
 import { useStoredChoice, useStoredFlag } from "./hooks/useStoredFlag";
 import { useTodayKey } from "./hooks/useTodayKey";
@@ -85,6 +86,9 @@ function Shell() {
   const todayEvents = useCalendarEvents(calendar, Date.parse(todayRange.start), Date.parse(todayRange.end)).events;
   // Meetings still to come today: dashed on the timeline (1f), not counted in totals
   const upcomingMeetings = todayEvents.filter((event) => event.endMs > Date.now());
+  // The next one to start: the empty state (1b) and the idle mini bar (1e)
+  const nextMeeting = todayEvents.find((event) => event.startMs > Date.now()) ?? null;
+  useMeetings({ work, settings: settingsState.settings, updateSetting: settingsState.update });
   const [sheetOpen, setSheetOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   // Bumped to focus quick add (Ctrl+Shift+Space or the tray)
@@ -186,6 +190,7 @@ function Shell() {
         onPause={work.timer.pause}
         onResume={work.startTask}
         onStart={openSheet}
+        nextMeeting={nextMeeting}
         onExpand={() => {
           changeMode(lastOpenMode);
         }}
@@ -286,6 +291,7 @@ function Shell() {
           onStartTask={openSheet}
           sheet={wideView === "today-calendar" && sheet}
           focusQuickAdd={quickAddFocus}
+          nextMeeting={nextMeeting}
         />
         {/* Above the footer, and above the timeline strip in Today + Calendar (drafted) */}
         <ToastViewport bottomClass={wideView === "log" ? "bottom-12" : "bottom-51"} />
@@ -325,6 +331,7 @@ function Shell() {
               onStartTask={openSheet}
               details={details}
               focusQuickAdd={quickAddFocus}
+              nextMeeting={nextMeeting}
             />
             <FooterBar total={todayTotal} />
             {timelineOpen ? (

@@ -19,6 +19,7 @@ function session(start: number, end: number | null, type: TaskType = "client"): 
     ticketNumber: null,
     clientName: null,
     projectName: null,
+    calendarEventId: null,
   };
 }
 

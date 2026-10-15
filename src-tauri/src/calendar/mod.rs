@@ -99,6 +99,18 @@ impl Calendar {
         }
     }
 
+    /// Cached events of included calendars overlapping [start, end), for the meeting alarms.
+    pub async fn events_between(&self, start_ms: i64, end_ms: i64) -> Vec<CalendarEvent> {
+        let inner = self.inner.lock().await;
+        visible_events(&inner.cache, start_ms, end_ms)
+    }
+
+    /// The same, from a plain thread (the tray ticker). Never call this from async code.
+    pub fn events_between_blocking(&self, start_ms: i64, end_ms: i64) -> Vec<CalendarEvent> {
+        let inner = self.inner.blocking_lock();
+        visible_events(&inner.cache, start_ms, end_ms)
+    }
+
     async fn status(&self) -> CalendarStatus {
         let inner = self.inner.lock().await;
         CalendarStatus {
@@ -232,6 +244,19 @@ impl Calendar {
     }
 }
 
+fn visible_events(cache: &CalendarCache, start_ms: i64, end_ms: i64) -> Vec<CalendarEvent> {
+    if cache.account.is_none() {
+        return Vec::new();
+    }
+    let included: Vec<&str> = cache.calendars.iter().filter(|c| c.included).map(|c| c.id.as_str()).collect();
+    cache
+        .events
+        .iter()
+        .filter(|e| e.end_ms > start_ms && e.start_ms < end_ms && included.contains(&e.calendar_id.as_str()))
+        .cloned()
+        .collect()
+}
+
 /// Starts the background sync: now, then every five minutes.
 pub fn start(app: AppHandle) {
     tauri::async_runtime::spawn(async move {
@@ -340,15 +365,7 @@ pub async fn calendar_events(
             store::save(&app, &inner.cache);
         }
     }
-    let inner = state.inner.lock().await;
-    let included: Vec<&str> = inner.cache.calendars.iter().filter(|c| c.included).map(|c| c.id.as_str()).collect();
-    Ok(inner
-        .cache
-        .events
-        .iter()
-        .filter(|e| e.end_ms > start_ms && e.start_ms < end_ms && included.contains(&e.calendar_id.as_str()))
-        .cloned()
-        .collect())
+    Ok(state.events_between(start_ms, end_ms).await)
 }
 
 /// "Calendars to include" (4e).

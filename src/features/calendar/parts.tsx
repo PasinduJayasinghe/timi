@@ -126,8 +126,8 @@ export function SyncProblemAlert({
           {auth
             ? "Google stopped Timi’s access. Reconnect to keep meetings up to date."
             : since
-              ? `Showing events from ${since}.`
-              : "Showing the events Timi already has."}
+              ? `Showing events from ${since}. Meeting alerts still work for those.`
+              : "Showing the events Timi already has. Meeting alerts still work for those."}
         </span>
       </div>
       <button

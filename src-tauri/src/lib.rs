@@ -1,4 +1,5 @@
 mod calendar;
+mod meetings;
 mod reminders;
 mod tray;
 
@@ -38,6 +39,12 @@ fn migrations() -> Vec<Migration> {
             version: 3,
             description: "task reminders and settings",
             sql: include_str!("../migrations/0003_reminders_settings.sql"),
+            kind: MigrationKind::Up,
+        },
+        Migration {
+            version: 4,
+            description: "meeting timers linked to calendar events",
+            sql: include_str!("../migrations/0004_calendar_meetings.sql"),
             kind: MigrationKind::Up,
         },
     ]
@@ -112,6 +119,7 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .manage(reminders::Reminders::default())
         .manage(ShortcutStatus::default())
+        .manage(meetings::Meetings::default())
         .invoke_handler(tauri::generate_handler![
             quit_app,
             quick_add_shortcut_registered,
@@ -124,6 +132,13 @@ pub fn run() {
             calendar::calendar_events,
             calendar::calendar_set_included,
             calendar::open_meet,
+            meetings::set_meeting_prefs,
+            meetings::meeting_alarm_info,
+            meetings::alarm_join,
+            meetings::alarm_start_timer,
+            meetings::alarm_snooze,
+            meetings::alarm_dismiss,
+            meetings::alarm_set_prefs,
         ])
         .setup(|app| {
             let handle = app.handle();
@@ -131,6 +146,7 @@ pub fn run() {
             reminders::start(handle.clone());
             app.manage(calendar::Calendar::new(handle));
             calendar::start(handle.clone());
+            meetings::start(handle.clone());
 
             let registered = app
                 .global_shortcut()
@@ -145,11 +161,14 @@ pub fn run() {
             }
             Ok(())
         })
-        // Closing (including Alt+F4) hides Timi to the tray; Quit is in the tray menu
+        // Closing the main window (including Alt+F4) hides Timi to the tray; Quit is in the tray
+        // menu. Other windows, such as the meeting alarm, close normally.
         .on_window_event(|window, event| {
             if let WindowEvent::CloseRequested { api, .. } = event {
-                api.prevent_close();
-                let _ = window.hide();
+                if window.label() == "main" {
+                    api.prevent_close();
+                    let _ = window.hide();
+                }
             }
         })
         .run(tauri::generate_context!())

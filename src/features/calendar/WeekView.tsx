@@ -116,7 +116,11 @@ export function WeekView({ dayKey, todayKey, sessions, events, onOpenDay }: Week
                     key={session.id}
                     style={{ top: `${left}%`, height: `${width}%` }}
                     className={`absolute inset-x-1 rounded-[4px] ${
-                      session.endedAt === null ? "bg-accent-gradient" : BLOCK[session.taskType]
+                      session.endedAt === null
+                        ? "bg-accent-gradient"
+                        : session.calendarEventId
+                          ? "bg-type-calendar/50"
+                          : BLOCK[session.taskType]
                     }`}
                   />
                 );

@@ -19,6 +19,8 @@ export type Task = {
   position: number;
   /** When to remind about the task (UTC ISO), if set. */
   remindAt: string | null;
+  /** The Google Calendar event a meeting timer was started from (4b), if any. */
+  calendarEventId: string | null;
   /** UTC ISO timestamps. */
   completedAt: string | null;
   createdAt: string;
@@ -55,6 +57,7 @@ export type TaskRow = {
   carried_from: string | null;
   position: number;
   remind_at: string | null;
+  calendar_event_id: string | null;
   completed_at: string | null;
   created_at: string;
   updated_at: string;
@@ -74,6 +77,8 @@ export type Session = {
   ticketNumber: string | null;
   clientName: string | null;
   projectName: string | null;
+  /** Set when the session is a meeting timer started from a calendar event. */
+  calendarEventId: string | null;
 };
 
 /** Session row as returned by the session queries (snake_case, joined task fields). */
@@ -88,6 +93,7 @@ export type SessionRow = {
   ticket_number: string | null;
   client_name: string | null;
   project_name: string | null;
+  calendar_event_id: string | null;
 };
 
 export type ClientRow = { id: string; name: string };
@@ -110,6 +116,7 @@ export function toTask(row: TaskRow): Task {
     carriedFrom: row.carried_from,
     position: row.position,
     remindAt: row.remind_at,
+    calendarEventId: row.calendar_event_id,
     completedAt: row.completed_at,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -128,6 +135,7 @@ export function toSession(row: SessionRow): Session {
     ticketNumber: row.ticket_number,
     clientName: row.client_name,
     projectName: row.project_name,
+    calendarEventId: row.calendar_event_id,
   };
 }
 

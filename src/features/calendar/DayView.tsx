@@ -8,7 +8,7 @@ import { formatSpan, hourLabel, nextMeeting, shortTime } from "../../lib/calenda
 import { formatDuration } from "../../lib/duration";
 import { sessionSeconds } from "../../lib/sessionMath";
 import { displayTitle, sessionDisplay } from "../../lib/taskDisplay";
-import { TYPE_STYLES } from "../../lib/taskTypes";
+import { styleOf } from "../../lib/taskTypes";
 import { axisHours, timelineAxis } from "../../lib/timeline";
 import { Avatars, eventTiming, JoinButton } from "./parts";
 
@@ -90,7 +90,7 @@ export function DayView({ dayKey, isToday, sessions, events }: DayViewProps) {
                   } ${
                     isRunning
                       ? "border-accent bg-running-block font-mono text-[10px] font-semibold text-accent-ink-hover shadow-running-block"
-                      : `text-[10.5px] font-semibold ${TYPE_STYLES[session.taskType].bar}`
+                      : `text-[10.5px] font-semibold ${styleOf({ type: session.taskType, calendarEventId: session.calendarEventId }).bar}`
                   }`}
                 >
                   {isRunning ? (

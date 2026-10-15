@@ -11,7 +11,7 @@ import { formatDuration, formatTimeOfDay, formatTimeRange } from "../../lib/dura
 import { sessionSeconds, SUMMARY_KEYS, totalSeconds, totalsBySummary } from "../../lib/sessionMath";
 import { SUMMARY_STYLES as SUMMARY } from "../../lib/summaryStyles";
 import { displayTitle, sessionDisplay, whereLabel } from "../../lib/taskDisplay";
-import { TYPE_STYLES } from "../../lib/taskTypes";
+import { styleOf } from "../../lib/taskTypes";
 import { buildTimesheet } from "../../lib/timesheet";
 import { LogEmpty } from "./LogEmpty";
 
@@ -188,7 +188,7 @@ export function LogView({ variant, todayKey, timer }: LogViewProps) {
 type TableProps = { sessions: readonly Session[]; now: number };
 
 function TypeLabel({ session, size }: { session: Session; size: 13 | 14 }) {
-  const style = TYPE_STYLES[session.taskType];
+  const style = styleOf(sessionDisplay(session));
   return (
     <>
       <Icon name={style.icon} size={size} />
@@ -222,7 +222,7 @@ function NarrowTable({ sessions, now }: TableProps) {
       <div className="min-h-0 flex-1 overflow-auto [scrollbar-width:thin]">
         {sessions.map((session) => {
           const task = sessionDisplay(session);
-          const style = TYPE_STYLES[task.type];
+          const style = styleOf(task);
           const running = session.endedAt === null;
           return (
             <div
@@ -316,10 +316,7 @@ function WideTable({ sessions, now }: TableProps) {
               <span role="cell" className="truncate">
                 {displayTitle(task)}
               </span>
-              <span
-                role="cell"
-                className={`flex items-center gap-1 text-caption font-semibold ${TYPE_STYLES[task.type].ink}`}
-              >
+              <span role="cell" className={`flex items-center gap-1 text-caption font-semibold ${styleOf(task).ink}`}>
                 <TypeLabel session={session} size={14} />
               </span>
               <span role="cell" className="truncate text-ink-muted">

@@ -13,6 +13,7 @@ const base: Omit<Session, "id" | "startedAt" | "endedAt"> = {
   ticketNumber: null,
   clientName: "Client A",
   projectName: "Storefront",
+  calendarEventId: null,
 };
 
 describe("buildTimesheet", () => {

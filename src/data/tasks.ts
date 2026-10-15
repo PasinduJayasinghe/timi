@@ -7,7 +7,7 @@ import { toTask, type Task, type TaskRow } from "./types";
 const SELECT_TASKS = `
   SELECT t.id, t.title, t.type, t.client_id, c.name AS client_name, t.project_id, p.name AS project_name,
          t.ticket_number, t.notes, t.estimate_minutes, t.list_day, t.carried_from, t.position,
-         t.remind_at, t.completed_at, t.created_at, t.updated_at
+         t.remind_at, t.calendar_event_id, t.completed_at, t.created_at, t.updated_at
   FROM tasks t
   LEFT JOIN clients c ON c.id = t.client_id
   LEFT JOIN projects p ON p.id = t.project_id`;
@@ -34,14 +34,15 @@ export type NewTask = Pick<
   | "listDay"
   | "position"
   | "createdAt"
+  | "calendarEventId"
 >;
 
 export async function create(task: NewTask): Promise<void> {
   const db = await getDb();
   await db.execute(
     `INSERT INTO tasks (id, title, type, client_id, project_id, ticket_number, notes, estimate_minutes,
-                        list_day, position, created_at, updated_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $11)`,
+                        list_day, position, created_at, updated_at, calendar_event_id)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $11, $12)`,
     [
       task.id,
       task.title,
@@ -54,6 +55,7 @@ export async function create(task: NewTask): Promise<void> {
       task.listDay,
       task.position,
       task.createdAt,
+      task.calendarEventId,
     ],
   );
 }

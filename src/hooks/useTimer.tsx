@@ -7,11 +7,14 @@ import { workDayRange } from "../lib/date";
 import { formatDuration } from "../lib/duration";
 import { HEARTBEAT_MS, isStale, secondsByTask, sessionSeconds } from "../lib/sessionMath";
 import { displayTitle, sessionDisplay } from "../lib/taskDisplay";
-import { TYPE_STYLES } from "../lib/taskTypes";
+import { styleOf } from "../lib/taskTypes";
 import type { ListStatus } from "./useTodayTasks";
 
 /** The task fields a session shows. */
-export type TimerTask = Pick<Task, "id" | "title" | "type" | "ticketNumber" | "clientName" | "projectName">;
+export type TimerTask = Pick<
+  Task,
+  "id" | "title" | "type" | "ticketNumber" | "clientName" | "projectName" | "calendarEventId"
+>;
 
 export type Timer = {
   status: ListStatus;
@@ -197,7 +200,7 @@ export function useTimer(
       tone: "success",
       message: (
         <>
-          Session saved · <Mono>{toastDuration(stopped)}</Mono> · {TYPE_STYLES[session.taskType].label}
+          Session saved · <Mono>{toastDuration(stopped)}</Mono> · {styleOf(sessionDisplay(session)).label}
         </>
       ),
       action: {
@@ -225,6 +228,7 @@ export function useTimer(
         ticketNumber: task.ticketNumber,
         clientName: task.clientName,
         projectName: task.projectName,
+        calendarEventId: task.calendarEventId,
       };
       const stopped = previous ? { ...previous, endedAt: startedAt } : null;
       if (stopped) applyStop(stopped);

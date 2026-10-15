@@ -18,6 +18,8 @@ type TodayViewProps = {
   details: TaskDetails;
   /** Focuses quick add each time it changes (global quick add). */
   focusQuickAdd?: number;
+  /** Today's next meeting, for the empty state (1b). */
+  nextMeeting?: { title: string; startMs: number } | null;
 };
 
 /** Loading rows appear only if loading takes longer than this, to avoid a flash. */
@@ -41,7 +43,7 @@ function useDelayedFlag(active: boolean, delay: number): boolean {
 }
 
 /** Today tab content: quick add, filter chips and the task list with its states. */
-export function TodayView({ work, variant, onStartTask, details, focusQuickAdd }: TodayViewProps) {
+export function TodayView({ work, variant, onStartTask, details, focusQuickAdd, nextMeeting }: TodayViewProps) {
   const { list, timer } = work;
   const wide = variant === "wide";
   const [filter, setFilter] = useState<TaskFilter>("all");
@@ -129,7 +131,7 @@ export function TodayView({ work, variant, onStartTask, details, focusQuickAdd }
       </div>
     );
   } else if (!hasTasks) {
-    body = <TodayEmpty className={`flex-1 ${wide ? "px-8" : "px-10"}`} />;
+    body = <TodayEmpty className={`flex-1 ${wide ? "px-8" : "px-10"}`} nextMeeting={nextMeeting} />;
   } else {
     body = (
       <>

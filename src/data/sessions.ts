@@ -6,7 +6,7 @@ import { toSession, toTask, type Session, type SessionRow, type Task, type TaskR
 const SELECT_SESSIONS = `
   SELECT s.id, s.task_id, s.started_at, s.ended_at, s.last_seen_at,
          t.title AS task_title, t.type AS task_type, t.ticket_number,
-         c.name AS client_name, p.name AS project_name
+         c.name AS client_name, p.name AS project_name, t.calendar_event_id
   FROM sessions s
   JOIN tasks t ON t.id = s.task_id
   LEFT JOIN clients c ON c.id = t.client_id
@@ -92,7 +92,8 @@ export async function recentTasks(limit: number): Promise<RecentTask[]> {
   const rows = await db.select<RecentRow[]>(
     `SELECT t.id, t.title, t.type, t.client_id, c.name AS client_name, t.project_id, p.name AS project_name,
             t.ticket_number, t.notes, t.estimate_minutes, t.list_day, t.carried_from, t.position,
-            t.remind_at, t.completed_at, t.created_at, t.updated_at, MAX(s.started_at) AS last_started_at
+            t.remind_at, t.calendar_event_id, t.completed_at, t.created_at, t.updated_at,
+            MAX(s.started_at) AS last_started_at
      FROM sessions s
      JOIN tasks t ON t.id = s.task_id
      LEFT JOIN clients c ON c.id = t.client_id

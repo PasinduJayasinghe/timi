@@ -29,6 +29,7 @@ type WideShellProps = {
   /** The Start task sheet, shown inside the Today pane. */
   sheet: ReactNode;
   focusQuickAdd: number;
+  nextMeeting: { title: string; startMs: number } | null;
 };
 
 /** Wide mode body (1d frame, with the timeline strip; 3g for Log). */
@@ -44,6 +45,7 @@ export function WideShell({
   onStartTask,
   sheet,
   focusQuickAdd,
+  nextMeeting,
 }: WideShellProps) {
   if (view === "log") {
     return (
@@ -76,6 +78,7 @@ export function WideShell({
             onStartTask={onStartTask}
             details={details}
             focusQuickAdd={focusQuickAdd}
+            nextMeeting={nextMeeting}
           />
           {sheet}
         </section>

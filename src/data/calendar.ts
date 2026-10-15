@@ -73,6 +73,35 @@ export function setIncludedCalendars(ids: string[]): Promise<CalendarStatus> {
   return invoke<CalendarStatus>("calendar_set_included", { ids });
 }
 
+/** Meeting alarm preferences, mirrored in Rust (src-tauri/src/meetings.rs). */
+export type MeetingPrefs = { leadMinutes: number; chime: boolean; autoStart: boolean };
+
+/** The lead times offered for meeting alarms (4a, 4e). */
+export const MEETING_LEADS = [1, 5, 10, 15] as const;
+
+export function setMeetingPrefs(prefs: MeetingPrefs): Promise<void> {
+  return invoke("set_meeting_prefs", { prefs });
+}
+
+/** What the alarm window shows (4a, 4b). */
+export type AlarmInfo = {
+  event: CalendarEvent;
+  prefs: MeetingPrefs;
+  /** The running task, which a meeting timer would pause (4b). */
+  runningTitle: string | null;
+};
+
+/** Alarm window commands (src-tauri/src/meetings.rs). */
+export const alarm = {
+  info: (): Promise<AlarmInfo | null> => invoke<AlarmInfo | null>("meeting_alarm_info"),
+  /** Opens Meet. True when the meeting timer started by itself (auto-start). */
+  join: (): Promise<boolean> => invoke<boolean>("alarm_join"),
+  startTimer: (): Promise<void> => invoke("alarm_start_timer"),
+  snooze: (): Promise<void> => invoke("alarm_snooze"),
+  dismiss: (): Promise<void> => invoke("alarm_dismiss"),
+  setPrefs: (prefs: MeetingPrefs): Promise<void> => invoke("alarm_set_prefs", { prefs }),
+};
+
 /** Opens a Google Meet link in the browser; Rust refuses anything else. */
 export function openMeet(url: string): Promise<void> {
   return invoke("open_meet", { url });

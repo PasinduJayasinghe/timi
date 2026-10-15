@@ -75,6 +75,22 @@ export function formatWeekTotal(seconds: number): string {
   return `${Math.floor(minutes / 60)}h${Math.floor((minutes % 60) / 6)}`;
 }
 
+/** Time left before a meeting (4a "IN 4:58"): "m:ss", or "h:mm:ss" from an hour; 0:00 once started. */
+export function formatCountdown(ms: number): string {
+  const total = Math.max(0, Math.ceil(ms / 1000));
+  const hours = Math.floor(total / 3600);
+  const minutes = Math.floor((total % 3600) / 60);
+  const seconds = total % 60;
+  return hours > 0 ? `${hours}:${pad(minutes)}:${pad(seconds)}` : `${minutes}:${pad(seconds)}`;
+}
+
+/** How far through the alert lead time we are (4a progress bar), from 0 to 1. */
+export function alarmProgress(startMs: number, leadMinutes: number, nowMs: number): number {
+  const lead = leadMinutes * MINUTE_MS;
+  if (lead <= 0) return 1;
+  return Math.min(1, Math.max(0, (nowMs - (startMs - lead)) / lead));
+}
+
 /** The Monday of the week a day key falls in ("YYYY-MM-DD"). */
 export function weekStartKey(dayKey: string): string {
   const [year, month, day] = dayKey.split("-").map(Number);
