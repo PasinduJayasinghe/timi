@@ -1,13 +1,19 @@
 use std::fs;
 
-/// Google OAuth client for Calendar sign-in, read from the gitignored `.env` at the project root
-/// (see `.env.example`). Environment variables of the same name win, e.g. on a build machine.
-const OAUTH_KEYS: [&str; 2] = ["TIMI_GOOGLE_CLIENT_ID", "TIMI_GOOGLE_CLIENT_SECRET"];
+/// Google OAuth client (Calendar sign-in) and the Supabase project (session sync), read from the
+/// gitignored `.env` at the project root (see `.env.example`). Environment variables of the same
+/// name win, e.g. on a build machine.
+const BUILD_KEYS: [&str; 4] = [
+    "TIMI_GOOGLE_CLIENT_ID",
+    "TIMI_GOOGLE_CLIENT_SECRET",
+    "TIMI_SUPABASE_URL",
+    "TIMI_SUPABASE_ANON_KEY",
+];
 
 fn main() {
     println!("cargo:rerun-if-changed=../.env");
     let dotenv = fs::read_to_string("../.env").unwrap_or_default();
-    for key in OAUTH_KEYS {
+    for key in BUILD_KEYS {
         println!("cargo:rerun-if-env-changed={key}");
         let from_env = std::env::var(key).ok().filter(|value| !value.is_empty());
         let from_file = dotenv.lines().find_map(|line| {

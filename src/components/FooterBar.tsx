@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Icon } from "./Icon";
 import { LiveDuration, type LiveTotal } from "./LiveDuration";
 
@@ -6,10 +7,12 @@ type FooterBarProps = {
   total: LiveTotal;
   /** "expanded" is 1a/1b (40px, top border); "wide" is 1d (38px). */
   variant?: "expanded" | "wide";
+  /** The sync chip (2e), on the right. */
+  sync?: ReactNode;
 };
 
-/** Footer with today's total. The sync chip arrives with Phase 6. */
-export function FooterBar({ total, variant = "expanded" }: FooterBarProps) {
+/** Footer with today's total and the sync chip. */
+export function FooterBar({ total, variant = "expanded", sync }: FooterBarProps) {
   const layout = variant === "expanded" ? "h-10 border-t border-white/70 px-3.5" : "h-9.5 px-4";
   return (
     <div className={`relative z-1 flex shrink-0 items-center justify-between ${layout}`}>
@@ -20,6 +23,7 @@ export function FooterBar({ total, variant = "expanded" }: FooterBarProps) {
           <LiveDuration {...total} />
         </span>
       </div>
+      {sync}
     </div>
   );
 }

@@ -25,10 +25,12 @@ export function useWorkday(
   carryOver: boolean | undefined,
   onSaveError: () => void,
   showToast: (toast: ToastMessage) => void,
+  /** True while session sync is offline (Phase 6a). */
+  syncOfflineRef?: { readonly current: boolean },
 ): Workday {
   const list = useTodayTasks(day, carryOver, onSaveError);
   const taskIds = useMemo(() => list.tasks.map((task) => task.id), [list.tasks]);
-  const timer = useTimer(day, taskIds, onSaveError, showToast);
+  const timer = useTimer(day, taskIds, onSaveError, showToast, syncOfflineRef);
   const { tasks, toggleDone: toggleListDone, remove: removeFromList, add } = list;
   const { running, start, pause } = timer;
 

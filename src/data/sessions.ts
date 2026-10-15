@@ -57,13 +57,16 @@ export async function insert(session: NewSession): Promise<void> {
 /** Closes whichever session is open. */
 export async function stopRunning(endedAt: string): Promise<void> {
   const db = await getDb();
-  await db.execute("UPDATE sessions SET ended_at = $1 WHERE ended_at IS NULL", [endedAt]);
+  await db.execute("UPDATE sessions SET ended_at = $1, synced_at = NULL WHERE ended_at IS NULL", [endedAt]);
 }
 
 /** Closes one session, if it is still open. */
 export async function stop(id: string, endedAt: string): Promise<void> {
   const db = await getDb();
-  await db.execute("UPDATE sessions SET ended_at = $1 WHERE id = $2 AND ended_at IS NULL", [endedAt, id]);
+  await db.execute("UPDATE sessions SET ended_at = $1, synced_at = NULL WHERE id = $2 AND ended_at IS NULL", [
+    endedAt,
+    id,
+  ]);
 }
 
 export async function heartbeat(id: string, seenAt: string): Promise<void> {
@@ -75,11 +78,95 @@ export async function heartbeat(id: string, seenAt: string): Promise<void> {
 export async function reopen(id: string, seenAt: string): Promise<boolean> {
   const db = await getDb();
   const result = await db.execute(
-    `UPDATE sessions SET ended_at = NULL, last_seen_at = $1
+    `UPDATE sessions SET ended_at = NULL, synced_at = NULL, last_seen_at = $1
      WHERE id = $2 AND NOT EXISTS (SELECT 1 FROM sessions WHERE ended_at IS NULL)`,
     [seenAt, id],
   );
   return result.rowsAffected > 0;
+}
+
+/** A closed session waiting to upload, with its task details (Phase 6a). */
+export type PendingUpload = {
+  id: string;
+  taskId: string;
+  taskTitle: string;
+  taskType: string;
+  clientName: string | null;
+  projectName: string | null;
+  ticketNumber: string | null;
+  calendarEventId: string | null;
+  startedAt: string;
+  endedAt: string;
+};
+
+type PendingRow = {
+  id: string;
+  task_id: string;
+  task_title: string;
+  task_type: string;
+  client_name: string | null;
+  project_name: string | null;
+  ticket_number: string | null;
+  calendar_event_id: string | null;
+  started_at: string;
+  ended_at: string;
+};
+
+/** Closed sessions not uploaded yet, or whose task changed since (e.g. renamed). Oldest first. */
+const PENDING = `s.ended_at IS NOT NULL AND (s.synced_at IS NULL OR s.synced_at < t.updated_at)`;
+
+export async function listPendingUploads(limit: number): Promise<PendingUpload[]> {
+  const db = await getDb();
+  const rows = await db.select<PendingRow[]>(
+    `SELECT s.id, s.task_id, t.title AS task_title, t.type AS task_type, c.name AS client_name,
+            p.name AS project_name, t.ticket_number, t.calendar_event_id, s.started_at, s.ended_at
+     FROM sessions s
+     JOIN tasks t ON t.id = s.task_id
+     LEFT JOIN clients c ON c.id = t.client_id
+     LEFT JOIN projects p ON p.id = t.project_id
+     WHERE ${PENDING}
+     ORDER BY s.started_at
+     LIMIT $1`,
+    [limit],
+  );
+  return rows.map((row) => ({
+    id: row.id,
+    taskId: row.task_id,
+    taskTitle: row.task_title,
+    taskType: row.task_type,
+    clientName: row.client_name,
+    projectName: row.project_name,
+    ticketNumber: row.ticket_number,
+    calendarEventId: row.calendar_event_id,
+    startedAt: row.started_at,
+    endedAt: row.ended_at,
+  }));
+}
+
+export async function countPendingUploads(): Promise<number> {
+  const db = await getDb();
+  const rows = await db.select<Array<{ count: number }>>(
+    `SELECT COUNT(*) AS count FROM sessions s JOIN tasks t ON t.id = s.task_id WHERE ${PENDING}`,
+  );
+  return rows[0]?.count ?? 0;
+}
+
+/**
+ * Marks uploaded sessions as synced at `listedAt` (when they were read for upload), so a task edit
+ * or a session change made during the upload still counts as waiting. A session whose end
+ * changed meanwhile (closed again after Undo) is left waiting too.
+ */
+export async function markSynced(
+  sessions: ReadonlyArray<Pick<PendingUpload, "id" | "endedAt">>,
+  listedAt: string,
+): Promise<void> {
+  if (sessions.length === 0) return;
+  const db = await getDb();
+  const conditions = sessions.map((_, index) => `(id = $${index * 2 + 2} AND ended_at = $${index * 2 + 3})`);
+  await db.execute(`UPDATE sessions SET synced_at = $1 WHERE ${conditions.join(" OR ")}`, [
+    listedAt,
+    ...sessions.flatMap((session) => [session.id, session.endedAt]),
+  ]);
 }
 
 export type RecentTask = { task: Task; lastStartedAt: string };

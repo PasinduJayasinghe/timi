@@ -100,12 +100,20 @@ pub fn auth_url(client_id: &str, redirect_uri: &str, challenge: &str, state: &st
     .unwrap_or_default()
 }
 
-/// The email in an ID token straight from Google's token endpoint (no signature check needed).
-pub fn email_from_id_token(id_token: &str) -> Option<String> {
+fn id_token_claims(id_token: &str) -> Option<serde_json::Value> {
     let payload = id_token.split('.').nth(1)?;
     let bytes = URL_SAFE_NO_PAD.decode(payload.trim_end_matches('=')).ok()?;
-    let claims: serde_json::Value = serde_json::from_slice(&bytes).ok()?;
-    claims.get("email")?.as_str().map(str::to_string)
+    serde_json::from_slice(&bytes).ok()
+}
+
+/// The email in an ID token straight from Google's token endpoint (no signature check needed).
+pub fn email_from_id_token(id_token: &str) -> Option<String> {
+    id_token_claims(id_token)?.get("email")?.as_str().map(str::to_string)
+}
+
+/// When an ID token expires, in milliseconds since the Unix epoch (its `exp` claim).
+pub fn id_token_expiry_ms(id_token: &str) -> Option<i64> {
+    id_token_claims(id_token)?.get("exp")?.as_i64().map(|seconds| seconds * 1000)
 }
 
 /// Query parameters from the redirect's request line, e.g. "GET /?code=…&state=… HTTP/1.1".
@@ -243,6 +251,13 @@ mod tests {
             Some("dev.account@example.com")
         );
         assert_eq!(email_from_id_token("not-a-token"), None);
+    }
+
+    #[test]
+    fn reads_the_expiry_from_an_id_token() {
+        let payload = URL_SAFE_NO_PAD.encode(br#"{"email":"a@example.com","exp":1760000000}"#);
+        assert_eq!(id_token_expiry_ms(&format!("h.{payload}.s")), Some(1_760_000_000_000));
+        assert_eq!(id_token_expiry_ms("h.e30.s"), None);
     }
 
     #[test]

@@ -1,4 +1,5 @@
 mod calendar;
+mod cloud;
 mod meetings;
 mod reminders;
 mod tray;
@@ -45,6 +46,12 @@ fn migrations() -> Vec<Migration> {
             version: 4,
             description: "meeting timers linked to calendar events",
             sql: include_str!("../migrations/0004_calendar_meetings.sql"),
+            kind: MigrationKind::Up,
+        },
+        Migration {
+            version: 5,
+            description: "session sync",
+            sql: include_str!("../migrations/0005_session_sync.sql"),
             kind: MigrationKind::Up,
         },
     ]
@@ -120,6 +127,7 @@ pub fn run() {
         .manage(reminders::Reminders::default())
         .manage(ShortcutStatus::default())
         .manage(meetings::Meetings::default())
+        .manage(cloud::Cloud::default())
         .invoke_handler(tauri::generate_handler![
             quit_app,
             quick_add_shortcut_registered,
@@ -139,6 +147,8 @@ pub fn run() {
             meetings::alarm_snooze,
             meetings::alarm_dismiss,
             meetings::alarm_set_prefs,
+            cloud::cloud_status,
+            cloud::cloud_upload,
         ])
         .setup(|app| {
             let handle = app.handle();

@@ -31,6 +31,16 @@ const SYNC_EVERY: Duration = Duration::from_secs(5 * 60);
 /// Focus can ask for a sync often; skip it if one ran this recently.
 const MIN_SYNC_GAP_MS: i64 = 60_000;
 
+/// Why a Google ID token isn't available.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum IdTokenError {
+    /// Google Calendar isn't connected.
+    SignedOut,
+    Network,
+    /// The grant was revoked, or Google sent no ID token.
+    Revoked,
+}
+
 /// Why the last sync failed (3c): offline or Google unreachable, or the grant was revoked.
 #[derive(Debug, Clone, Copy, Serialize, PartialEq)]
 #[serde(rename_all = "lowercase")]
@@ -56,6 +66,8 @@ struct Inner {
     cache: CalendarCache,
     /// Access token and its expiry (ms).
     access: Option<(String, i64)>,
+    /// Google ID token and its expiry (ms), exchanged for a Supabase session by `cloud`.
+    id_token: Option<(String, i64)>,
     problem: Option<SyncProblem>,
 }
 
@@ -94,9 +106,35 @@ impl Calendar {
                 .timeout(Duration::from_secs(30))
                 .build()
                 .unwrap_or_default(),
-            inner: Mutex::new(Inner { cache, access: None, problem: None }),
+            inner: Mutex::new(Inner { cache, access: None, id_token: None, problem: None }),
             syncing: AtomicBool::new(false),
         }
+    }
+
+    async fn store_id_token(&self, id_token: &str) {
+        let expires = oauth::id_token_expiry_ms(id_token).unwrap_or_else(|| now_ms() + 30 * 60_000);
+        self.inner.lock().await.id_token = Some((id_token.to_string(), expires));
+    }
+
+    /// A Google ID token for the signed-in account, refreshed when it has (nearly) expired.
+    /// Used by `cloud` to sign in to Supabase with the same Google account.
+    pub async fn google_id_token(&self) -> Result<String, IdTokenError> {
+        {
+            let inner = self.inner.lock().await;
+            if inner.cache.account.is_none() {
+                return Err(IdTokenError::SignedOut);
+            }
+            if let Some((token, expires)) = &inner.id_token {
+                if *expires > now_ms() + 60_000 {
+                    return Ok(token.clone());
+                }
+            }
+        }
+        self.access_token(true).await.map_err(|problem| match problem {
+            SyncProblem::Auth => IdTokenError::Revoked,
+            SyncProblem::Network => IdTokenError::Network,
+        })?;
+        self.inner.lock().await.id_token.as_ref().map(|(token, _)| token.clone()).ok_or(IdTokenError::Revoked)
     }
 
     /// Cached events of included calendars overlapping [start, end), for the meeting alarms.
@@ -138,6 +176,9 @@ impl Calendar {
         match oauth::refresh(&self.client, &config, &refresh_token).await {
             Ok(tokens) => {
                 let expires = now_ms() + tokens.expires_in * 1000;
+                if let Some(id_token) = &tokens.id_token {
+                    self.store_id_token(id_token).await;
+                }
                 self.inner.lock().await.access = Some((tokens.access_token.clone(), expires));
                 Ok(tokens.access_token)
             }
@@ -305,6 +346,10 @@ pub async fn calendar_connect(app: AppHandle, state: tauri::State<'_, Calendar>)
         let mut inner = state.inner.lock().await;
         inner.cache = CalendarCache { account: Some(email), ..CalendarCache::default() };
         inner.access = Some((tokens.access_token, now_ms() + tokens.expires_in * 1000));
+        inner.id_token = tokens.id_token.as_deref().map(|token| {
+            let expires = oauth::id_token_expiry_ms(token).unwrap_or_else(|| now_ms() + 30 * 60_000);
+            (token.to_string(), expires)
+        });
         inner.problem = None;
         store::save(&app, &inner.cache);
     }
@@ -326,6 +371,7 @@ pub async fn calendar_disconnect(app: AppHandle, state: tauri::State<'_, Calenda
         let mut inner = state.inner.lock().await;
         inner.cache = CalendarCache::default();
         inner.access = None;
+        inner.id_token = None;
         inner.problem = None;
     }
     store::clear(&app);

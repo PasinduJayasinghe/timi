@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FooterBar } from "./components/FooterBar";
 import { Icon } from "./components/Icon";
 import type { LiveTotal } from "./components/LiveDuration";
 import { MiniBar, type MiniBarState } from "./components/MiniBar";
+import { SyncChip } from "./components/SyncChip";
 import { panelId, tabId, Tabs, type TabItem } from "./components/Tabs";
 import { TimelineCollapsedBar } from "./components/TimelineCollapsedBar";
 import { TitleBar } from "./components/TitleBar";
@@ -27,6 +28,7 @@ import { useTaskDetails } from "./features/today/useTaskDetails";
 import { WideShell, type WideView } from "./features/wide/WideShell";
 import { DEFAULT_SETTINGS } from "./data/settings";
 import { useCalendar, useCalendarEvents } from "./hooks/useCalendar";
+import { useCloudSync } from "./hooks/useCloudSync";
 import { useDesktop } from "./hooks/useDesktop";
 import { useMeetings } from "./hooks/useMeetings";
 import { useSettings } from "./hooks/useSettings";
@@ -77,8 +79,11 @@ function Shell() {
   }, [showToast]);
   const settingsState = useSettings(onSaveError);
   const settings = settingsState.settings ?? DEFAULT_SETTINGS;
+  // Set by session sync; a session saved while offline gets the "Saved offline" toast (2e)
+  const syncOfflineRef = useRef(false);
   // Tasks wait for settings, so carry-over follows the Carry over setting
-  const work = useWorkday(todayKey, settingsState.settings?.carryOver, onSaveError, showToast);
+  const work = useWorkday(todayKey, settingsState.settings?.carryOver, onSaveError, showToast, syncOfflineRef);
+  const cloud = useCloudSync(work.timer, syncOfflineRef);
   const { running, todaySessions, trackedByTask } = work.timer;
   const details = useTaskDetails(work, settings.defaultReminderMinutes);
   const calendar = useCalendar();
@@ -292,6 +297,7 @@ function Shell() {
           sheet={wideView === "today-calendar" && sheet}
           focusQuickAdd={quickAddFocus}
           nextMeeting={nextMeeting}
+          syncChip={<SyncChip sync={cloud} />}
         />
         {/* Above the footer, and above the timeline strip in Today + Calendar (drafted) */}
         <ToastViewport bottomClass={wideView === "log" ? "bottom-12" : "bottom-51"} />
@@ -333,7 +339,7 @@ function Shell() {
               focusQuickAdd={quickAddFocus}
               nextMeeting={nextMeeting}
             />
-            <FooterBar total={todayTotal} />
+            <FooterBar total={todayTotal} sync={<SyncChip sync={cloud} />} />
             {timelineOpen ? (
               <TimelinePanel
                 todayKey={todayKey}

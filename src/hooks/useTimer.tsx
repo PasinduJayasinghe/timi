@@ -52,6 +52,8 @@ export function useTimer(
   taskIds: readonly string[],
   onSaveError: () => void,
   showToast: ShowToast,
+  /** True while sync is offline: a saved session gets the "Saved offline" toast (2e). */
+  offlineRef?: { readonly current: boolean },
 ): Timer {
   const [status, setStatus] = useState<ListStatus>("loading");
   const [running, setRunningState] = useState<Session | null>(null);
@@ -196,6 +198,21 @@ export function useTimer(
     const stopped = { ...session, endedAt };
     applyStop(stopped);
     write(() => sessionStore.stop(session.id, endedAt));
+    const undoAction = {
+      label: "Undo",
+      onClick: () => {
+        undo(stopped);
+      },
+    };
+    if (offlineRef?.current) {
+      showToast({
+        tone: "neutral",
+        icon: "cloud_off",
+        message: "Session saved on this device · will sync when you’re back online",
+        action: undoAction,
+      });
+      return;
+    }
     showToast({
       tone: "success",
       message: (
@@ -203,14 +220,9 @@ export function useTimer(
           Session saved · <Mono>{toastDuration(stopped)}</Mono> · {styleOf(sessionDisplay(session)).label}
         </>
       ),
-      action: {
-        label: "Undo",
-        onClick: () => {
-          undo(stopped);
-        },
-      },
+      action: undoAction,
     });
-  }, [applyStop, showToast, undo, write]);
+  }, [applyStop, offlineRef, showToast, undo, write]);
 
   const start = useCallback(
     (task: TimerTask): void => {

@@ -30,6 +30,8 @@ type WideShellProps = {
   sheet: ReactNode;
   focusQuickAdd: number;
   nextMeeting: { title: string; startMs: number } | null;
+  /** The sync chip (2e) for the footer. */
+  syncChip: ReactNode;
 };
 
 /** Wide mode body (1d frame, with the timeline strip; 3g for Log). */
@@ -46,6 +48,7 @@ export function WideShell({
   sheet,
   focusQuickAdd,
   nextMeeting,
+  syncChip,
 }: WideShellProps) {
   if (view === "log") {
     return (
@@ -94,7 +97,7 @@ export function WideShell({
         </section>
       </div>
       <TimelineStrip todayKey={todayKey} timer={work.timer} {...barActions} />
-      <FooterBar total={total} variant="wide" />
+      <FooterBar total={total} variant="wide" sync={syncChip} />
     </>
   );
 }
