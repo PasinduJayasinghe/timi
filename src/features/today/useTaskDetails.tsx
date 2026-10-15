@@ -25,7 +25,7 @@ export type TaskDetails = {
  * The task details popover (2d), shared by task rows and timeline bars. It is portalled to the
  * body because the wide-mode panes use backdrop-filter, which would trap a fixed-position popover.
  */
-export function useTaskDetails(work: Workday): TaskDetails {
+export function useTaskDetails(work: Workday, defaultReminderMinutes: number): TaskDetails {
   const toast = useToast();
   const [details, setDetails] = useState<OpenDetails | null>(null);
   const detailsRef = useRef(details);
@@ -66,6 +66,7 @@ export function useTaskDetails(work: Workday): TaskDetails {
             key={task.id}
             task={task}
             anchor={details.anchor}
+            defaultReminderMinutes={defaultReminderMinutes}
             onClose={close}
             onUpdate={(patch, names) => {
               work.list.update(task.id, patch, names);

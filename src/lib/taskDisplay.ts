@@ -37,6 +37,13 @@ export function whereLabel(task: DisplayFields): string | null {
   return parts.length > 0 ? parts.join(" · ") : null;
 }
 
+/** Who the task is for, in one name: the client, or the project for internal work (1f, 4c). */
+export function whoLabel(task: DisplayFields): string | null {
+  const fields = TYPE_FIELDS[task.type];
+  const client = fields.client !== "none" ? task.clientName : null;
+  return client ?? (fields.project !== "none" ? task.projectName : null);
+}
+
 export type CatalogPatch = {
   type: TaskType;
   clientId: string | null;

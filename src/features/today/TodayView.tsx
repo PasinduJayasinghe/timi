@@ -16,6 +16,8 @@ type TodayViewProps = {
   onStartTask: () => void;
   /** The task details popover, shared with the timeline. */
   details: TaskDetails;
+  /** Focuses quick add each time it changes (global quick add). */
+  focusQuickAdd?: number;
 };
 
 /** Loading rows appear only if loading takes longer than this, to avoid a flash. */
@@ -39,7 +41,7 @@ function useDelayedFlag(active: boolean, delay: number): boolean {
 }
 
 /** Today tab content: quick add, filter chips and the task list with its states. */
-export function TodayView({ work, variant, onStartTask, details }: TodayViewProps) {
+export function TodayView({ work, variant, onStartTask, details, focusQuickAdd }: TodayViewProps) {
   const { list, timer } = work;
   const wide = variant === "wide";
   const [filter, setFilter] = useState<TaskFilter>("all");
@@ -99,6 +101,7 @@ export function TodayView({ work, variant, onStartTask, details }: TodayViewProp
         list.add({ title, type: filter === "all" ? "other" : filter });
       }}
       onStartTask={onStartTask}
+      focusSignal={focusQuickAdd}
     />
   );
 

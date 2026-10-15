@@ -7,7 +7,7 @@ import { toTask, type Task, type TaskRow } from "./types";
 const SELECT_TASKS = `
   SELECT t.id, t.title, t.type, t.client_id, c.name AS client_name, t.project_id, p.name AS project_name,
          t.ticket_number, t.notes, t.estimate_minutes, t.list_day, t.carried_from, t.position,
-         t.completed_at, t.created_at, t.updated_at
+         t.remind_at, t.completed_at, t.created_at, t.updated_at
   FROM tasks t
   LEFT JOIN clients c ON c.id = t.client_id
   LEFT JOIN projects p ON p.id = t.project_id`;
@@ -60,7 +60,7 @@ export async function create(task: NewTask): Promise<void> {
 
 /** Fields the details popover can change. */
 export type TaskPatch = Partial<
-  Pick<Task, "title" | "type" | "clientId" | "projectId" | "ticketNumber" | "notes" | "estimateMinutes">
+  Pick<Task, "title" | "type" | "clientId" | "projectId" | "ticketNumber" | "notes" | "estimateMinutes" | "remindAt">
 >;
 
 const PATCH_COLUMNS: Record<keyof TaskPatch, string> = {
@@ -71,6 +71,7 @@ const PATCH_COLUMNS: Record<keyof TaskPatch, string> = {
   ticketNumber: "ticket_number",
   notes: "notes",
   estimateMinutes: "estimate_minutes",
+  remindAt: "remind_at",
 };
 
 export async function update(id: string, patch: TaskPatch): Promise<void> {

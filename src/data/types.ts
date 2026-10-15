@@ -17,6 +17,8 @@ export type Task = {
   /** Previous list day when the task was carried over. */
   carriedFrom: string | null;
   position: number;
+  /** When to remind about the task (UTC ISO), if set. */
+  remindAt: string | null;
   /** UTC ISO timestamps. */
   completedAt: string | null;
   createdAt: string;
@@ -52,6 +54,7 @@ export type TaskRow = {
   list_day: string;
   carried_from: string | null;
   position: number;
+  remind_at: string | null;
   completed_at: string | null;
   created_at: string;
   updated_at: string;
@@ -106,6 +109,7 @@ export function toTask(row: TaskRow): Task {
     listDay: row.list_day,
     carriedFrom: row.carried_from,
     position: row.position,
+    remindAt: row.remind_at,
     completedAt: row.completed_at,
     createdAt: row.created_at,
     updatedAt: row.updated_at,

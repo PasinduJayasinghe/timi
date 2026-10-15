@@ -28,3 +28,33 @@ export function useStoredFlag(key: string, initial: boolean): [boolean, (value: 
 
   return [value, update];
 }
+
+/** One of a fixed set of choices remembered in this browser profile, such as the window mode. */
+export function useStoredChoice<T extends string>(
+  key: string,
+  choices: readonly T[],
+  initial: T,
+): [T, (value: T) => void] {
+  const [value, setValue] = useState<T>(() => {
+    try {
+      const stored = localStorage.getItem(key);
+      return choices.find((choice) => choice === stored) ?? initial;
+    } catch {
+      return initial;
+    }
+  });
+
+  const update = useCallback(
+    (next: T): void => {
+      setValue(next);
+      try {
+        localStorage.setItem(key, next);
+      } catch {
+        // Storage unavailable: keep the value for this session
+      }
+    },
+    [key],
+  );
+
+  return [value, update];
+}

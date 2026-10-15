@@ -23,10 +23,21 @@ type WideShellProps = {
   onStartTask: () => void;
   /** The Start task sheet, shown inside the Today pane. */
   sheet: ReactNode;
+  focusQuickAdd: number;
 };
 
 /** Wide mode body (1d frame, with the timeline strip; 3g for Log). */
-export function WideShell({ view, todayKey, total, work, details, barActions, onStartTask, sheet }: WideShellProps) {
+export function WideShell({
+  view,
+  todayKey,
+  total,
+  work,
+  details,
+  barActions,
+  onStartTask,
+  sheet,
+  focusQuickAdd,
+}: WideShellProps) {
   if (view === "log") {
     return (
       <div
@@ -52,7 +63,13 @@ export function WideShell({ view, todayKey, total, work, details, barActions, on
           aria-label="Today"
           className="relative flex min-h-0 flex-col gap-2 overflow-hidden rounded-panel border border-white/80 bg-white/40 p-2.5 backdrop-blur-glass"
         >
-          <TodayView work={work} variant="wide" onStartTask={onStartTask} details={details} />
+          <TodayView
+            work={work}
+            variant="wide"
+            onStartTask={onStartTask}
+            details={details}
+            focusQuickAdd={focusQuickAdd}
+          />
           {sheet}
         </section>
         <section

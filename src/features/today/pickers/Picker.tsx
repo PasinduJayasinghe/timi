@@ -29,6 +29,8 @@ type PickerListOptions = {
   options: readonly PickerOption[];
   query: string;
   selectedId: string | null;
+  /** The option highlighted when the list opens, if not the selected one. */
+  initialActiveId?: string;
   onSelect: (id: string) => void;
   onCreate?: (name: string) => void;
   onClose: () => void;
@@ -52,6 +54,7 @@ export function usePickerList({
   options,
   query,
   selectedId,
+  initialActiveId,
   onSelect,
   onCreate,
   onClose,
@@ -66,7 +69,7 @@ export function usePickerList({
     Boolean(onCreate) && trimmed !== "" && !options.some((o) => o.label.toLowerCase() === trimmed.toLowerCase());
   const ids = [...visible.map((o) => o.id), ...(canCreate ? [CREATE_ID] : [])];
 
-  const [activeId, setActiveId] = useState<string | null>(selectedId);
+  const [activeId, setActiveId] = useState<string | null>(initialActiveId ?? selectedId);
   const active = activeId !== null && ids.includes(activeId) ? activeId : (ids[0] ?? null);
 
   const choose = (id: string): void => {
@@ -200,6 +203,9 @@ type PickerProps = {
   createNoun?: string;
   onCreate?: (name: string) => void;
   status?: PickerStatus;
+  /** Which edge of the opener the list lines up with. */
+  align?: "left" | "right";
+  initialActiveId?: string;
 };
 
 /** Dropdown list from the 2b project picker: filter, options with a check on the current one, and "Create …". */
@@ -216,12 +222,14 @@ export function Picker({
   createNoun,
   onCreate,
   status = "ready",
+  align = "left",
+  initialActiveId,
 }: PickerProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const [query, setQuery] = useState("");
-  const list = usePickerList({ options, query, selectedId, onSelect, onCreate, onClose });
+  const list = usePickerList({ options, query, selectedId, initialActiveId, onSelect, onCreate, onClose });
 
   useEffect(() => {
     if (filterable) inputRef.current?.focus();
@@ -241,7 +249,10 @@ export function Picker({
   }, [onClose]);
 
   return (
-    <div ref={panelRef} className={`absolute top-full left-0 mt-1 w-60 ${PICKER_PANEL}`}>
+    <div
+      ref={panelRef}
+      className={`absolute top-full mt-1 w-60 ${align === "right" ? "right-0" : "left-0"} ${PICKER_PANEL}`}
+    >
       {filterable && (
         <input
           ref={inputRef}

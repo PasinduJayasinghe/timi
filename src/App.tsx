@@ -18,17 +18,24 @@ import {
 } from "./components/WindowFrame";
 import { CalendarEmpty } from "./features/calendar/CalendarEmpty";
 import { LogView } from "./features/log/LogView";
+import { SettingsView } from "./features/settings/SettingsView";
 import { StartTaskSheet } from "./features/start/StartTaskSheet";
 import { TimelinePanel } from "./features/timeline/TimelinePanel";
 import { TodayView } from "./features/today/TodayView";
 import { useTaskDetails } from "./features/today/useTaskDetails";
 import { WideShell, type WideView } from "./features/wide/WideShell";
-import { useStoredFlag } from "./hooks/useStoredFlag";
+import { DEFAULT_SETTINGS } from "./data/settings";
+import { useDesktop } from "./hooks/useDesktop";
+import { useSettings } from "./hooks/useSettings";
+import { useStoredChoice, useStoredFlag } from "./hooks/useStoredFlag";
 import { useTodayKey } from "./hooks/useTodayKey";
 import { useWorkday } from "./hooks/useWorkday";
 import { fromLocalDayKey } from "./lib/date";
 import { totalSeconds } from "./lib/sessionMath";
-import { closeApp, resizeForMode, setPinned, type WindowMode } from "./lib/window";
+import { hideToTray, resizeForMode, setPinned, type WindowMode } from "./lib/window";
+
+/** Window modes remembered between runs; the mini bar always reopens as the last of these. */
+const OPEN_MODES = ["expanded", "wide"] as const;
 
 type Tab = "today" | "calendar" | "log";
 
@@ -65,29 +72,41 @@ function Shell() {
   const onSaveError = useCallback((): void => {
     showToast({ message: "Couldn’t save that change. Try again.", tone: "error" });
   }, [showToast]);
-  const work = useWorkday(todayKey, onSaveError, showToast);
+  const settingsState = useSettings(onSaveError);
+  const settings = settingsState.settings ?? DEFAULT_SETTINGS;
+  // Tasks wait for settings, so carry-over follows the Carry over setting
+  const work = useWorkday(todayKey, settingsState.settings?.carryOver, onSaveError, showToast);
   const { running, todaySessions, trackedByTask } = work.timer;
-  const details = useTaskDetails(work);
+  const details = useTaskDetails(work, settings.defaultReminderMinutes);
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  // Bumped to focus quick add (Ctrl+Shift+Space or the tray)
+  const [quickAddFocus, setQuickAddFocus] = useState(0);
   // 1a shows the timeline open; the last choice is remembered
   const [timelineOpen, setTimelineOpen] = useStoredFlag("timi.timelineOpen", true);
   const [tab, setTab] = useState<Tab>("today");
-  const [mode, setMode] = useState<WindowMode>("expanded");
-  const [lastOpenMode, setLastOpenMode] = useState<Exclude<WindowMode, "mini">>("expanded");
+  // Expanded or wide is remembered; the window-state plugin remembers the position
+  const [storedMode, setStoredMode] = useStoredChoice("timi.windowMode", OPEN_MODES, "expanded");
+  const [mode, setMode] = useState<WindowMode>(storedMode);
+  const [lastOpenMode, setLastOpenMode] = useState<Exclude<WindowMode, "mini">>(storedMode);
   // Matches alwaysOnTop: true in tauri.conf.json
   const [pinned, setPinnedState] = useState(true);
 
-  // Size the window to the starting mode, so a reload (e.g. in development) can't leave
-  // the expanded layout inside a mini-bar-sized window. Phase 4 remembers size and position.
+  // Size the window to the remembered mode on start, so a reload (e.g. in development) can't
+  // leave one layout inside another mode's window size
   useEffect(() => {
-    void resizeForMode("expanded");
+    void resizeForMode(storedMode);
+    // Only on start: later changes resize in changeMode
   }, []);
 
   const changeMode = (next: WindowMode): void => {
     // The popover's anchor won't survive the layout change
     details.close();
     setMode(next);
-    if (next !== "mini") setLastOpenMode(next);
+    if (next !== "mini") {
+      setLastOpenMode(next);
+      setStoredMode(next);
+    }
     void resizeForMode(next);
   };
 
@@ -105,10 +124,32 @@ function Shell() {
 
   const openSheet = (): void => {
     // The sheet lives on the Today view (inside the Today pane in wide mode)
+    setSettingsOpen(false);
     setTab("today");
     if (mode === "mini") changeMode(lastOpenMode);
     setSheetOpen(true);
   };
+
+  // The open task the tray's Resume and the mini bar's paused state restart: the last one timed today
+  const lastSession = todaySessions.length > 0 ? todaySessions[todaySessions.length - 1] : undefined;
+  const resumable =
+    !running && lastSession
+      ? (work.list.tasks.find((task) => task.id === lastSession.taskId && !task.completedAt) ?? null)
+      : null;
+
+  useDesktop({
+    work,
+    resumable,
+    onQuickAdd: () => {
+      details.close();
+      setSettingsOpen(false);
+      setSheetOpen(false);
+      setTab("today");
+      if (mode === "mini") changeMode(lastOpenMode);
+      setQuickAddFocus((count) => count + 1);
+    },
+    onStartSheet: openSheet,
+  });
 
   // Timeline bars open the task details popover when the task is on today's list
   const barActions = {
@@ -128,15 +169,9 @@ function Shell() {
   if (mode === "mini") {
     // Paused: the last task timed today, if it is still open (1e)
     let miniState: MiniBarState = { kind: "idle" };
-    if (running) {
-      miniState = { kind: "running", session: running };
-    } else {
-      const last = todaySessions.length > 0 ? todaySessions[todaySessions.length - 1] : undefined;
-      const task = last ? work.list.tasks.find((t) => t.id === last.taskId) : undefined;
-      if (task && !task.completedAt) {
-        miniState = { kind: "paused", task, trackedSeconds: trackedByTask.get(task.id) ?? 0 };
-      }
-    }
+    if (running) miniState = { kind: "running", session: running };
+    else if (resumable)
+      miniState = { kind: "paused", task: resumable, trackedSeconds: trackedByTask.get(resumable.id) ?? 0 };
     return (
       <MiniBar
         state={miniState}
@@ -153,6 +188,31 @@ function Shell() {
 
   const wide = mode === "wide";
   const wideView: WideView = tab === "log" ? "log" : "today-calendar";
+
+  if (settingsOpen) {
+    return (
+      <WindowFrame blobs={wide ? BLOBS_WIDE_LOG : BLOBS_LOG}>
+        <SettingsView
+          variant={wide ? "wide" : "expanded"}
+          settings={settings}
+          onChange={settingsState.update}
+          onBack={() => {
+            setSettingsOpen(false);
+          }}
+          onClose={() => {
+            void hideToTray();
+          }}
+        />
+        <ToastViewport bottomClass="bottom-4" />
+      </WindowFrame>
+    );
+  }
+
+  const openSettings = (): void => {
+    details.close();
+    setSheetOpen(false);
+    setSettingsOpen(true);
+  };
 
   const sheet = sheetOpen && (
     <StartTaskSheet
@@ -182,8 +242,9 @@ function Shell() {
         changeMode("mini");
       }}
       onClose={() => {
-        void closeApp();
+        void hideToTray();
       }}
+      onOpenSettings={openSettings}
       switcher={
         wide ? (
           <Tabs
@@ -214,6 +275,7 @@ function Shell() {
           barActions={barActions}
           onStartTask={openSheet}
           sheet={wideView === "today-calendar" && sheet}
+          focusQuickAdd={quickAddFocus}
         />
         {/* Above the footer, and above the timeline strip in Today + Calendar (drafted) */}
         <ToastViewport bottomClass={wideView === "log" ? "bottom-12" : "bottom-51"} />
@@ -232,7 +294,7 @@ function Shell() {
           type="button"
           aria-label="Settings"
           title="Settings"
-          aria-disabled="true"
+          onClick={openSettings}
           className="grid size-9.5 shrink-0 place-items-center rounded-control border border-white/80 bg-white/45 text-ink-muted hover:bg-white/80 hover:text-ink"
         >
           <Icon name="settings" size={18} />
@@ -247,7 +309,13 @@ function Shell() {
       >
         {tab === "today" && (
           <>
-            <TodayView work={work} variant="expanded" onStartTask={openSheet} details={details} />
+            <TodayView
+              work={work}
+              variant="expanded"
+              onStartTask={openSheet}
+              details={details}
+              focusQuickAdd={quickAddFocus}
+            />
             <FooterBar total={todayTotal} />
             {timelineOpen ? (
               <TimelinePanel

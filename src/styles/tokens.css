@@ -118,6 +118,7 @@
   --shadow-running-bar: 0 0 12px rgb(139 124 246 / 0.5); /* from screens: running bar, wide strip (1d) */
   --shadow-pulse: 0 0 10px rgb(139 124 246); /* from screens: running bar's pulsing edge (1a) */
   --shadow-tooltip: 0 14px 36px rgb(46 36 120 / 0.22); /* from screens: timeline tooltip (1f) */
+  --shadow-knob: 0 1px 4px rgb(30 27 75 / 0.3); /* from screens: switch knob (4e) */
 
   /* ---------- Typography ---------- */
   --font-sans: "Inter Variable", system-ui, sans-serif;

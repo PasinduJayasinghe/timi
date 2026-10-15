@@ -41,11 +41,11 @@ export async function resizeForMode(mode: WindowMode): Promise<void> {
   }
 }
 
-/** Phase 0: closing the only window quits the app. Phase 4 changes this to hide to tray. */
-export async function closeApp(): Promise<void> {
+/** Close hides Timi to the tray; Quit is in the tray menu. */
+export async function hideToTray(): Promise<void> {
   try {
-    await getCurrentWindow().close();
+    await getCurrentWindow().hide();
   } catch (error) {
-    logError("close", error);
+    logError("hide", error);
   }
 }

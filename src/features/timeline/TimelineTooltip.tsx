@@ -4,8 +4,8 @@ import { Icon } from "../../components/Icon";
 import type { Session } from "../../data/types";
 import { formatDuration, formatTimeOfDay } from "../../lib/duration";
 import { sessionSeconds } from "../../lib/sessionMath";
-import { displayTitle, sessionDisplay } from "../../lib/taskDisplay";
-import { TYPE_FIELDS, TYPE_STYLES } from "../../lib/taskTypes";
+import { displayTitle, sessionDisplay, whoLabel } from "../../lib/taskDisplay";
+import { TYPE_STYLES } from "../../lib/taskTypes";
 
 type TimelineTooltipProps = {
   session: Session;
@@ -47,9 +47,7 @@ export function TimelineTooltip({ session, anchor, now, openable }: TimelineTool
 
   const task = sessionDisplay(session);
   const style = TYPE_STYLES[task.type];
-  const fields = TYPE_FIELDS[task.type];
-  const who =
-    (fields.client !== "none" ? task.clientName : null) ?? (fields.project !== "none" ? task.projectName : null);
+  const who = whoLabel(task);
 
   return createPortal(
     <div

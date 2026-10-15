@@ -5,10 +5,12 @@ import { createClient, createProject, listClients, listProjects } from "../../da
 import type { TaskPatch } from "../../data/tasks";
 import type { Task } from "../../data/types";
 import type { NamePatch } from "../../hooks/useTodayTasks";
+import { formatTimeOfDay } from "../../lib/duration";
 import { formatMinutes, parseEstimate } from "../../lib/estimate";
 import { isValidTicketNumber, patchForTypeChange } from "../../lib/taskDisplay";
 import { TASK_TYPES, TYPE_FIELDS, TYPE_STYLES, isTaskType } from "../../lib/taskTypes";
 import { Picker, type PickerOption } from "./pickers/Picker";
+import { ReminderPicker } from "./pickers/ReminderPicker";
 
 type TaskDetailsPopoverProps = {
   task: Task;
@@ -17,9 +19,11 @@ type TaskDetailsPopoverProps = {
   onClose: () => void;
   onUpdate: (patch: TaskPatch, names?: NamePatch) => void;
   onDelete: () => void;
+  /** The quick reminder highlighted first (4e "Default reminder"), in minutes. */
+  defaultReminderMinutes: number;
 };
 
-type OpenPicker = "type" | "client" | "project" | null;
+type OpenPicker = "type" | "client" | "project" | "reminder" | null;
 
 const NONE_ID = "__none__";
 const GAP = 10;
@@ -94,7 +98,14 @@ const CHIP = "flex h-6.5 items-center rounded-[8px] text-caption";
 const NEUTRAL_CHIP = `${CHIP} bg-ink-muted/8 px-2.25 font-medium hover:bg-ink-muted/14`;
 
 /** Task details popover (2d). Reminder, Sessions, the timer button and the "…" menu arrive in later phases. */
-export function TaskDetailsPopover({ task, anchor, onClose, onUpdate, onDelete }: TaskDetailsPopoverProps) {
+export function TaskDetailsPopover({
+  task,
+  anchor,
+  onClose,
+  onUpdate,
+  onDelete,
+  defaultReminderMinutes,
+}: TaskDetailsPopoverProps) {
   const ref = useRef<HTMLDivElement>(null);
   const { style, arrow, arrowLeft } = usePlacement(anchor, ref);
   const typeStyle = TYPE_STYLES[task.type];
@@ -464,6 +475,51 @@ export function TaskDetailsPopover({ task, anchor, onClose, onUpdate, onDelete }
       </label>
 
       <div className="grid grid-cols-2 gap-2.5">
+        {/* Reminder (2d): a dropdown of quick times, a typed time, or None */}
+        <div className="relative flex flex-col gap-1.25">
+          <FieldLabel>Reminder</FieldLabel>
+          <button
+            type="button"
+            aria-haspopup="listbox"
+            aria-expanded={picker === "reminder"}
+            aria-label={`Reminder: ${task.remindAt ? formatTimeOfDay(task.remindAt) : "none"}`}
+            title={task.remindAt ? new Date(task.remindAt).toLocaleString() : undefined}
+            onClick={() => {
+              setPicker(picker === "reminder" ? null : "reminder");
+            }}
+            className="flex h-9.5 items-center gap-1.5 rounded-cta-sm border border-ink-muted/18 bg-white px-2.5 text-left hover:bg-white/80 focus-visible:outline-offset-1"
+          >
+            <Icon
+              name="notifications"
+              size={16}
+              fill={Boolean(task.remindAt)}
+              className={task.remindAt ? "text-accent-ink" : "text-ink-muted"}
+            />
+            <span
+              className={`min-w-0 flex-1 truncate text-ui ${
+                task.remindAt ? "font-mono font-medium text-ink" : "font-normal text-ink-placeholder"
+              }`}
+            >
+              {task.remindAt ? formatTimeOfDay(task.remindAt) : "None"}
+            </span>
+            <Icon name="expand_more" size={17} className="text-ink-muted" />
+          </button>
+          {picker === "reminder" && (
+            <ReminderPicker
+              value={task.remindAt}
+              defaultMinutes={defaultReminderMinutes}
+              selectedClass={typeStyle.pickerActive}
+              checkClass={typeStyle.ink}
+              onChange={(remindAt) => {
+                setPicker(null);
+                if (remindAt !== task.remindAt) onUpdate({ remindAt });
+              }}
+              onClose={() => {
+                setPicker(null);
+              }}
+            />
+          )}
+        </div>
         <label className="flex flex-col gap-1.25">
           <FieldLabel>Estimate</FieldLabel>
           <span

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Icon } from "../../components/Icon";
 
 type QuickAddRowProps = {
@@ -9,6 +9,8 @@ type QuickAddRowProps = {
   onAdd: (title: string) => void;
   /** Opens the Start task sheet (2a). */
   onStartTask: () => void;
+  /** Focuses the field each time it changes (global quick add). */
+  focusSignal?: number;
 };
 
 const ROW_CLASS = {
@@ -27,8 +29,19 @@ const BUTTON_CLASS = {
 } as const;
 
 /** Quick add field and Start task button. Enter adds a task; Start task opens the sheet. */
-export function QuickAddRow({ variant = "expanded", autoFocus = false, onAdd, onStartTask }: QuickAddRowProps) {
+export function QuickAddRow({
+  variant = "expanded",
+  autoFocus = false,
+  onAdd,
+  onStartTask,
+  focusSignal = 0,
+}: QuickAddRowProps) {
   const [draft, setDraft] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (focusSignal > 0) inputRef.current?.focus();
+  }, [focusSignal]);
 
   return (
     <div className="flex gap-2">
@@ -37,6 +50,7 @@ export function QuickAddRow({ variant = "expanded", autoFocus = false, onAdd, on
       >
         <Icon name="add" size={18} className="text-accent-ink" />
         <input
+          ref={inputRef}
           value={draft}
           onChange={(event) => {
             setDraft(event.currentTarget.value);

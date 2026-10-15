@@ -20,8 +20,13 @@ export type Workday = {
 };
 
 /** Today's tasks and the timer, with the actions that change both. */
-export function useWorkday(day: string, onSaveError: () => void, showToast: (toast: ToastMessage) => void): Workday {
-  const list = useTodayTasks(day, onSaveError);
+export function useWorkday(
+  day: string,
+  carryOver: boolean | undefined,
+  onSaveError: () => void,
+  showToast: (toast: ToastMessage) => void,
+): Workday {
+  const list = useTodayTasks(day, carryOver, onSaveError);
   const taskIds = useMemo(() => list.tasks.map((task) => task.id), [list.tasks]);
   const timer = useTimer(day, taskIds, onSaveError, showToast);
   const { tasks, toggleDone: toggleListDone, remove: removeFromList, add } = list;

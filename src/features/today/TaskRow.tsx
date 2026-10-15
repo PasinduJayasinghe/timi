@@ -2,7 +2,7 @@ import { useState, type DragEvent, type KeyboardEvent } from "react";
 import { Icon } from "../../components/Icon";
 import { LiveDuration } from "../../components/LiveDuration";
 import type { Task } from "../../data/types";
-import { formatClock, formatDuration } from "../../lib/duration";
+import { formatClock, formatDuration, formatTimeOfDay } from "../../lib/duration";
 import { formatMinutes } from "../../lib/estimate";
 import { displayMeta, displayTitle } from "../../lib/taskDisplay";
 import { TYPE_STYLES } from "../../lib/taskTypes";
@@ -49,6 +49,7 @@ export function TaskRow({
   const tracked = timer.kind === "stopped" ? timer.trackedSeconds : 0;
   const paused = !running && !done && tracked > 0;
   const carried = Boolean(task.carriedFrom) && !done;
+  const reminder = task.remindAt && !done ? task.remindAt : null;
   // 1a script: the estimate shows until the task has been timed
   const showEstimate = task.estimateMinutes !== null && !done && !running && tracked === 0;
   const wide = variant === "wide";
@@ -120,6 +121,17 @@ export function TaskRow({
       }`}
     >
       <Icon name={style.icon} size={wide ? 16 : 17} />
+    </span>
+  );
+
+  // 1c "Reminder due soon": bell and time, in the accent colour
+  const reminderTag = reminder && (
+    <span
+      title={`Reminder ${new Date(reminder).toLocaleString()}`}
+      className="flex shrink-0 items-center gap-0.5 rounded-xs bg-accent-ink/10 py-px pr-1.5 pl-1 font-semibold whitespace-nowrap text-accent-ink"
+    >
+      <Icon name="notifications" size={13} fill />
+      {formatTimeOfDay(reminder)}
     </span>
   );
 
@@ -224,6 +236,7 @@ export function TaskRow({
           {/* 1d: done rows show the title only */}
           {!done && <span className="font-normal text-ink-muted"> · {displayMeta(task)}</span>}
         </button>
+        {reminder && <span className="text-[11px]">{reminderTag}</span>}
         {carried && <span className="text-[11px]">{carriedTag}</span>}
         {controls}
       </div>
@@ -263,6 +276,7 @@ export function TaskRow({
         </span>
         <span className="flex min-w-0 items-center gap-1.5 text-meta leading-normal text-ink-muted">
           <span className="truncate">{displayMeta(task)}</span>
+          {reminderTag}
           {carriedTag}
           {showEstimate && (
             <span className="shrink-0 font-mono text-duration whitespace-nowrap">

@@ -21,6 +21,8 @@ type TitleBarProps = {
   onToggleWide: () => void;
   onCollapse: () => void;
   onClose: () => void;
+  /** Wide mode only: opens Settings (4e). */
+  onOpenSettings?: () => void;
   /** Wide mode only: the "Today + Calendar / Log" switcher. */
   switcher?: ReactNode;
 };
@@ -34,6 +36,7 @@ export function TitleBar({
   onToggleWide,
   onCollapse,
   onClose,
+  onOpenSettings,
   switcher,
 }: TitleBarProps) {
   const dateLabel = (
@@ -56,7 +59,7 @@ export function TitleBar({
           </div>
           {switcher}
           <div aria-hidden="true" onMouseDown={handleDragMouseDown} className="h-full flex-1 cursor-grab" />
-          <IconButton icon="settings" label="Settings" inert />
+          <IconButton icon="settings" label="Settings" onClick={onOpenSettings} />
         </>
       ) : (
         <div
