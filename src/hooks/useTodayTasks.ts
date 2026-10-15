@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import * as taskStore from "../data/tasks";
-import { nowIso } from "../data/db";
+import { nowIso, queueWrite, writesSettled } from "../data/db";
 import type { TaskPatch } from "../data/tasks";
 import type { Task } from "../data/types";
 import { positionForMove, topPosition } from "../lib/position";
-import type { TaskType } from "../lib/taskTypes";
 
 export type ListStatus = "loading" | "ready" | "error";
 
@@ -24,11 +23,16 @@ function groupOf(tasks: readonly Task[], task: Task): Task[] {
   return orderTasks(tasks).filter((other) => Boolean(other.completedAt) === Boolean(task.completedAt));
 }
 
+/** Fields for a new task. Anything left out starts empty. */
+export type TaskDraft = Pick<Task, "title" | "type"> &
+  Partial<Pick<Task, "clientId" | "clientName" | "projectId" | "projectName" | "ticketNumber" | "estimateMinutes">>;
+
 export type TodayTasks = {
   status: ListStatus;
   tasks: Task[];
   reload: () => void;
-  add: (title: string, type: TaskType) => void;
+  /** Adds a task at the top of the list and returns it. */
+  add: (draft: TaskDraft) => Task;
   toggleDone: (id: string) => void;
   remove: (id: string) => Task | undefined;
   restore: (task: Task) => void;
@@ -49,16 +53,13 @@ export function useTodayTasks(day: string, onSaveError: () => void): TodayTasks 
   const tasksRef = useRef<Task[]>(tasks);
   tasksRef.current = tasks;
   const loadId = useRef(0);
-  // Writes run one after another: the SQL plugin's connection pool could otherwise
-  // run an UPDATE before the INSERT it depends on, which changes no rows and fails silently
-  const writes = useRef<Promise<void>>(Promise.resolve());
 
   const load = useCallback(
     async (showLoading: boolean): Promise<void> => {
       const id = ++loadId.current;
       if (showLoading) setStatus("loading");
       try {
-        await writes.current;
+        await writesSettled();
         await taskStore.carryOver(day);
         const list = await taskStore.listForDay(day);
         if (id !== loadId.current) return;
@@ -79,9 +80,7 @@ export function useTodayTasks(day: string, onSaveError: () => void): TodayTasks 
   const commit = useCallback(
     (change: (prev: Task[]) => Task[], write: () => Promise<void>): void => {
       setTasks(change);
-      const run = writes.current.then(write);
-      writes.current = run.catch(() => undefined);
-      run.catch((error: unknown) => {
+      queueWrite(write).catch((error: unknown) => {
         console.error("[tasks] save failed", error);
         onSaveError();
         void load(false);
@@ -91,19 +90,19 @@ export function useTodayTasks(day: string, onSaveError: () => void): TodayTasks 
   );
 
   const add = useCallback(
-    (title: string, type: TaskType): void => {
+    (draft: TaskDraft): Task => {
       const createdAt = nowIso();
       const task: Task = {
         id: crypto.randomUUID(),
-        title,
-        type,
-        clientId: null,
-        clientName: null,
-        projectId: null,
-        projectName: null,
-        ticketNumber: null,
+        title: draft.title,
+        type: draft.type,
+        clientId: draft.clientId ?? null,
+        clientName: draft.clientName ?? null,
+        projectId: draft.projectId ?? null,
+        projectName: draft.projectName ?? null,
+        ticketNumber: draft.ticketNumber ?? null,
         notes: "",
-        estimateMinutes: null,
+        estimateMinutes: draft.estimateMinutes ?? null,
         listDay: day,
         carriedFrom: null,
         position: topPosition(tasksRef.current.map((t) => t.position)),
@@ -115,6 +114,7 @@ export function useTodayTasks(day: string, onSaveError: () => void): TodayTasks 
         (prev) => [...prev, task],
         () => taskStore.create(task),
       );
+      return task;
     },
     [commit, day],
   );

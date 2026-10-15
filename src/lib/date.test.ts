@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { formatShortDate, formatTitleDate, msUntilNextLocalMidnight, toLocalDayKey } from "./date";
+import {
+  addDays,
+  formatShortDate,
+  formatTitleDate,
+  localDayRange,
+  msUntilNextLocalMidnight,
+  relativeDayLabel,
+  toLocalDayKey,
+} from "./date";
 
 // vitest.config.ts runs these tests in Europe/London, which has daylight saving.
 
@@ -39,5 +47,52 @@ describe("date labels", () => {
 
   it("formats the short day picker date", () => {
     expect(formatShortDate(new Date(2026, 9, 10))).toBe("Sat 10 Oct");
+  });
+});
+
+describe("addDays", () => {
+  it("crosses month and year ends", () => {
+    expect(addDays("2026-10-31", 1)).toBe("2026-11-01");
+    expect(addDays("2026-01-01", -1)).toBe("2025-12-31");
+  });
+
+  it("moves one calendar day across clock changes", () => {
+    expect(addDays("2026-03-28", 1)).toBe("2026-03-29");
+    expect(addDays("2026-03-29", 1)).toBe("2026-03-30");
+    expect(addDays("2026-10-25", -1)).toBe("2026-10-24");
+  });
+});
+
+describe("localDayRange", () => {
+  const hours = (range: { start: string; end: string }): number =>
+    (Date.parse(range.end) - Date.parse(range.start)) / 3_600_000;
+
+  it("starts and ends at local midnight", () => {
+    // British Summer Time is UTC+1
+    expect(localDayRange("2026-10-10")).toEqual({
+      start: "2026-10-09T23:00:00.000Z",
+      end: "2026-10-10T23:00:00.000Z",
+    });
+  });
+
+  it("is 23 or 25 hours long on clock-change days", () => {
+    expect(hours(localDayRange("2026-03-29"))).toBe(23);
+    expect(hours(localDayRange("2026-10-25"))).toBe(25);
+    expect(hours(localDayRange("2026-10-26"))).toBe(24);
+  });
+});
+
+describe("relativeDayLabel", () => {
+  const today = "2026-10-15"; // a Thursday
+
+  it.each([
+    ["2026-10-15", "today"],
+    ["2026-10-14", "yesterday"],
+    ["2026-10-12", "Mon"],
+    ["2026-10-09", "Fri"],
+    ["2026-10-08", "8 Oct"],
+    ["2026-09-30", "30 Sept"],
+  ])("labels %s as %s", (key, label) => {
+    expect(relativeDayLabel(key, today)).toBe(label);
   });
 });

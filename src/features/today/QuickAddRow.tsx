@@ -7,6 +7,8 @@ type QuickAddRowProps = {
   autoFocus?: boolean;
   /** Called with the trimmed title when Enter is pressed. */
   onAdd: (title: string) => void;
+  /** Opens the Start task sheet (2a). */
+  onStartTask: () => void;
 };
 
 const ROW_CLASS = {
@@ -24,8 +26,8 @@ const BUTTON_CLASS = {
   wide: "h-9.5 rounded-tablist text-ui",
 } as const;
 
-/** Quick add field and Start task button. Enter adds a task; Start task arrives with Phase 2. */
-export function QuickAddRow({ variant = "expanded", autoFocus = false, onAdd }: QuickAddRowProps) {
+/** Quick add field and Start task button. Enter adds a task; Start task opens the sheet. */
+export function QuickAddRow({ variant = "expanded", autoFocus = false, onAdd, onStartTask }: QuickAddRowProps) {
   const [draft, setDraft] = useState("");
 
   return (
@@ -55,7 +57,7 @@ export function QuickAddRow({ variant = "expanded", autoFocus = false, onAdd }: 
       </label>
       <button
         type="button"
-        aria-disabled="true"
+        onClick={onStartTask}
         className={`flex items-center gap-1.5 pr-3.5 pl-2.5 font-semibold text-white bg-accent-gradient-strong hover:-translate-y-px ${BUTTON_CLASS[variant]}`}
       >
         <Icon name="play_arrow" size={20} fill />

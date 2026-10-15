@@ -1,8 +1,9 @@
 import { Icon } from "./Icon";
+import { LiveDuration, type LiveTotal } from "./LiveDuration";
 
 type FooterBarProps = {
-  /** Today's tracked total, e.g. "0m". */
-  total: string;
+  /** Today's tracked total. */
+  total: LiveTotal;
   /** "expanded" is 1a/1b (40px, top border); "wide" is 1d (38px). */
   variant?: "expanded" | "wide";
 };
@@ -15,7 +16,9 @@ export function FooterBar({ total, variant = "expanded" }: FooterBarProps) {
       <div className="flex items-center gap-1.5 text-caption text-ink-muted">
         <Icon name="schedule" size={16} />
         Today
-        <span className="font-mono text-ui font-semibold whitespace-nowrap text-ink">{total}</span>
+        <span className="font-mono text-ui font-semibold whitespace-nowrap text-ink">
+          <LiveDuration {...total} />
+        </span>
       </div>
     </div>
   );

@@ -8,6 +8,7 @@ const SIZE_CLASS = {
   18: "text-[18px]",
   19: "text-[19px]",
   20: "text-[20px]",
+  22: "text-[22px]",
   24: "text-[24px]",
 } as const;
 

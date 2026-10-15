@@ -28,6 +28,7 @@
   --color-app-from: #f1edff;
   --color-app-to: #e8eeff;
   --color-mini: #f8f6ff; /* from screens: mini bar surface */
+  --color-mini-to: #f0f4ff; /* from screens: running mini bar surface (1e) */
 
   --color-blob-violet: #a78bfa;
   --color-blob-sky: #7db4ff;
@@ -75,12 +76,14 @@
   --radius-control: 12px; /* from screens: settings button, wide segmented control */
   --radius-tablist: 13px; /* from screens: tab list, wide quick add */
   --radius-panel: 18px; /* from screens: timeline panel, wide panes, mini bar */
+  --radius-sheet: 22px; /* from screens: Start task sheet top corners (2a) */
 
   /* ---------- Blur ---------- */
   --blur-*: initial;
   --blur-glass: 24px;
   --blur-sheet: 30px;
   --blur-control: 20px; /* from screens: tab list and quick add */
+  --blur-backdrop: 3px; /* from screens: dimmed backdrop behind the sheet (2a) */
   --blur-blob-xs: 60px; /* from screens: calendar connect blob */
   --blur-blob-sm: 70px;
   --blur-blob-md: 80px;
@@ -105,6 +108,11 @@
   --shadow-row-hover: 0 6px 20px rgb(46 36 120 / 0.1); /* from screens: task row hover (1c) */
   --shadow-toast: 0 14px 36px rgb(46 36 120 / 0.18); /* from screens: toast (2e) */
   --shadow-picker: 0 16px 40px rgb(46 36 120 / 0.22); /* from screens: picker list (2b) */
+  --shadow-pause: 0 4px 12px rgb(108 124 246 / 0.45); /* from screens: pause button (1a) */
+  --shadow-sheet: 0 -12px 40px rgb(46 36 120 / 0.18); /* from screens: Start task sheet (2a) */
+  --shadow-cta-xl: 0 10px 28px rgb(91 71 214 / 0.4); /* from screens: Start client task (2a) */
+  --shadow-cta-xl-hover: 0 12px 32px rgb(91 71 214 / 0.55); /* from screens: Start client task hover (2a) */
+  --shadow-copy: 0 8px 22px rgb(91 71 214 / 0.3); /* from screens: Copy for timesheet (3f) */
 
   /* ---------- Typography ---------- */
   --font-sans: "Inter Variable", system-ui, sans-serif;
@@ -143,6 +151,12 @@
   --text-timer--line-height: normal;
   --text-duration: 11px;
   --text-duration--line-height: normal;
+  --text-micro: 10px; /* from screens: "PAUSED" (1c), Log column headers (3f) */
+  --text-micro--line-height: normal;
+  --text-micro--font-weight: 600;
+  --text-cta: 15px; /* from screens: Start client task (2a) */
+  --text-cta--line-height: normal;
+  --text-cta--font-weight: 600;
 
   --tracking-title: -0.01em; /* from screens: title bar date */
 
@@ -154,6 +168,9 @@
   --animate-check-pop: check-pop 320ms var(--ease-spring);
   /* toast entrance from the 1a script (dbToast .35s spring) */
   --animate-toast-in: toast-in 350ms var(--ease-spring);
+  /* Start task sheet: slides up over a fading backdrop (drafted; turned off with reduce motion) */
+  --animate-sheet-in: sheet-in 320ms var(--ease-soft);
+  --animate-fade-in: fade-in 200ms var(--ease-soft);
 
   @keyframes check-pop {
     0%,
@@ -162,6 +179,26 @@
     }
     50% {
       transform: scale(1.25);
+    }
+  }
+
+  @keyframes sheet-in {
+    from {
+      opacity: 0;
+      transform: translateY(32px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
     }
   }
 
@@ -189,4 +226,19 @@
 /* Buttons with labels: white text >= 4.6:1 */
 @utility bg-accent-gradient-strong {
   background-image: linear-gradient(135deg, var(--color-accent-strong), var(--color-accent-strong-to));
+}
+
+/* Running task row (1a/1c): white surface inside a 1.5px gradient border */
+@utility bg-running {
+  background:
+    linear-gradient(rgb(255 255 255 / 0.9), rgb(255 255 255 / 0.9)) padding-box,
+    linear-gradient(135deg, var(--color-accent), var(--color-accent-to)) border-box;
+}
+
+/* Running mini bar (1e) */
+@utility bg-running-mini {
+  background:
+    linear-gradient(color-mix(in srgb, var(--color-mini) 92%, transparent), color-mix(in srgb, var(--color-mini-to) 92%, transparent))
+      padding-box,
+    linear-gradient(135deg, var(--color-accent), var(--color-accent-to)) border-box;
 }

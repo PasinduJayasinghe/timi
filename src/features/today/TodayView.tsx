@@ -1,18 +1,21 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Icon } from "../../components/Icon";
+import { LoadError } from "../../components/LoadError";
 import { useToast } from "../../components/Toast";
-import { orderTasks, type TodayTasks } from "../../hooks/useTodayTasks";
+import { orderTasks } from "../../hooks/useTodayTasks";
+import type { Workday } from "../../hooks/useWorkday";
 import { TYPE_STYLES } from "../../lib/taskTypes";
 import { FilterChips, type TaskFilter } from "./FilterChips";
 import { QuickAddRow } from "./QuickAddRow";
 import { TaskDetailsPopover } from "./TaskDetailsPopover";
-import { TaskRow, type RowVariant } from "./TaskRow";
+import { TaskRow, type RowTimer, type RowVariant } from "./TaskRow";
 import { TodayEmpty } from "./TodayEmpty";
 
 type TodayViewProps = {
-  list: TodayTasks;
+  work: Workday;
   variant: RowVariant;
+  /** Opens the Start task sheet (2a). */
+  onStartTask: () => void;
 };
 
 /** Loading rows appear only if loading takes longer than this, to avoid a flash. */
@@ -35,36 +38,11 @@ function useDelayedFlag(active: boolean, delay: number): boolean {
   return shown;
 }
 
-/** Load error (drafted, in the 3c alert style). */
-function LoadError({ onRetry }: { onRetry: () => void }) {
-  return (
-    <div
-      role="alert"
-      className="flex items-start gap-2.5 rounded-md border border-status-error-edge/25 bg-status-error-surface/90 p-3"
-    >
-      <Icon name="sync_problem" size={20} className="text-status-error" />
-      <div className="flex flex-1 flex-col gap-0.75">
-        <span className="text-ui font-semibold">Couldn’t load your tasks</span>
-        <span className="text-caption leading-[1.45] text-ink-muted">
-          Your tasks are still saved on this PC. Try again, or restart Timi if this keeps happening.
-        </span>
-      </div>
-      <button
-        type="button"
-        onClick={onRetry}
-        className="flex h-8 items-center gap-1 rounded-sm border border-status-error-edge/30 bg-white px-3 text-caption font-semibold text-status-error hover:bg-status-error-surface"
-      >
-        <Icon name="refresh" size={16} />
-        Retry
-      </button>
-    </div>
-  );
-}
-
 type OpenDetails = { taskId: string; anchor: HTMLElement };
 
 /** Today tab content: quick add, filter chips and the task list with its states. */
-export function TodayView({ list, variant }: TodayViewProps) {
+export function TodayView({ work, variant, onStartTask }: TodayViewProps) {
+  const { list, timer } = work;
   const wide = variant === "wide";
   const toast = useToast();
   const [filter, setFilter] = useState<TaskFilter>("all");
@@ -92,7 +70,7 @@ export function TodayView({ list, variant }: TodayViewProps) {
 
   const remove = (id: string): void => {
     setDetails(null);
-    const removed = list.remove(id);
+    const removed = work.remove(id);
     if (!removed) return;
     toast({
       message: "Task deleted",
@@ -149,10 +127,16 @@ export function TodayView({ list, variant }: TodayViewProps) {
       variant={variant}
       autoFocus
       onAdd={(title) => {
-        list.add(title, filter === "all" ? "other" : filter);
+        list.add({ title, type: filter === "all" ? "other" : filter });
       }}
+      onStartTask={onStartTask}
     />
   );
+
+  const rowTimer = (taskId: string): RowTimer =>
+    timer.running?.taskId === taskId
+      ? { kind: "running", startedAt: timer.running.startedAt }
+      : { kind: "stopped", trackedSeconds: timer.trackedByTask.get(taskId) ?? 0 };
 
   const hasTasks = list.status === "ready" && list.tasks.length > 0;
 
@@ -160,7 +144,7 @@ export function TodayView({ list, variant }: TodayViewProps) {
   if (list.status === "error") {
     body = (
       <div className={wide ? "" : "px-3 pt-2.5"}>
-        <LoadError onRetry={list.reload} />
+        <LoadError title="Couldn’t load your tasks" subject="tasks" onRetry={list.reload} />
       </div>
     );
   } else if (list.status === "loading") {
@@ -196,12 +180,17 @@ export function TodayView({ list, variant }: TodayViewProps) {
               task={task}
               variant={variant}
               dragging={dragId === task.id}
+              timer={rowTimer(task.id)}
+              onPlay={() => {
+                work.startTask(task.id);
+              }}
+              onPause={timer.pause}
               titleRef={(element) => {
                 if (element) titleRefs.current.set(task.id, element);
                 else titleRefs.current.delete(task.id);
               }}
               onToggleDone={() => {
-                list.toggleDone(task.id);
+                work.toggleDone(task.id);
               }}
               onOpenDetails={(anchor) => {
                 const row = anchor.closest<HTMLElement>("[data-task-row]") ?? anchor;

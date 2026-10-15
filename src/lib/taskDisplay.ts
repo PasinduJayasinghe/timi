@@ -1,7 +1,18 @@
-import type { Task } from "../data/types";
+import type { Session, Task } from "../data/types";
 import { TYPE_FIELDS, TYPE_STYLES, type TaskType } from "./taskTypes";
 
-type DisplayFields = Pick<Task, "type" | "title" | "ticketNumber" | "clientName" | "projectName">;
+export type DisplayFields = Pick<Task, "type" | "title" | "ticketNumber" | "clientName" | "projectName">;
+
+/** A session's task fields, for the display helpers below. */
+export function sessionDisplay(session: Session): DisplayFields {
+  return {
+    type: session.taskType,
+    title: session.taskTitle,
+    ticketNumber: session.ticketNumber,
+    clientName: session.clientName,
+    projectName: session.projectName,
+  };
+}
 
 /** Row title: support tickets show "#4821 Subject". */
 export function displayTitle(task: DisplayFields): string {
@@ -14,11 +25,16 @@ export function displayTitle(task: DisplayFields): string {
  * the client for tickets and meetings. Falls back to the type label (as quick add does in 1a).
  */
 export function displayMeta(task: DisplayFields): string {
+  return whereLabel(task) ?? TYPE_STYLES[task.type].label;
+}
+
+/** "Client · Project" (only the fields the type uses), or null when neither is set. */
+export function whereLabel(task: DisplayFields): string | null {
   const parts: string[] = [];
   const fields = TYPE_FIELDS[task.type];
   if (fields.client !== "none" && task.clientName) parts.push(task.clientName);
   if (fields.project !== "none" && task.projectName) parts.push(task.projectName);
-  return parts.length > 0 ? parts.join(" · ") : TYPE_STYLES[task.type].label;
+  return parts.length > 0 ? parts.join(" · ") : null;
 }
 
 export type CatalogPatch = {

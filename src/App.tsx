@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { FooterBar } from "./components/FooterBar";
 import { Icon } from "./components/Icon";
-import { MiniBar } from "./components/MiniBar";
+import type { LiveTotal } from "./components/LiveDuration";
+import { MiniBar, type MiniBarState } from "./components/MiniBar";
 import { panelId, tabId, Tabs, type TabItem } from "./components/Tabs";
 import { TimelineCollapsedBar } from "./components/TimelineCollapsedBar";
 import { TitleBar } from "./components/TitleBar";
@@ -16,12 +17,14 @@ import {
   type BlobLayout,
 } from "./components/WindowFrame";
 import { CalendarEmpty } from "./features/calendar/CalendarEmpty";
-import { LogEmpty } from "./features/log/LogEmpty";
+import { LogView } from "./features/log/LogView";
+import { StartTaskSheet } from "./features/start/StartTaskSheet";
 import { TodayView } from "./features/today/TodayView";
 import { WideShell, type WideView } from "./features/wide/WideShell";
 import { useLocalDate } from "./hooks/useLocalDate";
-import { useTodayTasks } from "./hooks/useTodayTasks";
+import { useWorkday } from "./hooks/useWorkday";
 import { toLocalDayKey } from "./lib/date";
+import { totalSeconds } from "./lib/sessionMath";
 import { closeApp, resizeForMode, setPinned, type WindowMode } from "./lib/window";
 
 type Tab = "today" | "calendar" | "log";
@@ -43,9 +46,6 @@ const TAB_BLOBS: Record<Tab, BlobLayout> = {
   log: BLOBS_LOG,
 };
 
-/** No sessions until Phase 2. */
-const TODAY_TOTAL = "0m";
-
 function App() {
   return (
     <ToastProvider>
@@ -60,7 +60,10 @@ function Shell() {
   const onSaveError = useCallback((): void => {
     showToast({ message: "Couldn’t save that change. Try again.", tone: "error" });
   }, [showToast]);
-  const list = useTodayTasks(toLocalDayKey(date), onSaveError);
+  const todayKey = toLocalDayKey(date);
+  const work = useWorkday(todayKey, onSaveError, showToast);
+  const { running, todaySessions, trackedByTask } = work.timer;
+  const [sheetOpen, setSheetOpen] = useState(false);
   const [tab, setTab] = useState<Tab>("today");
   const [mode, setMode] = useState<WindowMode>("expanded");
   const [lastOpenMode, setLastOpenMode] = useState<Exclude<WindowMode, "mini">>("expanded");
@@ -79,6 +82,25 @@ function Shell() {
     void resizeForMode(next);
   };
 
+  // Today's total: closed sessions that started today, plus the running one if it started today
+  const todayTotal = useMemo<LiveTotal>(
+    () => ({
+      baseSeconds: totalSeconds(
+        todaySessions.filter((session) => session.endedAt !== null),
+        Date.now(),
+      ),
+      runningSince: running && todaySessions.some((s) => s.id === running.id) ? running.startedAt : null,
+    }),
+    [running, todaySessions],
+  );
+
+  const openSheet = (): void => {
+    // The sheet lives on the Today view (inside the Today pane in wide mode)
+    setTab("today");
+    if (mode === "mini") changeMode(lastOpenMode);
+    setSheetOpen(true);
+  };
+
   const togglePin = async (): Promise<void> => {
     const next = !pinned;
     setPinnedState(next);
@@ -87,9 +109,24 @@ function Shell() {
   };
 
   if (mode === "mini") {
+    // Paused: the last task timed today, if it is still open (1e)
+    let miniState: MiniBarState = { kind: "idle" };
+    if (running) {
+      miniState = { kind: "running", session: running };
+    } else {
+      const last = todaySessions.length > 0 ? todaySessions[todaySessions.length - 1] : undefined;
+      const task = last ? work.list.tasks.find((t) => t.id === last.taskId) : undefined;
+      if (task && !task.completedAt) {
+        miniState = { kind: "paused", task, trackedSeconds: trackedByTask.get(task.id) ?? 0 };
+      }
+    }
     return (
       <MiniBar
-        total={TODAY_TOTAL}
+        state={miniState}
+        total={todayTotal}
+        onPause={work.timer.pause}
+        onResume={work.startTask}
+        onStart={openSheet}
         onExpand={() => {
           changeMode(lastOpenMode);
         }}
@@ -99,6 +136,19 @@ function Shell() {
 
   const wide = mode === "wide";
   const wideView: WideView = tab === "log" ? "log" : "today-calendar";
+
+  const sheet = sheetOpen && (
+    <StartTaskSheet
+      variant={wide ? "wide" : "expanded"}
+      todayKey={todayKey}
+      runningTaskId={running?.taskId ?? null}
+      onStart={work.startNew}
+      onReplay={work.replay}
+      onClose={() => {
+        setSheetOpen(false);
+      }}
+    />
+  );
 
   const titleBar = (
     <TitleBar
@@ -138,7 +188,14 @@ function Shell() {
     return (
       <WindowFrame blobs={wideView === "log" ? BLOBS_WIDE_LOG : BLOBS_WIDE}>
         {titleBar}
-        <WideShell view={wideView} date={date} total={TODAY_TOTAL} list={list} />
+        <WideShell
+          view={wideView}
+          todayKey={todayKey}
+          total={todayTotal}
+          work={work}
+          onStartTask={openSheet}
+          sheet={wideView === "today-calendar" && sheet}
+        />
         <ToastViewport bottomClass="bottom-12" />
       </WindowFrame>
     );
@@ -169,16 +226,17 @@ function Shell() {
       >
         {tab === "today" && (
           <>
-            <TodayView list={list} variant="expanded" />
-            <FooterBar total={TODAY_TOTAL} />
-            <TimelineCollapsedBar total={TODAY_TOTAL} />
+            <TodayView work={work} variant="expanded" onStartTask={openSheet} />
+            <FooterBar total={todayTotal} />
+            <TimelineCollapsedBar total={todayTotal} />
           </>
         )}
         {tab === "calendar" && <CalendarEmpty className="flex-1 p-7" />}
-        {tab === "log" && <LogEmpty date={date} />}
+        {tab === "log" && <LogView variant="expanded" todayKey={todayKey} timer={work.timer} />}
       </div>
       {/* 1a: 64px from the bottom, above the footer and collapsed timeline */}
       <ToastViewport bottomClass={tab === "today" ? "bottom-16" : "bottom-4"} />
+      {sheet}
     </WindowFrame>
   );
 }

@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode, type RefObject } from "react";
 import { Icon } from "../../components/Icon";
+import { FieldError } from "../../components/FieldError";
 import { createClient, createProject, listClients, listProjects } from "../../data/catalog";
 import type { TaskPatch } from "../../data/tasks";
 import type { Task } from "../../data/types";
@@ -67,15 +68,6 @@ function usePlacement(anchor: HTMLElement, popover: RefObject<HTMLDivElement | n
 
 function FieldLabel({ children }: { children: ReactNode }) {
   return <span className="text-meta font-semibold text-ink-muted">{children}</span>;
-}
-
-function FieldError({ children }: { children: ReactNode }) {
-  return (
-    <span className="flex items-center gap-1 text-meta font-medium text-status-error">
-      <Icon name="error" size={14} />
-      {children}
-    </span>
-  );
 }
 
 const CHIP = "flex h-6.5 items-center rounded-[8px] text-caption";

@@ -1,14 +1,19 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Icon } from "./Icon";
 
-/** success: green check (2e "Session saved"); neutral: muted icon (2e "Saved offline"); error: drafted. */
-export type ToastTone = "success" | "neutral" | "error";
+/**
+ * success: green check (2e "Session saved"); accent: violet icon (2e "Switching timers");
+ * neutral: muted icon (2e "Saved offline"); error: drafted.
+ */
+export type ToastTone = "success" | "accent" | "neutral" | "error";
 
 export type ToastMessage = {
-  message: string;
+  message: ReactNode;
   tone?: ToastTone;
   icon?: string;
   action?: { label: string; onClick: () => void };
+  /** Longer messages wrap with the icon at the top (2e "Switching timers"). */
+  multiline?: boolean;
 };
 
 type ToastState = ToastMessage & { key: number };
@@ -77,6 +82,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
 const TONE_ICON: Record<ToastTone, { icon: string; className: string }> = {
   success: { icon: "check_circle", className: "text-status-success" },
+  accent: { icon: "swap_horiz", className: "text-accent-ink" },
   neutral: { icon: "info", className: "text-status-offline" },
   error: { icon: "error", className: "text-status-error" },
 };
@@ -96,7 +102,9 @@ export function ToastViewport({ bottomClass }: { bottomClass: string }) {
           onMouseLeave={resume}
           onFocus={pause}
           onBlur={resume}
-          className="pointer-events-auto flex animate-toast-in items-center gap-2 rounded-md border border-white bg-white/95 py-2.5 pr-2 pl-3 text-ui font-medium text-ink shadow-toast"
+          className={`pointer-events-auto flex animate-toast-in gap-2 rounded-md border border-white bg-white/95 py-2.5 pr-2 pl-3 text-ui text-ink shadow-toast ${
+            current.multiline ? "items-start leading-[1.4] font-normal" : "items-center font-medium"
+          }`}
         >
           <Icon
             name={current.icon ?? TONE_ICON[tone].icon}

@@ -1,16 +1,24 @@
 import { useState, type DragEvent, type KeyboardEvent, type Ref } from "react";
 import { Icon } from "../../components/Icon";
+import { LiveDuration } from "../../components/LiveDuration";
 import type { Task } from "../../data/types";
+import { formatClock, formatDuration } from "../../lib/duration";
 import { formatMinutes } from "../../lib/estimate";
 import { displayMeta, displayTitle } from "../../lib/taskDisplay";
 import { TYPE_STYLES } from "../../lib/taskTypes";
 
 export type RowVariant = "expanded" | "wide";
 
+/** This row's timer: the running session's start, or the time tracked so far. */
+export type RowTimer = { kind: "running"; startedAt: string } | { kind: "stopped"; trackedSeconds: number };
+
 type TaskRowProps = {
   task: Task;
   variant: RowVariant;
   dragging: boolean;
+  timer: RowTimer;
+  onPlay: () => void;
+  onPause: () => void;
   onToggleDone: () => void;
   onOpenDetails: (anchor: HTMLElement) => void;
   onMoveBy: (delta: -1 | 1) => void;
@@ -21,11 +29,14 @@ type TaskRowProps = {
   titleRef?: Ref<HTMLButtonElement>;
 };
 
-/** Task row: 1a/1c in the expanded window, 1d compact row in wide mode. Timer controls arrive with Phase 2. */
+/** Task row: 1a/1c in the expanded window, 1d compact row in wide mode. */
 export function TaskRow({
   task,
   variant,
   dragging,
+  timer,
+  onPlay,
+  onPause,
   onToggleDone,
   onOpenDetails,
   onMoveBy,
@@ -37,8 +48,12 @@ export function TaskRow({
   const [popping, setPopping] = useState(false);
   const style = TYPE_STYLES[task.type];
   const done = Boolean(task.completedAt);
+  const running = timer.kind === "running";
+  const tracked = timer.kind === "stopped" ? timer.trackedSeconds : 0;
+  const paused = !running && !done && tracked > 0;
   const carried = Boolean(task.carriedFrom) && !done;
-  const showEstimate = task.estimateMinutes !== null && !done;
+  // 1a script: the estimate shows until the task has been timed
+  const showEstimate = task.estimateMinutes !== null && !done && !running && tracked === 0;
   const wide = variant === "wide";
 
   const toggle = (): void => {
@@ -71,11 +86,13 @@ export function TaskRow({
     onDragEnd,
   };
 
-  const surface = done
-    ? "border-white/85 bg-white/30 opacity-62"
-    : wide
-      ? "border-white/90 bg-white/60"
-      : "border-white/85 bg-white/55 shadow-row hover:border-white hover:bg-white/85 hover:shadow-row-hover focus-within:border-white focus-within:bg-white/85 focus-within:shadow-row-hover";
+  let surface: string;
+  if (running) surface = "border-[1.5px] border-transparent bg-running shadow-running";
+  else if (done) surface = "border border-white/85 bg-white/30 opacity-62";
+  else if (wide) surface = "border border-white/90 bg-white/60";
+  else
+    surface =
+      "border border-white/85 bg-white/55 shadow-row hover:border-white hover:bg-white/85 hover:shadow-row-hover focus-within:border-white focus-within:bg-white/85 focus-within:shadow-row-hover";
 
   const check = (
     <button
@@ -116,19 +133,73 @@ export function TaskRow({
     </span>
   );
 
-  const playButton = !done && (
-    <button
-      type="button"
-      aria-label="Start timer"
-      title="Start timer"
-      aria-disabled="true"
-      className={`grid shrink-0 place-items-center rounded-full border-[1.5px] border-ink-muted/30 bg-transparent p-0 text-ink-muted hover:border-accent-ink hover:bg-white/70 hover:text-accent-ink ${
-        wide ? "size-7.5" : "size-8"
-      }`}
-    >
-      <Icon name="play_arrow" size={wide ? 17 : 18} fill />
-    </button>
-  );
+  const buttonSize = wide ? "size-7.5" : "size-8";
+  const buttonIcon = wide ? 17 : 18;
+
+  // 1a/1c (1d in wide mode): running, paused, to do and done
+  let controls = null;
+  if (running) {
+    controls = (
+      <>
+        <span
+          className={`shrink-0 font-mono font-semibold text-accent-ink tabular-nums ${wide ? "text-ui" : "text-timer"}`}
+        >
+          <LiveDuration baseSeconds={0} runningSince={timer.startedAt} format="clock" />
+        </span>
+        <button
+          type="button"
+          onClick={onPause}
+          aria-label="Pause timer"
+          title="Pause timer"
+          className={`grid shrink-0 place-items-center rounded-full p-0 text-white bg-accent-gradient focus-visible:outline-accent-ink ${buttonSize} ${
+            wide ? "" : "shadow-pause hover:scale-106"
+          }`}
+        >
+          <Icon name="pause" size={buttonIcon} fill />
+        </button>
+      </>
+    );
+  } else if (paused) {
+    controls = (
+      <>
+        {wide ? (
+          <span className="shrink-0 font-mono text-caption font-medium text-ink">{formatClock(tracked)}</span>
+        ) : (
+          <span className="flex shrink-0 flex-col items-end leading-[1.1]">
+            <span className="font-mono text-ui font-medium text-ink">{formatClock(tracked)}</span>
+            <span className="text-micro tracking-[0.05em] text-ink-muted">PAUSED</span>
+          </span>
+        )}
+        <button
+          type="button"
+          onClick={onPlay}
+          aria-label="Resume timer"
+          title="Resume timer"
+          className={`grid shrink-0 place-items-center rounded-full border-[1.5px] border-accent-ink/45 bg-white/70 p-0 text-accent-ink hover:bg-white ${buttonSize}`}
+        >
+          <Icon name="play_arrow" size={buttonIcon} fill />
+        </button>
+      </>
+    );
+  } else if (!done) {
+    controls = (
+      <button
+        type="button"
+        onClick={onPlay}
+        aria-label="Start timer"
+        title="Start timer"
+        className={`grid shrink-0 place-items-center rounded-full border-[1.5px] border-ink-muted/30 bg-transparent p-0 text-ink-muted hover:border-accent-ink hover:bg-white/70 hover:text-accent-ink ${buttonSize}`}
+      >
+        <Icon name="play_arrow" size={buttonIcon} fill />
+      </button>
+    );
+  } else if (tracked > 0) {
+    controls = (
+      <span className={`shrink-0 font-mono text-caption font-medium text-ink-muted ${wide ? "" : "pr-1"}`}>
+        {formatDuration(tracked)}
+      </span>
+    );
+  }
 
   if (wide) {
     return (
@@ -136,7 +207,7 @@ export function TaskRow({
         data-task-row
         {...dragHandlers}
         onKeyDown={onKeyDown}
-        className={`flex h-11.5 shrink-0 items-center gap-2 rounded-md border px-2 transition-[opacity,background-color] duration-300 ${surface} ${
+        className={`flex h-11.5 shrink-0 items-center gap-2 rounded-md px-2 transition-[opacity,background-color] duration-300 ${surface} ${
           dragging ? "opacity-45" : ""
         }`}
       >
@@ -158,7 +229,7 @@ export function TaskRow({
           {!done && <span className="font-normal text-ink-muted"> · {displayMeta(task)}</span>}
         </button>
         {carried && <span className="text-[11px]">{carriedTag}</span>}
-        {playButton}
+        {controls}
       </div>
     );
   }
@@ -168,7 +239,7 @@ export function TaskRow({
       data-task-row
       {...dragHandlers}
       onKeyDown={onKeyDown}
-      className={`group relative flex min-h-14 shrink-0 items-center gap-0.5 rounded-lg border py-1.5 pr-2 transition-[box-shadow,opacity,background-color] duration-300 ${surface} ${
+      className={`group relative flex min-h-14 shrink-0 items-center gap-0.5 rounded-lg py-1.5 pr-2 transition-[box-shadow,opacity,background-color] duration-300 ${surface} ${
         dragging ? "opacity-45" : ""
       }`}
     >
@@ -205,7 +276,7 @@ export function TaskRow({
           )}
         </span>
       </button>
-      {playButton}
+      {controls && <span className="flex shrink-0 items-center gap-2">{controls}</span>}
     </div>
   );
 }

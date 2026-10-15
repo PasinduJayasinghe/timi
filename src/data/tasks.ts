@@ -1,4 +1,3 @@
-import type { TaskType } from "../lib/taskTypes";
 import { getDb, nowIso } from "./db";
 import { toTask, type Task, type TaskRow } from "./types";
 
@@ -22,21 +21,40 @@ export async function listForDay(day: string): Promise<Task[]> {
   return rows.map(toTask);
 }
 
-export type NewTask = {
-  id: string;
-  title: string;
-  type: TaskType;
-  listDay: string;
-  position: number;
-  createdAt: string;
-};
+export type NewTask = Pick<
+  Task,
+  | "id"
+  | "title"
+  | "type"
+  | "clientId"
+  | "projectId"
+  | "ticketNumber"
+  | "notes"
+  | "estimateMinutes"
+  | "listDay"
+  | "position"
+  | "createdAt"
+>;
 
 export async function create(task: NewTask): Promise<void> {
   const db = await getDb();
   await db.execute(
-    `INSERT INTO tasks (id, title, type, list_day, position, created_at, updated_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $6)`,
-    [task.id, task.title, task.type, task.listDay, task.position, task.createdAt],
+    `INSERT INTO tasks (id, title, type, client_id, project_id, ticket_number, notes, estimate_minutes,
+                        list_day, position, created_at, updated_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $11)`,
+    [
+      task.id,
+      task.title,
+      task.type,
+      task.clientId,
+      task.projectId,
+      task.ticketNumber,
+      task.notes,
+      task.estimateMinutes,
+      task.listDay,
+      task.position,
+      task.createdAt,
+    ],
   );
 }
 

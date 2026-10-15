@@ -1,7 +1,8 @@
 import { Icon } from "./Icon";
+import { LiveDuration, type LiveTotal } from "./LiveDuration";
 
 type TimelineCollapsedBarProps = {
-  total: string;
+  total: LiveTotal;
 };
 
 /** Collapsed timeline bar (1a/1b). Phase 0: shown but inert; the timeline arrives with Phase 3. */
@@ -15,7 +16,9 @@ export function TimelineCollapsedBar({ total }: TimelineCollapsedBarProps) {
       <Icon name="view_timeline" size={17} className="text-accent-ink" />
       Timeline
       <span className="flex-1" />
-      <span className="font-mono font-medium whitespace-nowrap">{total} today</span>
+      <span className="font-mono font-medium whitespace-nowrap">
+        <LiveDuration {...total} /> today
+      </span>
       <span className="grid size-8 place-items-center text-ink-muted">
         <Icon name="expand_less" size={18} />
       </span>

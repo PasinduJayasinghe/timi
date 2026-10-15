@@ -57,6 +57,36 @@ export type TaskRow = {
   updated_at: string;
 };
 
+/** A timed session, with the display fields of its task. */
+export type Session = {
+  id: string;
+  taskId: string;
+  /** UTC ISO timestamps. A running session has no `endedAt`. */
+  startedAt: string;
+  endedAt: string | null;
+  /** Last time Timi was seen running while this session was open. */
+  lastSeenAt: string | null;
+  taskTitle: string;
+  taskType: TaskType;
+  ticketNumber: string | null;
+  clientName: string | null;
+  projectName: string | null;
+};
+
+/** Session row as returned by the session queries (snake_case, joined task fields). */
+export type SessionRow = {
+  id: string;
+  task_id: string;
+  started_at: string;
+  ended_at: string | null;
+  last_seen_at: string | null;
+  task_title: string;
+  task_type: string;
+  ticket_number: string | null;
+  client_name: string | null;
+  project_name: string | null;
+};
+
 export type ClientRow = { id: string; name: string };
 
 export type ProjectRow = { id: string; name: string; kind: string; client_id: string | null };
@@ -79,6 +109,21 @@ export function toTask(row: TaskRow): Task {
     completedAt: row.completed_at,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+  };
+}
+
+export function toSession(row: SessionRow): Session {
+  return {
+    id: row.id,
+    taskId: row.task_id,
+    startedAt: row.started_at,
+    endedAt: row.ended_at,
+    lastSeenAt: row.last_seen_at,
+    taskTitle: row.task_title,
+    taskType: isTaskType(row.task_type) ? row.task_type : "other",
+    ticketNumber: row.ticket_number,
+    clientName: row.client_name,
+    projectName: row.project_name,
   };
 }
 

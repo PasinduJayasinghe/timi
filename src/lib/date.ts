@@ -31,6 +31,38 @@ export function toLocalDayKey(date: Date): string {
   return `${date.getFullYear()}-${month}-${day}`;
 }
 
+/** Local midnight at the start of a "YYYY-MM-DD" day. */
+export function fromLocalDayKey(key: string): Date {
+  const [year, month, day] = key.split("-").map(Number);
+  return new Date(year, month - 1, day);
+}
+
+/** The day `count` calendar days after `key` (negative for earlier days). */
+export function addDays(key: string, count: number): string {
+  const date = fromLocalDayKey(key);
+  return toLocalDayKey(new Date(date.getFullYear(), date.getMonth(), date.getDate() + count));
+}
+
+/** A local day as UTC ISO bounds [start, end). Days with a clock change are 23 or 25 hours long. */
+export function localDayRange(key: string): { start: string; end: string } {
+  return {
+    start: fromLocalDayKey(key).toISOString(),
+    end: fromLocalDayKey(addDays(key, 1)).toISOString(),
+  };
+}
+
+/** How far back a day is, as in the 2a Recent list: "today", "yesterday", "Wed", or "3 Oct" for older days. */
+export function relativeDayLabel(key: string, todayKey: string): string {
+  if (key === todayKey) return "today";
+  if (key === addDays(todayKey, -1)) return "yesterday";
+  const date = fromLocalDayKey(key);
+  if (key > addDays(todayKey, -7) && key < todayKey) {
+    return new Intl.DateTimeFormat(LOCALE, { weekday: "short" }).format(date);
+  }
+  const parts = new Intl.DateTimeFormat(LOCALE, { day: "numeric", month: "short" }).formatToParts(date);
+  return `${part(parts, "day")} ${part(parts, "month")}`;
+}
+
 /** True when both dates fall on the same local calendar day. */
 export function isSameLocalDay(a: Date, b: Date): boolean {
   return (

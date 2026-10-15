@@ -4,12 +4,20 @@ use tauri_plugin_sql::{Migration, MigrationKind};
 const DB_URL: &str = "sqlite:timi.db";
 
 fn migrations() -> Vec<Migration> {
-    vec![Migration {
-        version: 1,
-        description: "tasks, sessions, clients and projects",
-        sql: include_str!("../migrations/0001_init.sql"),
-        kind: MigrationKind::Up,
-    }]
+    vec![
+        Migration {
+            version: 1,
+            description: "tasks, sessions, clients and projects",
+            sql: include_str!("../migrations/0001_init.sql"),
+            kind: MigrationKind::Up,
+        },
+        Migration {
+            version: 2,
+            description: "session heartbeat",
+            sql: include_str!("../migrations/0002_session_heartbeat.sql"),
+            kind: MigrationKind::Up,
+        },
+    ]
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
