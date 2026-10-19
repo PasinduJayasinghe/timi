@@ -25,6 +25,8 @@ type TitleBarProps = {
   onOpenSettings?: () => void;
   /** Wide mode only: the "Today + Calendar / Log" switcher. */
   switcher?: ReactNode;
+  /** Wide mode only: End shift (7i), left of Settings. */
+  shiftAction?: ReactNode;
 };
 
 /** Custom title bar, 48px (1a; 1d in wide mode). */
@@ -38,6 +40,7 @@ export function TitleBar({
   onClose,
   onOpenSettings,
   switcher,
+  shiftAction,
 }: TitleBarProps) {
   const dateLabel = (
     <>
@@ -59,6 +62,7 @@ export function TitleBar({
           </div>
           {switcher}
           <div aria-hidden="true" onMouseDown={handleDragMouseDown} className="h-full flex-1 cursor-grab" />
+          {shiftAction && <div className="mr-1 flex items-center gap-1.5">{shiftAction}</div>}
           <IconButton icon="settings" label="Settings" onClick={onOpenSettings} />
         </>
       ) : (

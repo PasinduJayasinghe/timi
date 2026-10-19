@@ -121,3 +121,41 @@ export async function carryOver(today: string): Promise<number> {
   );
   return result.rowsAffected;
 }
+
+const LEFTOVER = "t.completed_at IS NULL AND t.deleted_at IS NULL AND t.list_day < $1";
+
+/** Unfinished tasks from days before `today`, put aside when their shift ended (Plan my day step 1). */
+export async function leftovers(today: string): Promise<Task[]> {
+  const db = await getDb();
+  const rows = await db.select<TaskRow[]>(`${SELECT_TASKS} WHERE ${LEFTOVER} ORDER BY t.list_day, t.position`, [
+    today,
+  ]);
+  return rows.map(toTask);
+}
+
+export async function countLeftovers(today: string): Promise<number> {
+  const db = await getDb();
+  const rows = await db.select<Array<{ count: number }>>(`SELECT COUNT(*) AS count FROM tasks t WHERE ${LEFTOVER}`, [
+    today,
+  ]);
+  return rows[0]?.count ?? 0;
+}
+
+/** Lists a task on another day (Keep or Move in Plan my day), tagged with the day it came from. */
+export async function moveToDay(id: string, day: string): Promise<void> {
+  const db = await getDb();
+  await db.execute(
+    "UPDATE tasks SET carried_from = list_day, list_day = $1, updated_at = $2 WHERE id = $3 AND list_day <> $1",
+    [day, nowIso(), id],
+  );
+}
+
+/** Finished tasks on a day (the Between shifts summary). */
+export async function countDone(day: string): Promise<number> {
+  const db = await getDb();
+  const rows = await db.select<Array<{ count: number }>>(
+    "SELECT COUNT(*) AS count FROM tasks WHERE list_day = $1 AND completed_at IS NOT NULL AND deleted_at IS NULL",
+    [day],
+  );
+  return rows[0]?.count ?? 0;
+}

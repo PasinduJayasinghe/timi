@@ -10,6 +10,7 @@ function session(taskId: string, type: TaskType, start: number, end: number | nu
   return {
     id: `${taskId}-${start}`,
     taskId,
+    dayKey: "2026-10-10",
     startedAt: iso(start),
     endedAt: end === null ? null : iso(end),
     lastSeenAt: null,

@@ -11,6 +11,7 @@ function session(start: number, end: number | null, type: TaskType = "client"): 
   return {
     id: `s-${start}`,
     taskId: "t1",
+    dayKey: "2026-10-10",
     startedAt: iso(start),
     endedAt: end === null ? null : iso(end),
     lastSeenAt: null,
@@ -46,9 +47,17 @@ describe("timelineAxis", () => {
     expect(axis).toEqual({ startMs: at(10, 19), endMs: at(11, 6) });
   });
 
-  it("stays inside the work day (6 am to 6 am)", () => {
-    const axis = timelineAxis("2026-10-10", [session(at(10, 6, 15), at(10, 7)), session(at(11, 5, 30), at(11, 7))], 0);
+  it("keeps calendar events inside the work day (6 am to 6 am)", () => {
+    const axis = timelineAxis("2026-10-10", [], 0, [
+      { startMs: at(10, 5), endMs: at(10, 6, 30) },
+      { startMs: at(11, 5, 30), endMs: at(11, 7) },
+    ]);
     expect(axis).toEqual({ startMs: at(10, 6), endMs: at(11, 6) });
+  });
+
+  it("fits a shift's sessions past 6 am", () => {
+    const axis = timelineAxis("2026-10-10", [session(at(10, 6, 15), at(10, 7)), session(at(11, 5, 30), at(11, 7))], 0);
+    expect(axis).toEqual({ startMs: at(10, 6), endMs: at(11, 7) });
   });
 });
 

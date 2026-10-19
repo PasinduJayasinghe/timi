@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Icon } from "../../components/Icon";
 import { useCalendarEvents, type CalendarState } from "../../hooks/useCalendar";
-import { useDaySessions, useSessionsBetween } from "../../hooks/useDaySessions";
+import { useDaySessions, useSessionsForDays } from "../../hooks/useDaySessions";
 import type { Timer } from "../../hooks/useTimer";
 import { weekStartKey } from "../../lib/calendar";
 import { addDays, dayStartOf, fromLocalDayKey, workDayKey, workDayRange } from "../../lib/date";
@@ -74,10 +74,7 @@ export function CalendarView({ calendar, todayKey, timer }: CalendarViewProps) {
 
   const isToday = day === todayKey;
   const past = useDaySessions(view === "day" && day < todayKey ? day : null);
-  const week = useSessionsBetween(
-    view === "week" ? new Date(weekStartMs).toISOString() : null,
-    view === "week" ? new Date(weekEndMs).toISOString() : null,
-  );
+  const week = useSessionsForDays(view === "week" ? weekStart : null, view === "week" ? addDays(weekStart, 7) : null);
 
   if (!status) return <div aria-busy="true" aria-label="Loading calendar" className="flex-1" />;
   if (!status.connected) return <CalendarEmpty calendar={calendar} className="flex-1 p-7" />;
@@ -89,7 +86,7 @@ export function CalendarView({ calendar, todayKey, timer }: CalendarViewProps) {
   const daySessions = isToday ? timer.todaySessions : day < todayKey ? past.sessions : [];
   // The week's sessions, with today's live ones from the timer
   const weekSessions = [
-    ...week.sessions.filter((session) => workDayKey(new Date(session.startedAt)) !== todayKey),
+    ...week.sessions.filter((session) => session.dayKey !== todayKey),
     ...timer.todaySessions,
   ];
   const eventDays = new Set(events.events.map((event) => workDayKey(new Date(event.startMs))));

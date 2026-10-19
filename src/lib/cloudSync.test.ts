@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { isSyncError, syncStatus, syncTooltip, toUploadRow } from "./cloudSync";
 
 describe("toUploadRow", () => {
-  it("adds the work day, which starts at 6 am (Europe/London in tests)", () => {
+  it("sends the session's stored work day: the shift it was timed in", () => {
     const base = {
       id: "s1",
       taskId: "t1",
@@ -12,11 +12,11 @@ describe("toUploadRow", () => {
       projectName: "Storefront",
       ticketNumber: null,
       calendarEventId: null,
-      endedAt: "2026-10-11T01:00:00.000Z",
+      dayKey: "2026-10-10",
+      endedAt: "2026-10-11T08:00:00.000Z",
     };
-    // 1:30 am local on the 11th is still the night shift of the 10th
-    expect(toUploadRow({ ...base, startedAt: new Date(2026, 9, 11, 1, 30).toISOString() }).workDay).toBe("2026-10-10");
-    expect(toUploadRow({ ...base, startedAt: new Date(2026, 9, 11, 7, 0).toISOString() }).workDay).toBe("2026-10-11");
+    // 7 am on the 11th still belongs to the 10th while that shift is open
+    expect(toUploadRow({ ...base, startedAt: new Date(2026, 9, 11, 7, 0).toISOString() }).workDay).toBe("2026-10-10");
     expect(toUploadRow({ ...base, startedAt: "2026-10-10T19:00:00.000Z" }).taskTitle).toBe("Checkout flow");
   });
 });

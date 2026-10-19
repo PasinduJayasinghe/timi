@@ -67,6 +67,8 @@ export type TaskRow = {
 export type Session = {
   id: string;
   taskId: string;
+  /** The work day it belongs to, "YYYY-MM-DD": the shift it was timed in (Phase 7). */
+  dayKey: string;
   /** UTC ISO timestamps. A running session has no `endedAt`. */
   startedAt: string;
   endedAt: string | null;
@@ -85,6 +87,7 @@ export type Session = {
 export type SessionRow = {
   id: string;
   task_id: string;
+  day_key: string;
   started_at: string;
   ended_at: string | null;
   last_seen_at: string | null;
@@ -127,6 +130,7 @@ export function toSession(row: SessionRow): Session {
   return {
     id: row.id,
     taskId: row.task_id,
+    dayKey: row.day_key,
     startedAt: row.started_at,
     endedAt: row.ended_at,
     lastSeenAt: row.last_seen_at,

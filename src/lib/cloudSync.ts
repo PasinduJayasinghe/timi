@@ -1,5 +1,4 @@
 import type { PendingUpload } from "../data/sessions";
-import { workDayKey } from "./date";
 
 /** Why an upload didn't happen (src-tauri/src/cloud.rs). */
 export type SyncError = "not-configured" | "signed-out" | "network" | "auth" | "rejected";
@@ -11,7 +10,7 @@ export type SyncStatus = "off" | "saved" | "syncing" | "offline";
 export type UploadRow = PendingUpload & { workDay: string };
 
 export function toUploadRow(session: PendingUpload): UploadRow {
-  return { ...session, workDay: workDayKey(new Date(session.startedAt)) };
+  return { ...session, workDay: session.dayKey };
 }
 
 export function isSyncError(value: unknown): value is SyncError {

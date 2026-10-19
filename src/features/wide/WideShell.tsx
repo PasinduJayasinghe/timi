@@ -15,6 +15,10 @@ import type { TaskDetails } from "../today/useTaskDetails";
 export type WideView = "today-calendar" | "log";
 
 type WideShellProps = {
+  /** Shown in the Today pane instead of the task list, e.g. between shifts (7k). */
+  todayOverride?: ReactNode;
+  /** Above the Today pane's content, e.g. the "ended for you" note (7l). */
+  todayNotice?: ReactNode;
   view: WideView;
   todayKey: string;
   total: LiveTotal;
@@ -49,6 +53,8 @@ export function WideShell({
   focusQuickAdd,
   nextMeeting,
   syncChip,
+  todayOverride,
+  todayNotice,
 }: WideShellProps) {
   if (view === "log") {
     return (
@@ -75,14 +81,17 @@ export function WideShell({
           aria-label="Today"
           className="relative flex min-h-0 flex-col gap-2 overflow-hidden rounded-panel border border-white/80 bg-white/40 p-2.5 backdrop-blur-glass"
         >
-          <TodayView
-            work={work}
-            variant="wide"
-            onStartTask={onStartTask}
-            details={details}
-            focusQuickAdd={focusQuickAdd}
-            nextMeeting={nextMeeting}
-          />
+          {todayNotice}
+          {todayOverride ?? (
+            <TodayView
+              work={work}
+              variant="wide"
+              onStartTask={onStartTask}
+              details={details}
+              focusQuickAdd={focusQuickAdd}
+              nextMeeting={nextMeeting}
+            />
+          )}
           {sheet}
         </section>
         <section

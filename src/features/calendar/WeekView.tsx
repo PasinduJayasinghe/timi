@@ -37,7 +37,7 @@ export function WeekView({ dayKey, todayKey, sessions, events, onOpenDay }: Week
   const labels = [...axisHours(labelAxis).filter((_, index) => index % 3 === 0), { ms: labelAxis.endMs }];
 
   const perDay = days.map((key) => {
-    const daySessions = sessions.filter((session) => workDayKey(new Date(session.startedAt)) === key);
+    const daySessions = sessions.filter((session) => session.dayKey === key);
     const dayEvents = events.filter((event) => workDayKey(new Date(event.startMs)) === key);
     return { key, sessions: daySessions, events: dayEvents, total: totalSeconds(daySessions, now) };
   });

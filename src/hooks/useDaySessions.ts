@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { writesSettled } from "../data/db";
 import * as sessionStore from "../data/sessions";
 import type { Session } from "../data/types";
-import { workDayRange } from "../lib/date";
+import { addDays } from "../lib/date";
 import type { ListStatus } from "./useTodayTasks";
 
 export type DaySessions = {
@@ -11,25 +11,24 @@ export type DaySessions = {
   reload: () => void;
 };
 
-/** Sessions that started on a past day, for the Log. Pass null to load nothing (today comes from the timer). */
+/** Sessions of a past work day, for the Log. Pass null to load nothing (today comes from the timer). */
 export function useDaySessions(day: string | null): DaySessions {
-  const range = day === null ? null : workDayRange(day);
-  return useSessionsBetween(range?.start ?? null, range?.end ?? null);
+  return useSessionsForDays(day, day === null ? null : addDays(day, 1));
 }
 
-/** Sessions that started in [start, end) (UTC ISO), e.g. a week. Pass nulls to load nothing. */
-export function useSessionsBetween(start: string | null, end: string | null): DaySessions {
+/** Sessions of the work days in [fromDay, toDay), e.g. a week. Pass nulls to load nothing. */
+export function useSessionsForDays(fromDay: string | null, toDay: string | null): DaySessions {
   const [status, setStatus] = useState<ListStatus>("loading");
   const [sessions, setSessions] = useState<Session[]>([]);
   const loadId = useRef(0);
 
   const load = useCallback(async (): Promise<void> => {
     const id = ++loadId.current;
-    if (start === null || end === null) return;
+    if (fromDay === null || toDay === null) return;
     setStatus("loading");
     try {
       await writesSettled();
-      const list = await sessionStore.listBetween(start, end);
+      const list = await sessionStore.listForDays(fromDay, toDay);
       if (id !== loadId.current) return;
       setSessions(list);
       setStatus("ready");
@@ -37,7 +36,7 @@ export function useSessionsBetween(start: string | null, end: string | null): Da
       console.error("[sessions] load failed", error);
       if (id === loadId.current) setStatus("error");
     }
-  }, [start, end]);
+  }, [fromDay, toDay]);
 
   useEffect(() => {
     void load();

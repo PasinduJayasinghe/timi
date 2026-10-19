@@ -4,7 +4,7 @@ import { toSession, toTask, type Session, type SessionRow, type Task, type TaskR
 // Every write is a single statement, queued with queueWrite by the caller (see db.ts).
 
 const SELECT_SESSIONS = `
-  SELECT s.id, s.task_id, s.started_at, s.ended_at, s.last_seen_at,
+  SELECT s.id, s.task_id, s.day_key, s.started_at, s.ended_at, s.last_seen_at,
          t.title AS task_title, t.type AS task_type, t.ticket_number,
          c.name AS client_name, p.name AS project_name, t.calendar_event_id
   FROM sessions s
@@ -20,14 +20,14 @@ export async function getRunning(): Promise<Session | null> {
 }
 
 /**
- * Sessions that started in [startIso, endIso), oldest first. Includes sessions of deleted
- * tasks, because that time was still worked.
+ * Sessions of the work days in [fromDay, toDay) ("YYYY-MM-DD"), oldest first. Includes sessions
+ * of deleted tasks, because that time was still worked.
  */
-export async function listBetween(startIso: string, endIso: string): Promise<Session[]> {
+export async function listForDays(fromDay: string, toDay: string): Promise<Session[]> {
   const db = await getDb();
   const rows = await db.select<SessionRow[]>(
-    `${SELECT_SESSIONS} WHERE s.started_at >= $1 AND s.started_at < $2 ORDER BY s.started_at`,
-    [startIso, endIso],
+    `${SELECT_SESSIONS} WHERE s.day_key >= $1 AND s.day_key < $2 ORDER BY s.started_at`,
+    [fromDay, toDay],
   );
   return rows.map(toSession);
 }
@@ -44,13 +44,14 @@ export async function listClosedForTasks(taskIds: readonly string[]): Promise<Se
   return rows.map(toSession);
 }
 
-export type NewSession = { id: string; taskId: string; startedAt: string };
+/** `dayKey` is the open shift's day (Phase 7). */
+export type NewSession = { id: string; taskId: string; dayKey: string; startedAt: string };
 
 export async function insert(session: NewSession): Promise<void> {
   const db = await getDb();
   await db.execute(
-    "INSERT INTO sessions (id, task_id, started_at, last_seen_at, created_at) VALUES ($1, $2, $3, $3, $3)",
-    [session.id, session.taskId, session.startedAt],
+    "INSERT INTO sessions (id, task_id, day_key, started_at, last_seen_at, created_at) VALUES ($1, $2, $3, $4, $4, $4)",
+    [session.id, session.taskId, session.dayKey, session.startedAt],
   );
 }
 
@@ -95,6 +96,8 @@ export type PendingUpload = {
   projectName: string | null;
   ticketNumber: string | null;
   calendarEventId: string | null;
+  /** The work day it belongs to, "YYYY-MM-DD". */
+  dayKey: string;
   startedAt: string;
   endedAt: string;
 };
@@ -108,6 +111,7 @@ type PendingRow = {
   project_name: string | null;
   ticket_number: string | null;
   calendar_event_id: string | null;
+  day_key: string;
   started_at: string;
   ended_at: string;
 };
@@ -119,7 +123,7 @@ export async function listPendingUploads(limit: number): Promise<PendingUpload[]
   const db = await getDb();
   const rows = await db.select<PendingRow[]>(
     `SELECT s.id, s.task_id, t.title AS task_title, t.type AS task_type, c.name AS client_name,
-            p.name AS project_name, t.ticket_number, t.calendar_event_id, s.started_at, s.ended_at
+            p.name AS project_name, t.ticket_number, t.calendar_event_id, s.day_key, s.started_at, s.ended_at
      FROM sessions s
      JOIN tasks t ON t.id = s.task_id
      LEFT JOIN clients c ON c.id = t.client_id
@@ -138,6 +142,7 @@ export async function listPendingUploads(limit: number): Promise<PendingUpload[]
     projectName: row.project_name,
     ticketNumber: row.ticket_number,
     calendarEventId: row.calendar_event_id,
+    dayKey: row.day_key,
     startedAt: row.started_at,
     endedAt: row.ended_at,
   }));

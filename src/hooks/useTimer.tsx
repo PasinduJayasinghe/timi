@@ -3,7 +3,7 @@ import type { ToastMessage } from "../components/Toast";
 import { nowIso, queueWrite, writesSettled } from "../data/db";
 import * as sessionStore from "../data/sessions";
 import type { Session, Task } from "../data/types";
-import { workDayRange } from "../lib/date";
+import { addDays } from "../lib/date";
 import { formatDuration } from "../lib/duration";
 import { HEARTBEAT_MS, isStale, secondsByTask, sessionSeconds } from "../lib/sessionMath";
 import { displayTitle, sessionDisplay } from "../lib/taskDisplay";
@@ -28,6 +28,8 @@ export type Timer = {
   start: (task: TimerTask) => void;
   /** Stops the running timer and saves the session. */
   pause: () => void;
+  /** Stops the running timer without the Undo toast (End shift, 7j). */
+  stopQuietly: () => void;
   reload: () => void;
 };
 
@@ -105,10 +107,9 @@ export function useTimer(
     const id = ++loadId.current;
     try {
       await writesSettled();
-      const range = workDayRange(day);
       const [open, sessions] = await Promise.all([
         sessionStore.getRunning(),
-        sessionStore.listBetween(range.start, range.end),
+        sessionStore.listForDays(day, addDays(day, 1)),
       ]);
       if (id !== loadId.current) return;
       setTodaySessions(sessions);
@@ -224,6 +225,14 @@ export function useTimer(
     });
   }, [applyStop, offlineRef, showToast, undo, write]);
 
+  const stopQuietly = useCallback((): void => {
+    const session = runningRef.current;
+    if (!session) return;
+    const endedAt = nowIso();
+    applyStop({ ...session, endedAt });
+    write(() => sessionStore.stop(session.id, endedAt));
+  }, [applyStop, write]);
+
   const start = useCallback(
     (task: TimerTask): void => {
       const previous = runningRef.current;
@@ -232,6 +241,7 @@ export function useTimer(
       const session: Session = {
         id: crypto.randomUUID(),
         taskId: task.id,
+        dayKey: day,
         startedAt,
         endedAt: null,
         lastSeenAt: startedAt,
@@ -264,7 +274,7 @@ export function useTimer(
         });
       }
     },
-    [applyStop, setRunning, showToast, write],
+    [applyStop, day, setRunning, showToast, write],
   );
 
   // Heartbeat and gap check while a session runs
@@ -300,5 +310,5 @@ export function useTimer(
 
   const trackedByTask = useMemo(() => secondsByTask(closed, Date.now()), [closed]);
 
-  return { status, running, todaySessions, trackedByTask, start, pause, reload };
+  return { status, running, todaySessions, trackedByTask, start, pause, stopQuietly, reload };
 }

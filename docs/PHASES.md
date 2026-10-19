@@ -84,3 +84,17 @@ Goal: data backed up to the company and a clean installer.
 - [ ] NSIS installer built with `npm run tauri build`
 
 Done when: the installer works on a clean Windows user account.
+
+## Phase 7: Shifts
+
+Goal: plan the work when a shift starts, and clear the screen when it ends, with every day kept in the database.
+
+Design: `docs/design/drafts/Timi Planner (draft).html`, screens 7d and 7i–7l (approved draft).
+
+- [ ] A work day runs from Start shift to End shift; 6 am is only the fallback for a shift left open (ends itself after 4 idle hours)
+- [ ] Sessions store their work day (`day_key`), so the Log, timeline, calendar and sync group by shift
+- [ ] Plan my day when a shift starts: review leftovers (Keep, Move, Drop), then plan the shift's tasks and estimates against the hours left
+- [ ] End shift: summary, Copy for timesheet, the timer stops, Today clears; Reopen the shift just ended
+- [ ] Settings: "Plan my day when a shift starts" replaces "Carry over unfinished tasks"
+
+Done when: a whole shift (start, plan, time, end, start the next) works in the installed build, and earlier days stay in the Log.

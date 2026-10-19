@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { FooterBar } from "./components/FooterBar";
 import { Icon } from "./components/Icon";
+import { LoadError } from "./components/LoadError";
 import type { LiveTotal } from "./components/LiveDuration";
 import { MiniBar, type MiniBarState } from "./components/MiniBar";
 import { SyncChip } from "./components/SyncChip";
@@ -21,6 +22,9 @@ import {
 import { CalendarView } from "./features/calendar/CalendarView";
 import { LogView } from "./features/log/LogView";
 import { SettingsView } from "./features/settings/SettingsView";
+import { EndShiftSheet } from "./features/shift/EndShiftSheet";
+import { PlanMyDaySheet } from "./features/shift/PlanMyDaySheet";
+import { BetweenShifts, EndShiftButton, LeftoversChip, ShiftNotice, ShiftStrip } from "./features/shift/ShiftParts";
 import { StartTaskSheet } from "./features/start/StartTaskSheet";
 import { TimelinePanel } from "./features/timeline/TimelinePanel";
 import { TodayView } from "./features/today/TodayView";
@@ -30,10 +34,11 @@ import { DEFAULT_SETTINGS } from "./data/settings";
 import { useCalendar, useCalendarEvents } from "./hooks/useCalendar";
 import { useCloudSync } from "./hooks/useCloudSync";
 import { useDesktop } from "./hooks/useDesktop";
+import { useDaySummary, useLeftoverCount } from "./hooks/useLeftovers";
 import { useMeetings } from "./hooks/useMeetings";
 import { useSettings } from "./hooks/useSettings";
+import { useShift } from "./hooks/useShift";
 import { useStoredChoice, useStoredFlag } from "./hooks/useStoredFlag";
-import { useTodayKey } from "./hooks/useTodayKey";
 import { useWorkday } from "./hooks/useWorkday";
 import { fromLocalDayKey, workDayRange } from "./lib/date";
 import { totalSeconds } from "./lib/sessionMath";
@@ -70,19 +75,46 @@ function App() {
 }
 
 function Shell() {
-  const todayKey = useTodayKey();
-  // The title bar shows the work day, so a night shift keeps its date after midnight
-  const date = useMemo(() => fromLocalDayKey(todayKey), [todayKey]);
   const showToast = useToast();
   const onSaveError = useCallback((): void => {
     showToast({ message: "Couldn’t save that change. Try again.", tone: "error" });
   }, [showToast]);
   const settingsState = useSettings(onSaveError);
   const settings = settingsState.settings ?? DEFAULT_SETTINGS;
+  // Reloads after a shift starts with Plan my day off and leftovers carried over
+  const afterCarryOverRef = useRef<() => void>(() => undefined);
+  const onCarriedOver = useCallback((): void => {
+    afterCarryOverRef.current();
+  }, []);
+  const shift = useShift(settings.planMyDay, onSaveError, onCarriedOver);
+  const { todayKey } = shift;
+  // The title bar shows the shift's day, so a night shift keeps its date after midnight
+  const date = useMemo(() => fromLocalDayKey(todayKey), [todayKey]);
   // Set by session sync; a session saved while offline gets the "Saved offline" toast (2e)
   const syncOfflineRef = useRef(false);
-  // Tasks wait for settings, so carry-over follows the Carry over setting
-  const work = useWorkday(todayKey, settingsState.settings?.carryOver, onSaveError, showToast, syncOfflineRef);
+  // Adding a task or starting a timer between shifts starts one (7i), except while planning it (7d)
+  const [shiftSheet, setShiftSheet] = useState<"end" | "plan" | "review" | null>(null);
+  const planningRef = useRef(false);
+  planningRef.current = shiftSheet === "plan";
+  const ensureShiftRef = useRef(shift.ensure);
+  ensureShiftRef.current = shift.ensure;
+  const onActivity = useCallback((): void => {
+    if (!planningRef.current) ensureShiftRef.current();
+  }, []);
+  const work = useWorkday(todayKey, shift.ready, onSaveError, showToast, onActivity, syncOfflineRef);
+  const leftovers = useLeftoverCount(todayKey, settings.planMyDay && shift.ready);
+  afterCarryOverRef.current = () => {
+    work.list.reload();
+    leftovers.reload();
+  };
+  const lastShift = shift.view.status === "between" ? shift.view.last : null;
+  const lastSummary = useDaySummary(lastShift?.dayKey ?? null);
+  // A forgotten shift can end once the timer stops (7l)
+  const timerRunning = work.timer.running !== null;
+  const { recheck } = shift;
+  useEffect(() => {
+    if (!timerRunning) recheck();
+  }, [timerRunning, recheck]);
   const cloud = useCloudSync(work.timer, syncOfflineRef);
   const { running, todaySessions, trackedByTask } = work.timer;
   const details = useTaskDetails(work, settings.defaultReminderMinutes);
@@ -141,6 +173,7 @@ function Shell() {
   const openSheet = (): void => {
     // The sheet lives on the Today view (inside the Today pane in wide mode)
     setSettingsOpen(false);
+    setShiftSheet(null);
     setTab("today");
     if (mode === "mini") changeMode(lastOpenMode);
     setSheetOpen(true);
@@ -157,6 +190,8 @@ function Shell() {
     work,
     resumable,
     onQuickAdd: () => {
+      // Quick add is for adding a task, which starts a shift between shifts
+      shift.ensure();
       details.close();
       setSettingsOpen(false);
       setSheetOpen(false);
@@ -245,6 +280,98 @@ function Shell() {
     />
   );
 
+  // Shifts (Phase 7): End shift (7j), Plan my day (7d), between shifts (7k) and the 7l note
+  const shiftView = shift.view;
+  const openShiftSheet = (kind: "end" | "plan" | "review"): void => {
+    details.close();
+    setSheetOpen(false);
+    setTab("today");
+    setShiftSheet(kind);
+  };
+  const closeShiftSheet = (): void => {
+    setShiftSheet(null);
+  };
+  const startShift = (): void => {
+    if (settings.planMyDay) openShiftSheet("plan");
+    else void shift.start();
+  };
+  const reloadAfterPlan = (): void => {
+    work.list.reload();
+    leftovers.reload();
+  };
+
+  let shiftSheetNode: ReactNode = null;
+  if (shiftSheet === "end" && shiftView.status === "open") {
+    shiftSheetNode = (
+      <EndShiftSheet
+        variant={wide ? "wide" : "expanded"}
+        shift={shiftView.shift}
+        tasks={work.list.tasks}
+        sessions={todaySessions}
+        running={running}
+        trackedByTask={trackedByTask}
+        planMyDay={settings.planMyDay}
+        onEnd={() => {
+          work.timer.stopQuietly();
+          shift.end();
+          setShiftSheet(null);
+        }}
+        onClose={closeShiftSheet}
+      />
+    );
+  } else if (shiftSheet === "plan" || shiftSheet === "review") {
+    shiftSheetNode = (
+      <PlanMyDaySheet
+        variant={wide ? "wide" : "expanded"}
+        mode={shiftSheet === "plan" ? "start" : "review"}
+        todayKey={todayKey}
+        tasks={work.list.tasks}
+        events={todayEvents}
+        onAdd={(title) => {
+          work.list.add({ title, type: "other" });
+        }}
+        onEstimate={(id, minutes) => {
+          work.list.update(id, { estimateMinutes: minutes });
+        }}
+        onChanged={reloadAfterPlan}
+        showToast={showToast}
+        onStart={() => {
+          setShiftSheet(null);
+          void shift.start();
+        }}
+        onClose={closeShiftSheet}
+      />
+    );
+  }
+
+  const notice = shift.notice && (
+    <ShiftNotice shift={shift.notice} onDismiss={shift.dismissNotice} className={wide ? "" : "mx-3 mb-2"} />
+  );
+
+  // Between shifts, Today shows only Start shift; earlier days stay in the Log
+  let todayOverride: ReactNode = undefined;
+  if (shiftView.status === "between") {
+    todayOverride = (
+      <BetweenShifts
+        last={shiftView.last}
+        trackedSeconds={lastSummary.trackedSeconds}
+        doneCount={lastSummary.doneCount}
+        leftovers={leftovers.count}
+        onStart={startShift}
+        onReopen={shift.reopen}
+      />
+    );
+  } else if (shiftView.status === "error") {
+    todayOverride = <LoadError title="Couldn’t load your shift" subject="tasks" onRetry={shift.reload} />;
+  }
+
+  const reviewLeftovers = (): void => {
+    openShiftSheet("review");
+  };
+  const endShift = (): void => {
+    openShiftSheet("end");
+  };
+
   const titleBar = (
     <TitleBar
       date={date}
@@ -263,6 +390,14 @@ function Shell() {
         void hideToTray();
       }}
       onOpenSettings={openSettings}
+      shiftAction={
+        wide && shiftView.status === "open" ? (
+          <>
+            {leftovers.count > 0 && <LeftoversChip count={leftovers.count} onClick={reviewLeftovers} />}
+            <EndShiftButton onClick={endShift} />
+          </>
+        ) : undefined
+      }
       switcher={
         wide ? (
           <Tabs
@@ -294,7 +429,9 @@ function Shell() {
           todayEvents={todayEvents}
           barActions={{ ...barActions, meetings: upcomingMeetings }}
           onStartTask={openSheet}
-          sheet={wideView === "today-calendar" && sheet}
+          sheet={wideView === "today-calendar" && (sheet || shiftSheetNode)}
+          todayOverride={todayOverride}
+          todayNotice={notice}
           focusQuickAdd={quickAddFocus}
           nextMeeting={nextMeeting}
           syncChip={<SyncChip sync={cloud} />}
@@ -331,14 +468,33 @@ function Shell() {
       >
         {tab === "today" && (
           <>
-            <TodayView
-              work={work}
-              variant="expanded"
-              onStartTask={openSheet}
-              details={details}
-              focusQuickAdd={quickAddFocus}
-              nextMeeting={nextMeeting}
-            />
+            {notice}
+            {todayOverride ? (
+              <>
+                <div className="relative z-1 mx-3 shrink-0">{todayOverride}</div>
+                <div className="flex-1" />
+              </>
+            ) : (
+              <>
+                {shiftView.status === "open" && (
+                  <ShiftStrip
+                    shift={shiftView.shift}
+                    total={todayTotal}
+                    leftovers={leftovers.count}
+                    onReview={reviewLeftovers}
+                    onEndShift={endShift}
+                  />
+                )}
+                <TodayView
+                  work={work}
+                  variant="expanded"
+                  onStartTask={openSheet}
+                  details={details}
+                  focusQuickAdd={quickAddFocus}
+                  nextMeeting={nextMeeting}
+                />
+              </>
+            )}
             <FooterBar total={todayTotal} sync={<SyncChip sync={cloud} />} />
             {timelineOpen ? (
               <TimelinePanel
@@ -366,6 +522,7 @@ function Shell() {
       {/* 1a script: 236px from the bottom with the timeline open, 64px with it collapsed */}
       <ToastViewport bottomClass={tab !== "today" ? "bottom-4" : timelineOpen ? "bottom-59" : "bottom-16"} />
       {sheet}
+      {shiftSheetNode}
       {details.popover}
     </WindowFrame>
   );

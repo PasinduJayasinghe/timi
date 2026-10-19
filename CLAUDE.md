@@ -23,7 +23,7 @@ Timi is a sticky-note style desktop app for daily tasks, task timers, a day time
 - Fonts are self-hosted with Fontsource (Inter and JetBrains Mono). No fonts loaded from the network.
 - `useEffect` callbacks always use block bodies, because a returned value is treated as a cleanup function.
 - Elapsed time is always calculated from stored timestamps (`started_at`, `ended_at`). Never count time by incrementing with `setInterval`.
-- Store times as UTC ISO strings and display them in local time. Treat "today" as the local work day, which starts at 6 am, so a night shift counts as one day (`DAY_START_HOUR` in `src/lib/date.ts`).
+- Store times as UTC ISO strings and display them in local time. Treat "today" as the open shift's work day (`useShift`): a day runs from Start shift to End shift, and sessions store their `day_key`. Between shifts and for older data, a work day starts at 6 am, so a night shift counts as one day (`DAY_START_HOUR` in `src/lib/date.ts`).
 - Only one timer runs at a time.
 - Reminders and meeting alarms are scheduled in Rust, not with web view timers, so they fire while the window is hidden.
 - Every list has loading, empty and error states. Every control has hover and visible focus states, with a minimum target of 32 x 32 px. Respect the system "reduce motion" setting.

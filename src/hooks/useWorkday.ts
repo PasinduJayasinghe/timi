@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from "react";
 import type { ToastMessage } from "../components/Toast";
 import type { Task } from "../data/types";
-import { useTimer, type Timer } from "./useTimer";
+import { useTimer, type Timer, type TimerTask } from "./useTimer";
 import { useTodayTasks, type TaskDraft, type TodayTasks } from "./useTodayTasks";
 
 export type Workday = {
@@ -19,20 +19,40 @@ export type Workday = {
   replay: (task: Task) => void;
 };
 
-/** Today's tasks and the timer, with the actions that change both. */
+/**
+ * Today's tasks and the timer, with the actions that change both. `onActivity` runs before a task
+ * is added or a timer starts, so doing either between shifts starts a shift (Phase 7).
+ */
 export function useWorkday(
   day: string,
-  carryOver: boolean | undefined,
+  ready: boolean,
   onSaveError: () => void,
   showToast: (toast: ToastMessage) => void,
+  onActivity: () => void,
   /** True while session sync is offline (Phase 6a). */
   syncOfflineRef?: { readonly current: boolean },
 ): Workday {
-  const list = useTodayTasks(day, carryOver, onSaveError);
+  const taskList = useTodayTasks(day, ready, onSaveError);
+  const { add: addToList } = taskList;
+  const addTask = useCallback(
+    (draft: TaskDraft): Task => {
+      onActivity();
+      return addToList(draft);
+    },
+    [addToList, onActivity],
+  );
+  const list: TodayTasks = { ...taskList, add: addTask };
   const taskIds = useMemo(() => list.tasks.map((task) => task.id), [list.tasks]);
   const timer = useTimer(day, taskIds, onSaveError, showToast, syncOfflineRef);
-  const { tasks, toggleDone: toggleListDone, remove: removeFromList, add } = list;
-  const { running, start, pause } = timer;
+  const { tasks, toggleDone: toggleListDone, remove: removeFromList } = taskList;
+  const { running, start: startTimer, pause } = timer;
+  const start = useCallback(
+    (task: TimerTask): void => {
+      onActivity();
+      startTimer(task);
+    },
+    [onActivity, startTimer],
+  );
 
   const startTask = useCallback(
     (id: string): void => {
@@ -62,9 +82,9 @@ export function useWorkday(
 
   const startNew = useCallback(
     (draft: TaskDraft): void => {
-      start(add(draft));
+      start(addTask(draft));
     },
-    [add, start],
+    [addTask, start],
   );
 
   const replay = useCallback(
@@ -86,5 +106,6 @@ export function useWorkday(
     [day, startNew, startTask, tasks],
   );
 
-  return { list, timer, startTask, toggleDone, remove, startNew, replay };
+  // timer.start goes through onActivity too
+  return { list, timer: { ...timer, start }, startTask, toggleDone, remove, startNew, replay };
 }

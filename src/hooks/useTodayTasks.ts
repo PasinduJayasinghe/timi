@@ -49,11 +49,11 @@ export type TodayTasks = {
 };
 
 /**
- * Today's task list. Carries unfinished tasks over when the day changes, if `carryOver` is on;
- * stays loading while `carryOver` is undefined (settings not loaded yet).
+ * Today's task list: the tasks listed on `day`. Stays loading until `ready` (the shift is known,
+ * so `day` is final). Unfinished tasks from earlier days come over when a shift starts (useShift).
  * Changes apply optimistically; a failed write reloads from the database and calls `onSaveError`.
  */
-export function useTodayTasks(day: string, carryOver: boolean | undefined, onSaveError: () => void): TodayTasks {
+export function useTodayTasks(day: string, ready: boolean, onSaveError: () => void): TodayTasks {
   const [status, setStatus] = useState<ListStatus>("loading");
   const [tasks, setTasks] = useState<Task[]>([]);
   const tasksRef = useRef<Task[]>(tasks);
@@ -63,11 +63,10 @@ export function useTodayTasks(day: string, carryOver: boolean | undefined, onSav
   const load = useCallback(
     async (showLoading: boolean): Promise<void> => {
       const id = ++loadId.current;
-      if (carryOver === undefined) return;
+      if (!ready) return;
       if (showLoading) setStatus("loading");
       try {
         await writesSettled();
-        if (carryOver) await taskStore.carryOver(day);
         const list = await taskStore.listForDay(day);
         if (id !== loadId.current) return;
         setTasks(list);
@@ -77,7 +76,7 @@ export function useTodayTasks(day: string, carryOver: boolean | undefined, onSav
         if (id === loadId.current) setStatus("error");
       }
     },
-    [day, carryOver],
+    [day, ready],
   );
 
   useEffect(() => {

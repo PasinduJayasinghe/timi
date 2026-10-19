@@ -7,6 +7,7 @@ const at = (hours: number, minutes: number): string => new Date(2026, 9, 10, hou
 
 const base: Omit<Session, "id" | "startedAt" | "endedAt"> = {
   taskId: "t1",
+  dayKey: "2026-10-10",
   lastSeenAt: null,
   taskTitle: "Checkout flow — fix payment step",
   taskType: "client",

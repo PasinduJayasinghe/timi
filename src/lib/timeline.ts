@@ -29,8 +29,9 @@ function ceilHour(ms: number): number {
 }
 
 /**
- * The axis for a work day: the working hours, widened to whole hours to include every session,
- * and kept inside the work day (6 am to 6 am).
+ * The axis for a work day: the working hours, widened to whole hours to include every session and
+ * the `extra` spans. Extra spans are kept inside 6 am to 6 am; sessions belong to the day's shift,
+ * so they always fit, even past 6 am.
  */
 export function timelineAxis(
   dayKey: string,
@@ -45,20 +46,20 @@ export function timelineAxis(
 
   let startMs = at(WORK_START_MIN);
   let endMs = at(WORK_START_MIN + WORK_SPAN_MIN);
+  for (const span of extra) {
+    startMs = Math.min(startMs, floorHour(span.startMs));
+    endMs = Math.max(endMs, ceilHour(span.endMs));
+  }
+  startMs = Math.max(startMs, dayStartOf(dayKey).getTime());
+  endMs = Math.min(endMs, dayStartOf(addDays(dayKey, 1)).getTime());
+  // The day's sessions always fit: a shift can run past 6 am (Phase 7)
   for (const session of sessions) {
     const sessionStart = Date.parse(session.startedAt);
     const sessionEnd = session.endedAt ? Date.parse(session.endedAt) : Math.max(nowMs, sessionStart + MIN_RUNNING_MS);
     startMs = Math.min(startMs, floorHour(sessionStart));
     endMs = Math.max(endMs, ceilHour(sessionEnd));
   }
-  for (const span of extra) {
-    startMs = Math.min(startMs, floorHour(span.startMs));
-    endMs = Math.max(endMs, ceilHour(span.endMs));
-  }
-  return {
-    startMs: Math.max(startMs, dayStartOf(dayKey).getTime()),
-    endMs: Math.min(endMs, dayStartOf(addDays(dayKey, 1)).getTime()),
-  };
+  return { startMs, endMs };
 }
 
 /** Where a session sits on the axis, as percentages of its width. */

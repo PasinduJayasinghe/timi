@@ -24,12 +24,12 @@ FONT = ROOT / "node_modules/@fontsource-variable/material-symbols-rounded/files/
 OUT = ROOT / "src/components/icons.ts"
 
 ICON_NAMES = [
-    "add", "apartment", "arrow_back", "calendar_month", "calendar_today", "category", "check", "check_circle",
+    "add", "apartment", "arrow_back", "arrow_forward", "bedtime", "calendar_month", "calendar_today", "category", "check", "check_circle",
     "chevron_left", "chevron_right", "close", "close_fullscreen", "cloud_done", "cloud_off", "confirmation_number",
     "content_copy", "delete", "drag_indicator", "error", "event", "expand_less", "expand_more", "folder", "groups",
     "history", "info", "link", "notifications", "notifications_active", "open_in_full", "pause", "play_arrow",
     "push_pin", "refresh", "replay", "schedule", "settings", "snooze", "swap_horiz", "sync", "sync_problem", "timer",
-    "videocam", "view_timeline", "volume_off", "volume_up", "width", "work",
+    "videocam", "view_timeline", "volume_off", "volume_up", "wb_sunny", "width", "work",
 ]
 
 # Extra weights, as their own names: the done check on task rows is drawn at weight 600 (1a)

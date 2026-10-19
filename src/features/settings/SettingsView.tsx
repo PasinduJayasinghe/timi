@@ -136,12 +136,12 @@ export function SettingsView({ calendar, settings, onChange, onBack, onClose, va
                 onChange={changeStartOnLogin}
               />
             </Row>
-            <Row title="Carry over unfinished tasks" sub="Tagged “from yesterday” the next day">
+            <Row title="Plan my day when a shift starts" sub="Off: unfinished tasks carry over on their own">
               <Switch
-                checked={settings.carryOver}
-                label="Carry over unfinished tasks"
+                checked={settings.planMyDay}
+                label="Plan my day when a shift starts"
                 onChange={(next) => {
-                  onChange("carryOver", next);
+                  onChange("planMyDay", next);
                 }}
               />
             </Row>

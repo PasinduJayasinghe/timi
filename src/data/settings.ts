@@ -2,8 +2,11 @@ import { getDb, queueWrite } from "./db";
 
 /** App preferences from Settings (4e). Start on login is kept by the autostart plugin itself. */
 export type Settings = {
-  /** Unfinished tasks move to the new day, tagged "from yesterday". */
-  carryOver: boolean;
+  /**
+   * Start shift opens Plan my day, where unfinished tasks from the last shift are reviewed (7d).
+   * Off: they move to the new shift on their own, tagged "from yesterday".
+   */
+  planMyDay: boolean;
   /** The quick reminder highlighted first in the Reminder picker, in minutes. */
   defaultReminderMinutes: number;
   /** "Alert before meeting" (4e): 1, 5, 10 or 15 minutes. */
@@ -15,7 +18,7 @@ export type Settings = {
 };
 
 export const DEFAULT_SETTINGS: Settings = {
-  carryOver: true,
+  planMyDay: true,
   defaultReminderMinutes: 30,
   meetingAlertMinutes: 5,
   meetingChime: true,
@@ -23,7 +26,7 @@ export const DEFAULT_SETTINGS: Settings = {
 };
 
 const KEYS: Record<keyof Settings, string> = {
-  carryOver: "carry_over",
+  planMyDay: "plan_my_day",
   defaultReminderMinutes: "default_reminder_minutes",
   meetingAlertMinutes: "meeting_alert_minutes",
   meetingChime: "meeting_chime",
