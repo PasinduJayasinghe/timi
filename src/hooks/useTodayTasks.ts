@@ -117,6 +117,8 @@ export function useTodayTasks(day: string, ready: boolean, onSaveError: () => vo
         calendarEventId: draft.calendarEventId ?? null,
         listDay: day,
         carriedFrom: null,
+        plannedStart: null,
+        plannedMinutes: null,
         position: topPosition(tasksRef.current.map((t) => t.position)),
         completedAt: null,
         createdAt,

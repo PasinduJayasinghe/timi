@@ -9,7 +9,7 @@ import { addDays, formatShortDate, fromLocalDayKey } from "../../lib/date";
 import { TimelineRows, type TimelineRowsProps } from "./TimelineRows";
 
 /** What bars do when clicked, and today's upcoming calendar meetings (shown on today only). */
-type BarActions = Pick<TimelineRowsProps, "canOpen" | "onOpen" | "meetings">;
+type BarActions = Pick<TimelineRowsProps, "canOpen" | "onOpen" | "meetings" | "planned">;
 
 /** Couldn't load a day's sessions (drafted; the panel is too small for the full 3c alert). */
 function TimelineError({ onRetry }: { onRetry: () => void }) {
@@ -125,6 +125,7 @@ export function TimelinePanel({ todayKey, timer, onCollapse, ...actions }: Timel
         variant="expanded"
         {...actions}
         meetings={isToday ? actions.meetings : undefined}
+        planned={isToday ? actions.planned : undefined}
       />
     </section>
   );

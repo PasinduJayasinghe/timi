@@ -4,7 +4,7 @@ import { openMeet, type CalendarEvent } from "../../data/calendar";
 import type { Session } from "../../data/types";
 import { useNow } from "../../hooks/useNow";
 import { formatDuration, formatTimeOfDay } from "../../lib/duration";
-import { sessionSeconds, totalsBySummary } from "../../lib/sessionMath";
+import { sessionSeconds, totalsBySummary, type SummaryKey } from "../../lib/sessionMath";
 import { SUMMARY_STYLES } from "../../lib/summaryStyles";
 import { displayTitle, sessionDisplay, whoLabel } from "../../lib/taskDisplay";
 import { styleOf } from "../../lib/taskTypes";
@@ -31,7 +31,12 @@ export type TimelineRowsProps = {
   onOpen: (taskId: string, bar: HTMLElement) => void;
   /** Calendar meetings still to come, shown dashed in the Meetings row (1f). Not counted in totals. */
   meetings?: readonly CalendarEvent[];
+  /** Planned blocks (Phase 9), drawn as dashed outlines behind the tracked bars (7c). */
+  planned?: readonly PlannedBlock[];
 };
+
+/** A task's planned time on the timeline (7c). */
+export type PlannedBlock = { id: string; row: SummaryKey; startMs: number; endMs: number };
 
 function sessionTooltip(session: Session, now: number, openable: boolean): TooltipContent {
   const task = sessionDisplay(session);
@@ -75,6 +80,7 @@ export function TimelineRows({
   canOpen,
   onOpen,
   meetings = [],
+  planned = [],
 }: TimelineRowsProps) {
   const wide = variant === "wide";
   const running = sessions.some((session) => session.endedAt === null);
@@ -82,8 +88,14 @@ export function TimelineRows({
   const now = useNow(isToday, running ? 1000 : 30_000);
   const [hover, setHover] = useState<{ content: TooltipContent; bar: HTMLElement } | null>(null);
 
-  const axis = timelineAxis(dayKey, sessions, now, meetings);
+  const axis = timelineAxis(dayKey, sessions, now, [...meetings, ...planned]);
   const totals = totalsBySummary(sessions, now);
+  // Rows with plans show "tracked / planned" (7c)
+  const plannedTotals = new Map<SummaryKey, number>();
+  for (const block of planned) {
+    plannedTotals.set(block.row, (plannedTotals.get(block.row) ?? 0) + (block.endMs - block.startMs) / 1000);
+  }
+  const hasPlans = plannedTotals.size > 0;
   const nowPercent = isToday ? axisPercent(now, axis) : null;
   const labels = axisLabels(axis, variant);
 
@@ -151,6 +163,19 @@ export function TimelineRows({
               aria-label={SUMMARY_STYLES[key].title}
               className={`relative ${rowHeight} ${rowRadius} bg-white/30`}
             >
+              {planned
+                .filter((block) => block.row === key)
+                .map((block) => {
+                  const { left, width } = rangePosition(block.startMs, block.endMs, axis);
+                  return (
+                    <span
+                      key={`plan-${block.id}`}
+                      aria-hidden="true"
+                      style={{ left: `${left}%`, width: `${width}%` }}
+                      className={`pointer-events-none absolute inset-y-0 border-[1.5px] border-dashed border-current opacity-70 ${rowRadius} ${SUMMARY_STYLES[key].ink}`}
+                    />
+                  );
+                })}
               {sessions
                 .filter((session) => rowOf(session) === key)
                 .map((session) => {
@@ -266,15 +291,20 @@ export function TimelineRows({
       {/* Row totals: the same numbers as the Log (3f) */}
       <div
         className={`flex shrink-0 flex-col text-right font-mono text-[10.5px] font-medium text-ink ${rowGap} ${
-          wide ? "w-13 pt-4" : "w-10.5 pt-4.5"
+          hasPlans ? (wide ? "w-26 pt-4" : "w-24 pt-4.5") : wide ? "w-13 pt-4" : "w-10.5 pt-4.5"
         }`}
       >
-        {TIMELINE_ROWS.map((key) => (
-          <span key={key} className={wide ? "h-5 leading-5" : "h-6 leading-6"}>
-            <span className="sr-only">{SUMMARY_STYLES[key].title}: </span>
-            {totals[key] > 0 ? formatDuration(totals[key]) : "—"}
-          </span>
-        ))}
+        {TIMELINE_ROWS.map((key) => {
+          const plannedSeconds = plannedTotals.get(key);
+          const tracked = totals[key] > 0 ? formatDuration(totals[key]) : "—";
+          return (
+            <span key={key} className={`whitespace-nowrap ${wide ? "h-5 leading-5" : "h-6 leading-6"}`}>
+              <span className="sr-only">{SUMMARY_STYLES[key].title}: </span>
+              {plannedSeconds ? `${tracked} / ${formatDuration(plannedSeconds)}` : tracked}
+              {plannedSeconds ? <span className="sr-only"> planned</span> : null}
+            </span>
+          );
+        })}
       </div>
 
       {hover && <TimelineTooltip content={hover.content} anchor={hover.bar} />}

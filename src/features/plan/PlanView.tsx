@@ -16,6 +16,7 @@ import { TodayView } from "../today/TodayView";
 import { useTaskDetails, type TaskDetails } from "../today/useTaskDetails";
 import { GoalsCard } from "./GoalsCard";
 import { DayLoadBar, PastDaySummary, PlanEmpty } from "./PlanParts";
+import { ScheduleView } from "./ScheduleView";
 import { WeekColumns } from "./WeekColumns";
 
 /** Days shown side by side in the wide Plan (7g). */
@@ -60,6 +61,8 @@ export function PlanView({
   // Planning is mostly for the next day, so it opens on tomorrow (7a)
   const [day, setDay] = useState(() => addDays(todayKey, 1));
   const [monthOpen, setMonthOpen] = useState(false);
+  // List (7a) or Schedule (7b)
+  const [mode, setMode] = useState<"list" | "schedule">("list");
   // The wide Plan's first column (7g): today, until the arrows move it
   const [windowStart, setWindowStart] = useState(todayKey);
   const toast = useToast();
@@ -128,13 +131,57 @@ export function PlanView({
     : { list: otherList, timer: work.timer, startTask: noop, toggleDone: otherList.toggleDone };
 
   const header = (
-    <div className={`relative z-1 flex shrink-0 flex-col gap-0.5 ${variant === "wide" ? "" : "mt-3 px-3.5"}`}>
-      <h2 className="m-0 text-title tracking-title">{title}</h2>
-      <span className="text-meta text-ink-muted">
-        {relative ? `${relative} · ` : ""}
-        {workingHours()}
-      </span>
+    <div className={`relative z-1 flex shrink-0 items-center gap-2 ${variant === "wide" ? "" : "mt-3 px-3.5"}`}>
+      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <h2 className="m-0 truncate text-title tracking-title">{title}</h2>
+        <span className="text-meta text-ink-muted">
+          {relative ? `${relative} · ` : ""}
+          {workingHours()}
+        </span>
+      </div>
+      {!isPast && (
+        <div
+          role="radiogroup"
+          aria-label="View"
+          className="flex rounded-control border border-white/80 bg-white/45 p-0.75"
+        >
+          {(["list", "schedule"] as const).map((option) => (
+            <button
+              key={option}
+              type="button"
+              role="radio"
+              aria-checked={mode === option}
+              onClick={() => {
+                setMode(option);
+              }}
+              className={`h-8 rounded-sm px-3 text-caption ${
+                mode === option ? "bg-white font-semibold shadow-sm" : "font-medium text-ink-muted hover:text-ink"
+              }`}
+            >
+              {option === "list" ? "List" : "Schedule"}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
+  );
+
+  /** Saves a planned time from the Schedule view (7b), or clears it. */
+  const schedule = (id: string, startMs: number | null, minutes: number | null): void => {
+    list.update(id, {
+      plannedStart: startMs === null ? null : new Date(startMs).toISOString(),
+      plannedMinutes: minutes,
+    });
+  };
+  const scheduleView = (wide: boolean) => (
+    <ScheduleView
+      dayKey={day}
+      isToday={isToday}
+      tasks={list.tasks}
+      events={events}
+      onSchedule={schedule}
+      variant={wide ? "wide" : "expanded"}
+    />
   );
 
   if (variant === "wide") {
@@ -157,16 +204,22 @@ export function PlanView({
           ) : (
             <>
               <DayLoadBar load={load} />
-              {plan.status === "ready" && <GoalsCard plan={plan} />}
-              <TodayView
-                work={dayWork}
-                variant="wide"
-                startable={isToday}
-                showFilters={false}
-                quickAddPlaceholder={`Add to ${formatShortDate(fromLocalDayKey(day))}, press Enter`}
-                empty={<PlanEmpty dayKey={day} className="mt-1" />}
-                details={details}
-              />
+              {mode === "schedule" ? (
+                scheduleView(true)
+              ) : (
+                <>
+                  {plan.status === "ready" && <GoalsCard plan={plan} />}
+                  <TodayView
+                    work={dayWork}
+                    variant="wide"
+                    startable={isToday}
+                    showFilters={false}
+                    quickAddPlaceholder={`Add to ${formatShortDate(fromLocalDayKey(day))}, press Enter`}
+                    empty={<PlanEmpty dayKey={day} className="mt-1" />}
+                    details={details}
+                  />
+                </>
+              )}
             </>
           )}
         </section>
@@ -240,18 +293,24 @@ export function PlanView({
       ) : (
         <>
           <DayLoadBar load={load} className="mt-2.5 px-3.5" />
-          {plan.status === "ready" && <GoalsCard plan={plan} className="mx-3 mt-2.5" />}
-          <div className="mt-2.5 flex min-h-0 flex-1 flex-col">
-            <TodayView
-              work={dayWork}
-              variant="expanded"
-              startable={isToday}
-              showFilters={false}
-              quickAddPlaceholder={`Add to ${formatShortDate(fromLocalDayKey(day))}, press Enter`}
-              empty={<PlanEmpty dayKey={day} />}
-              details={details}
-            />
-          </div>
+          {mode === "schedule" ? (
+            <div className="mt-2.5 flex min-h-0 flex-1 flex-col px-3 pb-2">{scheduleView(false)}</div>
+          ) : (
+            <>
+              {plan.status === "ready" && <GoalsCard plan={plan} className="mx-3 mt-2.5" />}
+              <div className="mt-2.5 flex min-h-0 flex-1 flex-col">
+                <TodayView
+                  work={dayWork}
+                  variant="expanded"
+                  startable={isToday}
+                  showFilters={false}
+                  quickAddPlaceholder={`Add to ${formatShortDate(fromLocalDayKey(day))}, press Enter`}
+                  empty={<PlanEmpty dayKey={day} />}
+                  details={details}
+                />
+              </div>
+            </>
+          )}
         </>
       )}
       {!isToday && otherDetails.popover}

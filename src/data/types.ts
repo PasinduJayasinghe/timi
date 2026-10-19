@@ -21,6 +21,9 @@ export type Task = {
   remindAt: string | null;
   /** The Google Calendar event a meeting timer was started from (4b), if any. */
   calendarEventId: string | null;
+  /** When the task is planned to start (UTC ISO) and for how long (Phase 9). Null when unscheduled. */
+  plannedStart: string | null;
+  plannedMinutes: number | null;
   /** UTC ISO timestamps. */
   completedAt: string | null;
   createdAt: string;
@@ -58,6 +61,8 @@ export type TaskRow = {
   position: number;
   remind_at: string | null;
   calendar_event_id: string | null;
+  planned_start: string | null;
+  planned_minutes: number | null;
   completed_at: string | null;
   created_at: string;
   updated_at: string;
@@ -120,6 +125,8 @@ export function toTask(row: TaskRow): Task {
     position: row.position,
     remindAt: row.remind_at,
     calendarEventId: row.calendar_event_id,
+    plannedStart: row.planned_start,
+    plannedMinutes: row.planned_minutes,
     completedAt: row.completed_at,
     createdAt: row.created_at,
     updatedAt: row.updated_at,

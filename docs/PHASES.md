@@ -118,3 +118,16 @@ Design: `docs/design/drafts/Timi Planner (draft).html`, screens 7a, 7e, 7f, 7g a
 - [ ] The selected day next to the coming days, with dragging a task onto a day to move it
 
 Done when: tomorrow can be planned the night before, and those tasks are on Today when the next shift starts.
+
+## Phase 9: Time-blocking
+
+Goal: give tasks a planned time and compare the plan with what was tracked.
+
+Design: `docs/design/drafts/Timi Planner (draft).html`, screens 7b and 7c (approved draft).
+
+- [ ] Planned start and length on tasks (migration 8)
+- [ ] Plan tab List / Schedule: Unscheduled tray, Planned and Google Calendar lanes, drag to schedule, move and resize (15-minute snapping), and a Schedule dialog for the keyboard
+- [ ] Today rows: "planned …" while ahead or under way, "not started" once the time passes
+- [ ] Timeline: dashed planned outlines behind tracked bars, and "tracked / planned" totals
+
+Done when: a planned day shows its blocks on Schedule, and the timeline compares them with the tracked time.

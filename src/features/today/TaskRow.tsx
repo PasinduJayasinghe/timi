@@ -5,6 +5,7 @@ import type { Task } from "../../data/types";
 import { formatClock, formatDuration, formatTimeOfDay } from "../../lib/duration";
 import { formatMinutes } from "../../lib/estimate";
 import { carriedLabel } from "../../lib/plan";
+import type { PlanHint } from "../../lib/schedule";
 import { displayMeta, displayTitle } from "../../lib/taskDisplay";
 import { styleOf } from "../../lib/taskTypes";
 
@@ -31,6 +32,8 @@ type TaskRowProps = {
   onDragEnd: () => void;
   /** False on another day's plan (7a): only today's tasks can be timed. */
   startable?: boolean;
+  /** "planned 11 pm–12:30 am" or "not started · 7:30 pm" (7c). */
+  planHint?: PlanHint | null;
 };
 
 /** Task row: 1a/1c in the expanded window, 1d compact row in wide mode. */
@@ -48,6 +51,7 @@ export function TaskRow({
   onDragOver,
   onDragEnd,
   startable = true,
+  planHint = null,
 }: TaskRowProps) {
   const [popping, setPopping] = useState(false);
   const style = styleOf(task);
@@ -151,6 +155,17 @@ export function TaskRow({
     </span>
   );
 
+  const planTag = planHint && (
+    <span
+      className={`flex shrink-0 items-center gap-0.5 rounded-xs py-px pr-1.5 pl-1 font-semibold whitespace-nowrap ${
+        planHint.kind === "late" ? "bg-status-error-surface text-status-error" : "bg-type-internal/14 text-type-internal-ink"
+      }`}
+    >
+      <Icon name="schedule" size={13} />
+      {planHint.text}
+    </span>
+  );
+
   const buttonSize = wide ? "size-7.5" : "size-8";
   const buttonIcon = wide ? 17 : 18;
 
@@ -248,6 +263,7 @@ export function TaskRow({
         </button>
         {reminder && <span className="text-[11px]">{reminderTag}</span>}
         {carried && <span className="text-[11px]">{carriedTag}</span>}
+        {planTag && <span className="text-[11px]">{planTag}</span>}
         {controls}
       </div>
     );
@@ -288,6 +304,7 @@ export function TaskRow({
           <span className="truncate">{displayMeta(task)}</span>
           {reminderTag}
           {carriedTag}
+          {planTag}
           {showEstimate && (
             <span className="shrink-0 font-mono text-duration whitespace-nowrap">
               est {formatMinutes(task.estimateMinutes ?? 0)}

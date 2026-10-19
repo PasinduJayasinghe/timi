@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { LoadError } from "../../components/LoadError";
 import { orderTasks } from "../../hooks/useTodayTasks";
 import type { Workday } from "../../hooks/useWorkday";
+import { useNow } from "../../hooks/useNow";
+import { planHint } from "../../lib/schedule";
 import { TYPE_STYLES } from "../../lib/taskTypes";
 import { FilterChips, type TaskFilter } from "./FilterChips";
 import { QuickAddRow } from "./QuickAddRow";
@@ -77,6 +79,17 @@ export function TodayView({
   const displayOrder = preview ? preview.flatMap((id) => byId.get(id) ?? []) : ordered;
   const visible = displayOrder.filter((task) => filter === "all" || task.type === filter);
   const showLoading = useDelayedFlag(list.status === "loading", LOADING_DELAY_MS);
+  // Plan hints (7c) change as time passes: re-check each minute while any task has a plan
+  const hasPlans = list.tasks.some((task) => task.plannedStart !== null && !task.completedAt);
+  const now = useNow(hasPlans, 60_000);
+  const lastStarts = useMemo(() => {
+    const starts = new Map<string, number>();
+    for (const session of timer.todaySessions) {
+      const start = Date.parse(session.startedAt);
+      if (start > (starts.get(session.taskId) ?? 0)) starts.set(session.taskId, start);
+    }
+    return starts;
+  }, [timer.todaySessions]);
 
   /** Keyboard reorder: swap with the next visible task in the same group. */
   const moveBy = (id: string, delta: -1 | 1): void => {
@@ -179,6 +192,7 @@ export function TodayView({
               dragging={dragId === task.id}
               timer={rowTimer(task.id)}
               startable={startable}
+              planHint={planHint(task, lastStarts.get(task.id) ?? null, now)}
               onPlay={() => {
                 work.startTask(task.id);
               }}

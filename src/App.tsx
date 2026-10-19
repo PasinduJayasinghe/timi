@@ -42,7 +42,8 @@ import { useShift } from "./hooks/useShift";
 import { useStoredChoice, useStoredFlag } from "./hooks/useStoredFlag";
 import { useWorkday } from "./hooks/useWorkday";
 import { fromLocalDayKey, workDayRange } from "./lib/date";
-import { totalSeconds } from "./lib/sessionMath";
+import { summaryKey, totalSeconds } from "./lib/sessionMath";
+import type { PlannedBlock } from "./features/timeline/TimelineRows";
 import { hideToTray, resizeForMode, setPinned, type WindowMode } from "./lib/window";
 
 /** Window modes remembered between runs; the mini bar always reopens as the last of these. */
@@ -206,8 +207,23 @@ function Shell() {
     onStartSheet: openSheet,
   });
 
+  // Today's planned blocks: dashed outlines on the timeline (7c)
+  const planned: PlannedBlock[] = work.list.tasks.flatMap((task) =>
+    task.plannedStart && task.plannedMinutes
+      ? [
+          {
+            id: task.id,
+            row: summaryKey(task.type),
+            startMs: Date.parse(task.plannedStart),
+            endMs: Date.parse(task.plannedStart) + task.plannedMinutes * 60_000,
+          },
+        ]
+      : [],
+  );
+
   // Timeline bars open the task details popover when the task is on today's list
   const barActions = {
+    planned,
     canOpen: (taskId: string): boolean => work.list.tasks.some((task) => task.id === taskId),
     onOpen: (taskId: string, bar: HTMLElement): void => {
       details.toggle(taskId, bar, bar);
