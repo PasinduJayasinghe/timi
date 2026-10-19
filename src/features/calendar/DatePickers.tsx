@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Icon } from "../../components/Icon";
 import { IconButton } from "../../components/IconButton";
 import { weekStartKey } from "../../lib/calendar";
@@ -22,13 +22,23 @@ type WeekStripProps = {
   todayKey: string;
   /** Days with calendar events get a rose dot (3a). */
   eventDays: ReadonlySet<string>;
+  /** A line under each date instead of the dot, and a ring on today (the Plan tab, 7a). */
+  dayLine?: (key: string, selected: boolean) => ReactNode;
   monthOpen: boolean;
   onSelect: (key: string) => void;
   onToggleMonth: () => void;
 };
 
 /** Week strip at the top of the Calendar tab (3a): month name opens the month picker. */
-export function WeekStrip({ selectedKey, todayKey, eventDays, monthOpen, onSelect, onToggleMonth }: WeekStripProps) {
+export function WeekStrip({
+  selectedKey,
+  todayKey,
+  eventDays,
+  dayLine,
+  monthOpen,
+  onSelect,
+  onToggleMonth,
+}: WeekStripProps) {
   const days = weekDays(selectedKey);
   return (
     <div className="relative z-1 mx-3 flex shrink-0 flex-col gap-1.5 rounded-lg border border-white/85 bg-white/55 px-2 pt-2 pb-2.5 backdrop-blur-glass">
@@ -78,17 +88,25 @@ export function WeekStrip({ selectedKey, todayKey, eventDays, monthOpen, onSelec
               onClick={() => {
                 onSelect(key);
               }}
-              className={`flex h-8.5 flex-col items-center justify-center gap-0.5 rounded-sm text-ui ${
+              className={`flex flex-col items-center justify-center gap-0.5 rounded-sm text-ui ${
+                dayLine ? "h-10.5" : "h-8.5"
+              } ${
                 selected
                   ? "font-bold text-white bg-accent-gradient-strong"
-                  : `font-medium hover:bg-white/70 ${future ? "text-ink-muted" : "text-ink"}`
+                  : `font-medium hover:bg-white/70 ${dayLine ? "text-ink" : future ? "text-ink-muted" : "text-ink"} ${
+                      dayLine && key === todayKey ? "shadow-[inset_0_0_0_1.5px] shadow-accent-ink/35" : ""
+                    }`
               }`}
             >
               {dayNumber(key)}
-              <span
-                aria-hidden="true"
-                className={`size-1 rounded-full ${eventDays.has(key) ? (selected ? "bg-white" : "bg-type-calendar") : ""}`}
-              />
+              {dayLine ? (
+                dayLine(key, selected)
+              ) : (
+                <span
+                  aria-hidden="true"
+                  className={`size-1 rounded-full ${eventDays.has(key) ? (selected ? "bg-white" : "bg-type-calendar") : ""}`}
+                />
+              )}
             </button>
           );
         })}
@@ -104,6 +122,8 @@ type MonthPickerProps = {
   onClose: () => void;
   /** Where it opens; it must share a parent with the button that toggles it. */
   position?: string;
+  /** Days before this can't be picked (moving a task, 7f). */
+  minKey?: string;
 };
 
 /** Month picker (3b): the selected week is banded, the selected day filled; "Today" jumps back. */
@@ -113,6 +133,7 @@ export function MonthPicker({
   onSelect,
   onClose,
   position = "top-full left-0 mt-1",
+  minKey,
 }: MonthPickerProps) {
   const ref = useRef<HTMLDivElement>(null);
   const selected = fromLocalDayKey(selectedKey);
@@ -182,6 +203,7 @@ export function MonthPicker({
             const inMonth = fromLocalDayKey(key).getMonth() === month.month;
             const isSelected = key === selectedKey;
             const inSelectedWeek = weekStartKey(key) === selectedWeek;
+            const tooEarly = minKey !== undefined && key < minKey;
             let band = "";
             if (inSelectedWeek && !isSelected) {
               band = `bg-accent/12 ${index === 0 ? "rounded-l-[8px]" : ""} ${index === 6 ? "rounded-r-[8px]" : ""}`;
@@ -192,13 +214,16 @@ export function MonthPicker({
                 type="button"
                 aria-pressed={isSelected}
                 aria-current={key === todayKey ? "date" : undefined}
+                disabled={tooEarly}
                 onClick={() => {
                   onSelect(key);
                 }}
                 className={`size-8 ${band} ${
                   isSelected
                     ? "rounded-[8px] font-bold text-white bg-accent-gradient-strong"
-                    : `rounded-[8px] hover:bg-accent/20 ${inMonth ? "text-ink" : "text-ink-disabled"}`
+                    : `rounded-[8px] hover:bg-accent/20 disabled:cursor-default disabled:bg-transparent ${
+                        inMonth && !tooEarly ? "text-ink" : "text-ink-disabled"
+                      }`
                 }`}
               >
                 {dayNumber(key)}

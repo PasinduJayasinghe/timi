@@ -5,12 +5,22 @@ import { createClient, createProject, listClients, listProjects } from "../../da
 import type { TaskPatch } from "../../data/tasks";
 import type { Task } from "../../data/types";
 import type { NamePatch } from "../../hooks/useTodayTasks";
+import { addDays, formatShortDate, fromLocalDayKey } from "../../lib/date";
 import { formatTimeOfDay } from "../../lib/duration";
 import { formatMinutes, parseEstimate } from "../../lib/estimate";
 import { isValidTicketNumber, patchForTypeChange } from "../../lib/taskDisplay";
 import { TASK_TYPES, TYPE_FIELDS, TYPE_STYLES, isTaskType } from "../../lib/taskTypes";
 import { Picker, type PickerOption } from "./pickers/Picker";
+import { DayPicker } from "./pickers/DayPicker";
 import { ReminderPicker } from "./pickers/ReminderPicker";
+
+/** The Day field's text (7f): "Sat 17 Oct · tomorrow". */
+function dayLabel(day: string, todayKey: string): string {
+  const date = formatShortDate(fromLocalDayKey(day));
+  if (day === todayKey) return `${date} · today`;
+  if (day === addDays(todayKey, 1)) return `${date} · tomorrow`;
+  return date;
+}
 
 type TaskDetailsPopoverProps = {
   task: Task;
@@ -21,9 +31,13 @@ type TaskDetailsPopoverProps = {
   onDelete: () => void;
   /** The quick reminder highlighted first (4e "Default reminder"), in minutes. */
   defaultReminderMinutes: number;
+  /** Today's work day, for the Day field (7f). */
+  todayKey: string;
+  /** Lists the task on another day (7f). */
+  onMoveToDay: (day: string) => void;
 };
 
-type OpenPicker = "type" | "client" | "project" | "reminder" | null;
+type OpenPicker = "type" | "client" | "project" | "reminder" | "day" | null;
 
 const NONE_ID = "__none__";
 const GAP = 10;
@@ -107,6 +121,8 @@ export function TaskDetailsPopover({
   onUpdate,
   onDelete,
   defaultReminderMinutes,
+  todayKey,
+  onMoveToDay,
 }: TaskDetailsPopoverProps) {
   const ref = useRef<HTMLDivElement>(null);
   const { style, arrow, arrowLeft } = usePlacement(anchor, ref);
@@ -475,6 +491,40 @@ export function TaskDetailsPopover({
           className="min-h-16 resize-none rounded-control border border-ink-muted/14 bg-app-from/60 px-3 py-2.25 text-ui leading-normal font-normal text-ink focus-visible:outline-offset-1"
         />
       </label>
+
+      {/* Day (7f): move the task to another day */}
+      <div className="relative flex flex-col gap-1.25">
+        <FieldLabel>Day</FieldLabel>
+        <button
+          type="button"
+          aria-haspopup="listbox"
+          aria-expanded={picker === "day"}
+          aria-label={`Day: ${dayLabel(task.listDay, todayKey)}`}
+          onClick={() => {
+            setPicker(picker === "day" ? null : "day");
+          }}
+          className="flex h-9.5 items-center gap-1.5 rounded-cta-sm border border-ink-muted/18 bg-white px-2.5 text-left hover:bg-white/80 focus-visible:outline-offset-1"
+        >
+          <Icon name="calendar_today" size={16} className="text-accent-ink" />
+          <span className="min-w-0 flex-1 truncate text-ui font-semibold">{dayLabel(task.listDay, todayKey)}</span>
+          <Icon name="expand_more" size={17} className="text-ink-muted" />
+        </button>
+        {picker === "day" && (
+          <DayPicker
+            value={task.listDay}
+            todayKey={todayKey}
+            selectedClass={typeStyle.pickerActive}
+            checkClass={typeStyle.ink}
+            onChange={(day) => {
+              setPicker(null);
+              if (day !== task.listDay) onMoveToDay(day);
+            }}
+            onClose={() => {
+              setPicker(null);
+            }}
+          />
+        )}
+      </div>
 
       <div className="grid grid-cols-2 gap-2.5">
         {/* Reminder (2d): a dropdown of quick times, a typed time, or None */}

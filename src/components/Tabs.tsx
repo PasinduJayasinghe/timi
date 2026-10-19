@@ -10,7 +10,7 @@ type TabsProps<T extends string> = {
   selected: T;
   onSelect: (id: T) => void;
   label: string;
-  /** "main" is the 3-column tab list (1a); "compact" is the wide-mode switcher (1d). */
+  /** "main" is the tab list (1a), one equal column per tab; "compact" is the wide-mode switcher (1d). */
   variant?: "main" | "compact";
   className?: string;
 };
@@ -24,7 +24,7 @@ export function panelId(id: string): string {
 }
 
 const LIST_CLASS = {
-  main: "grid flex-1 grid-cols-3 rounded-tablist p-0.75 backdrop-blur-control",
+  main: "grid flex-1 grid-flow-col auto-cols-fr rounded-tablist p-0.75 backdrop-blur-control",
   compact: "flex rounded-control p-0.75",
 } as const;
 

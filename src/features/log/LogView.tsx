@@ -13,7 +13,11 @@ import { SUMMARY_STYLES as SUMMARY } from "../../lib/summaryStyles";
 import { displayTitle, sessionDisplay, whereLabel } from "../../lib/taskDisplay";
 import { styleOf } from "../../lib/taskTypes";
 import { buildTimesheet } from "../../lib/timesheet";
+import { useDayPlan } from "../../hooks/useDayPlan";
+import { GoalsCard } from "../plan/GoalsCard";
 import { LogEmpty } from "./LogEmpty";
+
+const noSave = (): void => undefined;
 
 type LogViewProps = {
   /** "expanded" is 3f; "wide" is 3g. */
@@ -36,6 +40,8 @@ export function LogView({ variant, todayKey, timer }: LogViewProps) {
   const isToday = offset === 0;
 
   const past = useDaySessions(isToday ? null : day);
+  // Read-only here: nothing is written, so a failed save can't happen
+  const plan = useDayPlan(day, noSave);
   const status = isToday ? timer.status : past.status;
   const sessions = isToday ? timer.todaySessions : past.sessions;
   const reload = isToday ? timer.reload : past.reload;
@@ -164,9 +170,13 @@ export function LogView({ variant, todayKey, timer }: LogViewProps) {
     body = <NarrowTable sessions={sessions} now={now} />;
   }
 
+  // The day's goals and note (7e), only if it had any
+  const hasPlan = plan.status === "ready" && (plan.goals.length > 0 || plan.note.trim() !== "");
+
   return (
     <div className={`relative z-1 flex min-h-0 flex-1 flex-col ${wide ? "" : "px-3 pb-3"}`}>
       {picker}
+      {hasPlan && <GoalsCard plan={plan} readOnly className={wide ? "mb-2.5" : "mb-2"} />}
       {body}
       {!wide && hasRows && (
         <div className="flex shrink-0 flex-col gap-1.5 pt-2.5">

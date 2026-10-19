@@ -4,6 +4,7 @@ import { LiveDuration } from "../../components/LiveDuration";
 import type { Task } from "../../data/types";
 import { formatClock, formatDuration, formatTimeOfDay } from "../../lib/duration";
 import { formatMinutes } from "../../lib/estimate";
+import { carriedLabel } from "../../lib/plan";
 import { displayMeta, displayTitle } from "../../lib/taskDisplay";
 import { styleOf } from "../../lib/taskTypes";
 
@@ -25,6 +26,8 @@ type TaskRowProps = {
   onDragStart: () => void;
   onDragOver: () => void;
   onDragEnd: () => void;
+  /** False on another day's plan (7a): only today's tasks can be timed. */
+  startable?: boolean;
 };
 
 /** Task row: 1a/1c in the expanded window, 1d compact row in wide mode. */
@@ -41,6 +44,7 @@ export function TaskRow({
   onDragStart,
   onDragOver,
   onDragEnd,
+  startable = true,
 }: TaskRowProps) {
   const [popping, setPopping] = useState(false);
   const style = styleOf(task);
@@ -138,7 +142,7 @@ export function TaskRow({
   const carriedTag = carried && (
     <span className="flex shrink-0 items-center gap-0.5 rounded-xs bg-ink-muted/10 py-px pr-1.5 pl-1 font-medium whitespace-nowrap text-type-other-ink">
       <Icon name="history" size={13} />
-      from yesterday
+      {task.carriedFrom && carriedLabel(task.carriedFrom, task.listDay)}
     </span>
   );
 
@@ -195,9 +199,10 @@ export function TaskRow({
       <button
         type="button"
         onClick={onPlay}
+        disabled={!startable}
         aria-label="Start timer"
-        title="Start timer"
-        className={`grid shrink-0 place-items-center rounded-full border-[1.5px] border-ink-muted/30 bg-transparent p-0 text-ink-muted hover:border-accent-ink hover:bg-white/70 hover:text-accent-ink ${buttonSize}`}
+        title={startable ? "Start timer" : "Only today’s tasks can be timed"}
+        className={`grid shrink-0 place-items-center rounded-full border-[1.5px] border-ink-muted/30 bg-transparent p-0 text-ink-muted enabled:hover:border-accent-ink enabled:hover:bg-white/70 enabled:hover:text-accent-ink disabled:cursor-default disabled:opacity-50 ${buttonSize}`}
       >
         <Icon name="play_arrow" size={buttonIcon} fill />
       </button>

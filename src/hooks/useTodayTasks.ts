@@ -46,10 +46,14 @@ export type TodayTasks = {
   /** Moves a task one step up (-1) or down (+1) within its group. */
   moveBy: (id: string, delta: -1 | 1) => void;
   update: (id: string, patch: TaskPatch, names?: NamePatch) => void;
+  /** Lists a task on another day (7f). Returns it, for Undo with `undoMove`. */
+  moveToDay: (id: string, day: string) => Task | undefined;
+  /** Puts a moved task back on its old day, with its old tag. */
+  undoMove: (task: Task) => void;
 };
 
 /**
- * Today's task list: the tasks listed on `day`. Stays loading until `ready` (the shift is known,
+ * A day's task list (Today, and the Plan tab for other days): the tasks listed on `day`. Stays loading until `ready` (the shift is known,
  * so `day` is final). Unfinished tasks from earlier days come over when a shift starts (useShift).
  * Changes apply optimistically; a failed write reloads from the database and calls `onSaveError`.
  */
@@ -204,9 +208,32 @@ export function useTodayTasks(day: string, ready: boolean, onSaveError: () => vo
     [commit],
   );
 
+  const moveToDay = useCallback(
+    (id: string, to: string): Task | undefined => {
+      const task = tasksRef.current.find((t) => t.id === id);
+      if (!task || to === task.listDay) return undefined;
+      commit(
+        (prev) => prev.filter((t) => t.id !== id),
+        () => taskStore.moveToDay(id, to),
+      );
+      return task;
+    },
+    [commit],
+  );
+
+  const undoMove = useCallback(
+    (task: Task): void => {
+      commit(
+        (prev) => (task.listDay === day && !prev.some((t) => t.id === task.id) ? [...prev, task] : prev),
+        () => taskStore.placeOnDay(task.id, task.listDay, task.carriedFrom),
+      );
+    },
+    [commit, day],
+  );
+
   const reload = useCallback((): void => {
     void load(true);
   }, [load]);
 
-  return { status, tasks, reload, add, toggleDone, remove, restore, moveTo, moveBy, update };
+  return { status, tasks, reload, add, toggleDone, remove, restore, moveTo, moveBy, update, moveToDay, undoMove };
 }

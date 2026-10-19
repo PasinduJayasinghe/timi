@@ -7,8 +7,10 @@ type QuickAddRowProps = {
   autoFocus?: boolean;
   /** Called with the trimmed title when Enter is pressed. */
   onAdd: (title: string) => void;
-  /** Opens the Start task sheet (2a). */
-  onStartTask: () => void;
+  /** Opens the Start task sheet (2a). Leave out for no Start task button (the Plan tab, 7a). */
+  onStartTask?: () => void;
+  /** "Add a task, press Enter" unless set, e.g. "Add to Sat 17 Oct, press Enter". */
+  placeholder?: string;
   /** Focuses the field each time it changes (global quick add). */
   focusSignal?: number;
 };
@@ -35,6 +37,7 @@ export function QuickAddRow({
   onAdd,
   onStartTask,
   focusSignal = 0,
+  placeholder = "Add a task, press Enter",
 }: QuickAddRowProps) {
   const [draft, setDraft] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -64,19 +67,21 @@ export function QuickAddRow({
             setDraft("");
           }}
           autoFocus={autoFocus}
-          placeholder="Add a task, press Enter"
+          placeholder={placeholder}
           aria-label="Quick add task"
           className={`min-w-0 flex-1 border-none bg-transparent font-normal text-ink outline-none placeholder:text-ink-placeholder focus-visible:outline-none ${INPUT_TEXT[variant]}`}
         />
       </label>
-      <button
-        type="button"
-        onClick={onStartTask}
-        className={`flex items-center gap-1.5 pr-3.5 pl-2.5 font-semibold text-white bg-accent-gradient-strong hover:-translate-y-px ${BUTTON_CLASS[variant]}`}
-      >
-        <Icon name="play_arrow" size={20} fill />
-        Start task
-      </button>
+      {onStartTask && (
+        <button
+          type="button"
+          onClick={onStartTask}
+          className={`flex items-center gap-1.5 pr-3.5 pl-2.5 font-semibold text-white bg-accent-gradient-strong hover:-translate-y-px ${BUTTON_CLASS[variant]}`}
+        >
+          <Icon name="play_arrow" size={20} fill />
+          Start task
+        </button>
+      )}
     </div>
   );
 }

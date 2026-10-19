@@ -159,3 +159,27 @@ export async function countDone(day: string): Promise<number> {
   );
   return rows[0]?.count ?? 0;
 }
+
+export type DayTotals = { tasks: number; estimateMinutes: number };
+
+/** Tasks and estimated minutes per day for days in [fromDay, toDay) (the Plan week strip, 7a). */
+export async function weekSummary(fromDay: string, toDay: string): Promise<Map<string, DayTotals>> {
+  const db = await getDb();
+  const rows = await db.select<Array<{ list_day: string; tasks: number; minutes: number | null }>>(
+    `SELECT list_day, COUNT(*) AS tasks, SUM(estimate_minutes) AS minutes FROM tasks
+     WHERE deleted_at IS NULL AND list_day >= $1 AND list_day < $2 GROUP BY list_day`,
+    [fromDay, toDay],
+  );
+  return new Map(rows.map((row) => [row.list_day, { tasks: row.tasks, estimateMinutes: row.minutes ?? 0 }]));
+}
+
+/** Puts a task back on a day with its old tag (Undo after moving it). */
+export async function placeOnDay(id: string, listDay: string, carriedFrom: string | null): Promise<void> {
+  const db = await getDb();
+  await db.execute("UPDATE tasks SET list_day = $1, carried_from = $2, updated_at = $3 WHERE id = $4", [
+    listDay,
+    carriedFrom,
+    nowIso(),
+    id,
+  ]);
+}

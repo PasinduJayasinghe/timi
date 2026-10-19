@@ -28,7 +28,8 @@ import { BetweenShifts, EndShiftButton, LeftoversChip, ShiftNotice, ShiftStrip }
 import { StartTaskSheet } from "./features/start/StartTaskSheet";
 import { TimelinePanel } from "./features/timeline/TimelinePanel";
 import { TodayView } from "./features/today/TodayView";
-import { useTaskDetails } from "./features/today/useTaskDetails";
+import { useTaskDetails, workdaySource } from "./features/today/useTaskDetails";
+import { PlanView } from "./features/plan/PlanView";
 import { WideShell, type WideView } from "./features/wide/WideShell";
 import { DEFAULT_SETTINGS } from "./data/settings";
 import { useCalendar, useCalendarEvents } from "./hooks/useCalendar";
@@ -47,10 +48,11 @@ import { hideToTray, resizeForMode, setPinned, type WindowMode } from "./lib/win
 /** Window modes remembered between runs; the mini bar always reopens as the last of these. */
 const OPEN_MODES = ["expanded", "wide"] as const;
 
-type Tab = "today" | "calendar" | "log";
+type Tab = "today" | "plan" | "calendar" | "log";
 
 const TABS: readonly TabItem<Tab>[] = [
   { id: "today", label: "Today" },
+  { id: "plan", label: "Plan" },
   { id: "calendar", label: "Calendar" },
   { id: "log", label: "Log" },
 ];
@@ -62,6 +64,7 @@ const WIDE_TABS: readonly TabItem<WideView>[] = [
 
 const TAB_BLOBS: Record<Tab, BlobLayout> = {
   today: BLOBS_TODAY,
+  plan: BLOBS_TODAY,
   calendar: BLOBS_CALENDAR,
   log: BLOBS_LOG,
 };
@@ -117,7 +120,7 @@ function Shell() {
   }, [timerRunning, recheck]);
   const cloud = useCloudSync(work.timer, syncOfflineRef);
   const { running, todaySessions, trackedByTask } = work.timer;
-  const details = useTaskDetails(work, settings.defaultReminderMinutes);
+  const details = useTaskDetails(workdaySource(work), settings.defaultReminderMinutes, todayKey);
   const calendar = useCalendar();
   const todayRange = workDayRange(todayKey);
   const todayEvents = useCalendarEvents(calendar, Date.parse(todayRange.start), Date.parse(todayRange.end)).events;
@@ -515,6 +518,17 @@ function Shell() {
               />
             )}
           </>
+        )}
+        {tab === "plan" && (
+          <PlanView
+            work={work}
+            todayKey={todayKey}
+            ready={shift.ready}
+            calendar={calendar}
+            todayDetails={details}
+            defaultReminderMinutes={settings.defaultReminderMinutes}
+            onSaveError={onSaveError}
+          />
         )}
         {tab === "calendar" && <CalendarView calendar={calendar} todayKey={todayKey} timer={work.timer} />}
         {tab === "log" && <LogView variant="expanded" todayKey={todayKey} timer={work.timer} />}

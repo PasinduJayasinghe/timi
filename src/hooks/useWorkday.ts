@@ -41,11 +41,19 @@ export function useWorkday(
     },
     [addToList, onActivity],
   );
-  const list: TodayTasks = { ...taskList, add: addTask };
-  const taskIds = useMemo(() => list.tasks.map((task) => task.id), [list.tasks]);
+  const taskIds = useMemo(() => taskList.tasks.map((task) => task.id), [taskList.tasks]);
   const timer = useTimer(day, taskIds, onSaveError, showToast, syncOfflineRef);
-  const { tasks, toggleDone: toggleListDone, remove: removeFromList } = taskList;
+  const { tasks, toggleDone: toggleListDone, remove: removeFromList, moveToDay: moveInList } = taskList;
   const { running, start: startTimer, pause } = timer;
+  // Moving a running task to another day stops its timer first, as delete does (7f)
+  const moveToDay = useCallback(
+    (id: string, to: string): Task | undefined => {
+      if (running?.taskId === id) pause();
+      return moveInList(id, to);
+    },
+    [moveInList, pause, running],
+  );
+  const list: TodayTasks = { ...taskList, add: addTask, moveToDay };
   const start = useCallback(
     (task: TimerTask): void => {
       onActivity();

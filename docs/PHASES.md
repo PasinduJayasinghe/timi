@@ -98,3 +98,23 @@ Design: `docs/design/drafts/Timi Planner (draft).html`, screens 7d and 7i–7l (
 - [ ] Settings: "Plan my day when a shift starts" replaces "Carry over unfinished tasks"
 
 Done when: a whole shift (start, plan, time, end, start the next) works in the installed build, and earlier days stay in the Log.
+
+## Phase 8: Plan tab
+
+Goal: plan future days, with goals and a note for each day.
+
+Design: `docs/design/drafts/Timi Planner (draft).html`, screens 7a, 7e, 7f, 7g and 7h (approved draft).
+
+### 8a: Plan tab
+
+- [ ] Plan tab (Today · Plan · Calendar · Log): week strip with tasks · hours per day, the day's load bar, goals and note, quick add and task rows for any day
+- [ ] Past days as a read-only summary; empty, loading and error states
+- [ ] Day field in task details: move a task to another day, with Undo
+- [ ] Carried and moved tasks name the day they came from ("from Fri")
+- [ ] The Log shows the day's goals and note
+
+### 8b: Wide-mode Plan
+
+- [ ] The selected day next to the coming days, with dragging a task onto a day to move it
+
+Done when: tomorrow can be planned the night before, and those tasks are on Today when the next shift starts.

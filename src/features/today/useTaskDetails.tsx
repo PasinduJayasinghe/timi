@@ -1,7 +1,10 @@
 import { useCallback, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useToast } from "../../components/Toast";
+import type { Task } from "../../data/types";
+import type { TodayTasks } from "../../hooks/useTodayTasks";
 import type { Workday } from "../../hooks/useWorkday";
+import { formatShortDate, fromLocalDayKey } from "../../lib/date";
 import { TaskDetailsPopover } from "./TaskDetailsPopover";
 
 type OpenDetails = {
@@ -21,16 +24,27 @@ export type TaskDetails = {
   popover: ReactNode;
 };
 
+/** The list the popover edits: Today's (with the timer) or another day's on the Plan tab. */
+export type TaskSource = Pick<TodayTasks, "tasks" | "update" | "restore" | "moveToDay" | "undoMove"> & {
+  /** Deletes a task and returns it, for Undo. */
+  remove: (id: string) => Task | undefined;
+};
+
+/** Today's list as a task source: deleting a running task stops its timer first. */
+export function workdaySource(work: Workday): TaskSource {
+  return { ...work.list, remove: work.remove };
+}
+
 /**
  * The task details popover (2d), shared by task rows and timeline bars. It is portalled to the
  * body because the wide-mode panes use backdrop-filter, which would trap a fixed-position popover.
  */
-export function useTaskDetails(work: Workday, defaultReminderMinutes: number): TaskDetails {
+export function useTaskDetails(source: TaskSource, defaultReminderMinutes: number, todayKey: string): TaskDetails {
   const toast = useToast();
   const [details, setDetails] = useState<OpenDetails | null>(null);
   const detailsRef = useRef(details);
   detailsRef.current = details;
-  const task = details ? work.list.tasks.find((t) => t.id === details.taskId) : undefined;
+  const task = details ? source.tasks.find((t) => t.id === details.taskId) : undefined;
 
   const close = useCallback((): void => {
     const opener = detailsRef.current?.opener;
@@ -44,7 +58,7 @@ export function useTaskDetails(work: Workday, defaultReminderMinutes: number): T
 
   const remove = (id: string): void => {
     setDetails(null);
-    const removed = work.remove(id);
+    const removed = source.remove(id);
     if (!removed) return;
     toast({
       message: "Task deleted",
@@ -53,7 +67,25 @@ export function useTaskDetails(work: Workday, defaultReminderMinutes: number): T
       action: {
         label: "Undo",
         onClick: () => {
-          work.list.restore(removed);
+          source.restore(removed);
+        },
+      },
+    });
+  };
+
+  // Moving a task to another day takes it off this list (7f), so the popover closes
+  const moveToDay = (id: string, day: string): void => {
+    const moved = source.moveToDay(id, day);
+    if (!moved) return;
+    close();
+    toast({
+      message: `Moved to ${formatShortDate(fromLocalDayKey(day))}`,
+      tone: "neutral",
+      icon: "calendar_today",
+      action: {
+        label: "Undo",
+        onClick: () => {
+          source.undoMove(moved);
         },
       },
     });
@@ -67,9 +99,13 @@ export function useTaskDetails(work: Workday, defaultReminderMinutes: number): T
             task={task}
             anchor={details.anchor}
             defaultReminderMinutes={defaultReminderMinutes}
+            todayKey={todayKey}
             onClose={close}
             onUpdate={(patch, names) => {
-              work.list.update(task.id, patch, names);
+              source.update(task.id, patch, names);
+            }}
+            onMoveToDay={(day) => {
+              moveToDay(task.id, day);
             }}
             onDelete={() => {
               remove(task.id);
