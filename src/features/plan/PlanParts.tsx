@@ -39,10 +39,17 @@ type PastDaySummaryProps = {
   planned: number | null;
   doneCount: number | null;
   trackedSeconds: number | null;
+  className?: string;
 };
 
 /** A past day on the Plan tab (7h): a read-only summary; the Log has the detail. */
-export function PastDaySummary({ dayKey, planned, doneCount, trackedSeconds }: PastDaySummaryProps) {
+export function PastDaySummary({
+  dayKey,
+  planned,
+  doneCount,
+  trackedSeconds,
+  className = "mx-3",
+}: PastDaySummaryProps) {
   const title = new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "long" }).format(
     fromLocalDayKey(dayKey),
   );
@@ -54,7 +61,7 @@ export function PastDaySummary({ dayKey, planned, doneCount, trackedSeconds }: P
   return (
     <section
       aria-label={`${formatShortDate(fromLocalDayKey(dayKey))} summary`}
-      className="relative z-1 mx-3 flex shrink-0 flex-col gap-2 rounded-lg border border-white/85 bg-white/55 px-3 py-2.5 backdrop-blur-glass"
+      className={`relative z-1 flex shrink-0 flex-col gap-2 rounded-lg border border-white/85 bg-white/55 px-3 py-2.5 backdrop-blur-glass ${className}`}
     >
       <div className="flex items-center gap-1.5">
         <Icon name="history" size={16} className="text-ink-muted" />
@@ -79,12 +86,14 @@ export function PastDaySummary({ dayKey, planned, doneCount, trackedSeconds }: P
 }
 
 /** An empty future day (7h). */
-export function PlanEmpty({ dayKey }: { dayKey: string }) {
+export function PlanEmpty({ dayKey, className = "mx-3 mt-2.5" }: { dayKey: string; className?: string }) {
   const name = new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "long" }).format(
     fromLocalDayKey(dayKey),
   );
   return (
-    <div className="relative z-1 mx-3 mt-2.5 flex flex-col gap-2 rounded-lg border border-white/85 bg-white/55 px-4 py-3.5">
+    <div
+      className={`relative z-1 flex flex-col gap-2 rounded-lg border border-white/85 bg-white/55 px-4 py-3.5 ${className}`}
+    >
       <span className="text-heading">Nothing planned yet.</span>
       <span className="text-ui leading-[1.55] text-ink-muted">Add tasks for {name} above.</span>
     </div>

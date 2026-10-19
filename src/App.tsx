@@ -59,6 +59,7 @@ const TABS: readonly TabItem<Tab>[] = [
 
 const WIDE_TABS: readonly TabItem<WideView>[] = [
   { id: "today-calendar", label: "Today + Calendar" },
+  { id: "plan", label: "Plan" },
   { id: "log", label: "Log" },
 ];
 
@@ -242,7 +243,9 @@ function Shell() {
   }
 
   const wide = mode === "wide";
-  const wideView: WideView = tab === "log" ? "log" : "today-calendar";
+  let wideView: WideView = "today-calendar";
+  if (tab === "log") wideView = "log";
+  else if (tab === "plan") wideView = "plan";
 
   if (settingsOpen) {
     return (
@@ -409,8 +412,8 @@ function Shell() {
             label="Views"
             variant="compact"
             onSelect={(view) => {
-              if (view === "log") setTab("log");
-              else if (tab === "log") setTab("today");
+              if (view === "log" || view === "plan") setTab(view);
+              else if (tab === "log" || tab === "plan") setTab("today");
             }}
           />
         ) : undefined
@@ -438,9 +441,23 @@ function Shell() {
           focusQuickAdd={quickAddFocus}
           nextMeeting={nextMeeting}
           syncChip={<SyncChip sync={cloud} />}
+          plan={
+            <PlanView
+              variant="wide"
+              work={work}
+              todayKey={todayKey}
+              ready={shift.ready}
+              calendar={calendar}
+              todayDetails={details}
+              defaultReminderMinutes={settings.defaultReminderMinutes}
+              onSaveError={onSaveError}
+            />
+          }
         />
         {/* Above the footer, and above the timeline strip in Today + Calendar (drafted) */}
-        <ToastViewport bottomClass={wideView === "log" ? "bottom-12" : "bottom-51"} />
+        <ToastViewport
+          bottomClass={wideView === "log" ? "bottom-12" : wideView === "plan" ? "bottom-4" : "bottom-51"}
+        />
         {details.popover}
       </WindowFrame>
     );
@@ -521,6 +538,7 @@ function Shell() {
         )}
         {tab === "plan" && (
           <PlanView
+            variant="expanded"
             work={work}
             todayKey={todayKey}
             ready={shift.ready}

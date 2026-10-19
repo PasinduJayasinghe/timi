@@ -183,3 +183,13 @@ export async function placeOnDay(id: string, listDay: string, carriedFrom: strin
     id,
   ]);
 }
+
+/** Tasks listed on the days in [fromDay, toDay), by day then position (wide Plan week, export). */
+export async function listForDayRange(fromDay: string, toDay: string): Promise<Task[]> {
+  const db = await getDb();
+  const rows = await db.select<TaskRow[]>(
+    `${SELECT_TASKS} WHERE t.list_day >= $1 AND t.list_day < $2 AND t.deleted_at IS NULL ORDER BY t.list_day, t.position`,
+    [fromDay, toDay],
+  );
+  return rows.map(toTask);
+}

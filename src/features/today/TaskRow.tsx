@@ -10,6 +10,9 @@ import { styleOf } from "../../lib/taskTypes";
 
 export type RowVariant = "expanded" | "wide";
 
+/** Drag data type carrying a task id, for drop targets outside the list (wide Plan, 8b). */
+export const TASK_DRAG_TYPE = "application/x-timi-task";
+
 /** This row's timer: the running session's start, or the time tracked so far. */
 export type RowTimer = { kind: "running"; startedAt: string } | { kind: "stopped"; trackedSeconds: number };
 
@@ -75,6 +78,8 @@ export function TaskRow({
     onDragStart: (event: DragEvent<HTMLDivElement>) => {
       event.dataTransfer.effectAllowed = "move";
       event.dataTransfer.setData("text/plain", task.id);
+      // Lets the wide Plan's day columns accept task rows only (8b)
+      event.dataTransfer.setData(TASK_DRAG_TYPE, task.id);
       onDragStart();
     },
     onDragOver: (event: DragEvent<HTMLDivElement>) => {
