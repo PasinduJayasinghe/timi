@@ -30,6 +30,7 @@ import { TimelinePanel } from "./features/timeline/TimelinePanel";
 import { TodayView } from "./features/today/TodayView";
 import { useTaskDetails, workdaySource } from "./features/today/useTaskDetails";
 import { PlanView } from "./features/plan/PlanView";
+import { NotesView } from "./features/notes/NotesView";
 import { WideShell, type WideView } from "./features/wide/WideShell";
 import { DEFAULT_SETTINGS } from "./data/settings";
 import { useCalendar, useCalendarEvents } from "./hooks/useCalendar";
@@ -49,11 +50,12 @@ import { hideToTray, resizeForMode, setPinned, type WindowMode } from "./lib/win
 /** Window modes remembered between runs; the mini bar always reopens as the last of these. */
 const OPEN_MODES = ["expanded", "wide"] as const;
 
-type Tab = "today" | "plan" | "calendar" | "log";
+type Tab = "today" | "plan" | "notes" | "calendar" | "log";
 
 const TABS: readonly TabItem<Tab>[] = [
   { id: "today", label: "Today" },
   { id: "plan", label: "Plan" },
+  { id: "notes", label: "Notes" },
   { id: "calendar", label: "Calendar" },
   { id: "log", label: "Log" },
 ];
@@ -61,12 +63,14 @@ const TABS: readonly TabItem<Tab>[] = [
 const WIDE_TABS: readonly TabItem<WideView>[] = [
   { id: "today-calendar", label: "Today + Calendar" },
   { id: "plan", label: "Plan" },
+  { id: "notes", label: "Notes" },
   { id: "log", label: "Log" },
 ];
 
 const TAB_BLOBS: Record<Tab, BlobLayout> = {
   today: BLOBS_TODAY,
   plan: BLOBS_TODAY,
+  notes: BLOBS_TODAY,
   calendar: BLOBS_CALENDAR,
   log: BLOBS_LOG,
 };
@@ -262,6 +266,7 @@ function Shell() {
   let wideView: WideView = "today-calendar";
   if (tab === "log") wideView = "log";
   else if (tab === "plan") wideView = "plan";
+  else if (tab === "notes") wideView = "notes";
 
   if (settingsOpen) {
     return (
@@ -387,6 +392,19 @@ function Shell() {
     todayOverride = <LoadError title="Couldn’t load your shift" subject="tasks" onRetry={shift.reload} />;
   }
 
+  const notesView = (variant: "expanded" | "wide") => (
+    <NotesView
+      variant={variant}
+      onMakeTask={(title) => {
+        work.list.add({ title, type: "other" });
+      }}
+      onOpenToday={() => {
+        setTab("today");
+      }}
+      onSaveError={onSaveError}
+    />
+  );
+
   const reviewLeftovers = (): void => {
     openShiftSheet("review");
   };
@@ -428,8 +446,11 @@ function Shell() {
             label="Views"
             variant="compact"
             onSelect={(view) => {
-              if (view === "log" || view === "plan") setTab(view);
-              else if (tab === "log" || tab === "plan") setTab("today");
+              if (view === "today-calendar") {
+                if (tab !== "calendar") setTab("today");
+              } else {
+                setTab(view);
+              }
             }}
           />
         ) : undefined
@@ -457,6 +478,7 @@ function Shell() {
           focusQuickAdd={quickAddFocus}
           nextMeeting={nextMeeting}
           syncChip={<SyncChip sync={cloud} />}
+          notes={notesView("wide")}
           plan={
             <PlanView
               variant="wide"
@@ -472,7 +494,7 @@ function Shell() {
         />
         {/* Above the footer, and above the timeline strip in Today + Calendar (drafted) */}
         <ToastViewport
-          bottomClass={wideView === "log" ? "bottom-12" : wideView === "plan" ? "bottom-4" : "bottom-51"}
+          bottomClass={wideView === "log" ? "bottom-12" : wideView === "today-calendar" ? "bottom-51" : "bottom-4"}
         />
         {details.popover}
       </WindowFrame>
@@ -564,6 +586,7 @@ function Shell() {
             onSaveError={onSaveError}
           />
         )}
+        {tab === "notes" && notesView("expanded")}
         {tab === "calendar" && <CalendarView calendar={calendar} todayKey={todayKey} timer={work.timer} />}
         {tab === "log" && <LogView variant="expanded" todayKey={todayKey} timer={work.timer} />}
       </div>

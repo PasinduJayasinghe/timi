@@ -12,11 +12,13 @@ import type { TimelineRowsProps } from "../timeline/TimelineRows";
 import { TodayView } from "../today/TodayView";
 import type { TaskDetails } from "../today/useTaskDetails";
 
-export type WideView = "today-calendar" | "plan" | "log";
+export type WideView = "today-calendar" | "plan" | "notes" | "log";
 
 type WideShellProps = {
   /** The wide Plan (7g), shown for the "plan" view. */
   plan?: ReactNode;
+  /** Notes side by side (8c), shown for the "notes" view. */
+  notes?: ReactNode;
   /** Shown in the Today pane instead of the task list, e.g. between shifts (7k). */
   todayOverride?: ReactNode;
   /** Above the Today pane's content, e.g. the "ended for you" note (7l). */
@@ -58,7 +60,15 @@ export function WideShell({
   todayOverride,
   todayNotice,
   plan,
+  notes,
 }: WideShellProps) {
+  if (view === "notes") {
+    return (
+      <div role="tabpanel" id="panel-notes" aria-labelledby="tab-notes" className="relative z-1 flex min-h-0 flex-1 flex-col">
+        {notes}
+      </div>
+    );
+  }
   if (view === "plan") {
     return (
       <div role="tabpanel" id="panel-plan" aria-labelledby="tab-plan" className="relative z-1 flex min-h-0 flex-1 flex-col">

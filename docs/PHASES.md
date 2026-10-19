@@ -131,3 +131,16 @@ Design: `docs/design/drafts/Timi Planner (draft).html`, screens 7b and 7c (appro
 - [ ] Timeline: dashed planned outlines behind tracked bars, and "tracked / planned" totals
 
 Done when: a planned day shows its blocks on Schedule, and the timeline compares them with the tracked time.
+
+## Phase 10: Quick notes
+
+Goal: a place for short notes that don't belong to a task.
+
+Design: `docs/design/drafts/Timi Notes and Export (draft).html`, screens 8a–8d (approved draft).
+
+- [ ] Notes table (migration 9); notes stay on this PC
+- [ ] Notes tab: search, quick add, pinned first then newest, cards with title, preview and edited time
+- [ ] Open note: saves as you type, Pin, Make a task, Delete with Undo
+- [ ] Wide mode: list and note side by side; empty, no results, loading and error states
+
+Done when: a note written during a shift is there the next day, and Make a task puts it on Today.
