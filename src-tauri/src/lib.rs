@@ -1,5 +1,6 @@
 mod calendar;
 mod cloud;
+mod export;
 mod meetings;
 mod reminders;
 mod tray;
@@ -148,6 +149,8 @@ pub fn run() {
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         // Rust only: opens the Google sign-in page and Meet links (no web view permission)
         .plugin(tauri_plugin_opener::init())
+        // Only used from Rust (export.rs), so the web view gets no dialog permission
+        .plugin(tauri_plugin_dialog::init())
         .manage(reminders::Reminders::default())
         .manage(ShortcutStatus::default())
         .manage(meetings::Meetings::default())
@@ -173,6 +176,8 @@ pub fn run() {
             meetings::alarm_set_prefs,
             cloud::cloud_status,
             cloud::cloud_upload,
+            export::export_xlsx,
+            export::open_export,
         ])
         .setup(|app| {
             let handle = app.handle();

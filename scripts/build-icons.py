@@ -26,9 +26,9 @@ OUT = ROOT / "src/components/icons.ts"
 ICON_NAMES = [
     "add", "add_task", "apartment", "arrow_back", "arrow_forward", "bedtime", "calendar_month", "calendar_today", "category", "check", "check_circle",
     "chevron_left", "chevron_right", "close", "close_fullscreen", "cloud_done", "cloud_off", "confirmation_number",
-    "content_copy", "delete", "drag_indicator", "edit_note", "error", "event", "expand_less", "expand_more", "flag", "folder", "groups",
+    "content_copy", "delete", "download", "drag_indicator", "edit_note", "error", "event", "expand_less", "expand_more", "flag", "folder", "groups",
     "history", "info", "link", "notifications", "notifications_active", "open_in_full", "pause", "play_arrow",
-    "push_pin", "refresh", "replay", "schedule", "search", "settings", "snooze", "swap_horiz", "sync", "sync_problem", "timer",
+    "push_pin", "refresh", "replay", "schedule", "search", "settings", "snooze", "swap_horiz", "sync", "sync_problem", "table_view", "timer",
     "videocam", "view_timeline", "volume_off", "volume_up", "wb_sunny", "width", "work",
 ]
 

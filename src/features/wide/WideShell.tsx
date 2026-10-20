@@ -19,6 +19,8 @@ type WideShellProps = {
   plan?: ReactNode;
   /** Notes side by side (8c), shown for the "notes" view. */
   notes?: ReactNode;
+  /** Opens Export to Excel from the Log (9a). */
+  onExport: (day: string) => void;
   /** Shown in the Today pane instead of the task list, e.g. between shifts (7k). */
   todayOverride?: ReactNode;
   /** Above the Today pane's content, e.g. the "ended for you" note (7l). */
@@ -61,6 +63,7 @@ export function WideShell({
   todayNotice,
   plan,
   notes,
+  onExport,
 }: WideShellProps) {
   if (view === "notes") {
     return (
@@ -84,7 +87,7 @@ export function WideShell({
         aria-labelledby="tab-log"
         className="relative z-1 flex min-h-0 flex-1 flex-col px-3 pb-3"
       >
-        <LogView variant="wide" todayKey={todayKey} timer={work.timer} />
+        <LogView variant="wide" todayKey={todayKey} timer={work.timer} onExport={onExport} />
       </div>
     );
   }

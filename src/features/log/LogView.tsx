@@ -25,6 +25,8 @@ type LogViewProps = {
   todayKey: string;
   /** Today's sessions come from the timer, so the running one stays live. */
   timer: Timer;
+  /** Opens Export to Excel (9a), starting with the day shown. */
+  onExport: (day: string) => void;
 };
 
 type CopyState = { kind: "idle" } | { kind: "copied"; rows: number } | { kind: "failed" };
@@ -32,7 +34,7 @@ type CopyState = { kind: "idle" } | { kind: "copied"; rows: number } | { kind: "
 const COPIED_MS = 2200;
 
 /** Log tab (3f; 3g in wide mode): one day's sessions, totals per type and "Copy for timesheet". */
-export function LogView({ variant, todayKey, timer }: LogViewProps) {
+export function LogView({ variant, todayKey, timer, onExport }: LogViewProps) {
   const wide = variant === "wide";
   // Days back from today, so the Log moves on when a new work day starts
   const [offset, setOffset] = useState(0);
@@ -147,6 +149,18 @@ export function LogView({ variant, todayKey, timer }: LogViewProps) {
       )}
       <span className="flex-1" />
       {!wide && <span className="font-mono text-timer font-semibold">{formatDuration(total)}</span>}
+      {wide && (
+        <button
+          type="button"
+          onClick={() => {
+            onExport(day);
+          }}
+          className="flex h-9.5 items-center gap-1.5 rounded-control border border-white bg-white/80 px-3 text-ui font-semibold text-accent-ink hover:bg-white"
+        >
+          <Icon name="table_view" size={18} />
+          Export to Excel
+        </button>
+      )}
       {wide && hasRows && copyButton}
     </div>
   );
@@ -178,9 +192,23 @@ export function LogView({ variant, todayKey, timer }: LogViewProps) {
       {picker}
       {hasPlan && <GoalsCard plan={plan} readOnly className={wide ? "mb-2.5" : "mb-2"} />}
       {body}
-      {!wide && hasRows && (
+      {!wide && (
         <div className="flex shrink-0 flex-col gap-1.5 pt-2.5">
-          {copyButton}
+          <div className="flex gap-2">
+            {hasRows && <div className="flex flex-1 flex-col">{copyButton}</div>}
+            <button
+              type="button"
+              onClick={() => {
+                onExport(day);
+              }}
+              className={`flex h-11 items-center justify-center gap-1.5 rounded-md border border-white bg-white/75 px-3.5 text-ui font-semibold text-accent-ink shadow-sm hover:bg-white ${
+                hasRows ? "" : "flex-1"
+              }`}
+            >
+              <Icon name="table_view" size={18} />
+              {hasRows ? "Excel" : "Export to Excel"}
+            </button>
+          </div>
           <span aria-live="polite" className="min-h-3.5 text-center text-duration text-ink-muted">
             {copyHint}
           </span>

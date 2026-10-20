@@ -31,6 +31,7 @@ import { TodayView } from "./features/today/TodayView";
 import { useTaskDetails, workdaySource } from "./features/today/useTaskDetails";
 import { PlanView } from "./features/plan/PlanView";
 import { NotesView } from "./features/notes/NotesView";
+import { ExportSheet } from "./features/log/ExportSheet";
 import { WideShell, type WideView } from "./features/wide/WideShell";
 import { DEFAULT_SETTINGS } from "./data/settings";
 import { useCalendar, useCalendarEvents } from "./hooks/useCalendar";
@@ -103,6 +104,8 @@ function Shell() {
   const syncOfflineRef = useRef(false);
   // Adding a task or starting a timer between shifts starts one (7i), except while planning it (7d)
   const [shiftSheet, setShiftSheet] = useState<"end" | "plan" | "review" | null>(null);
+  // Export to Excel (9b): open with the day shown in the Log
+  const [exportDay, setExportDay] = useState<string | null>(null);
   const planningRef = useRef(false);
   planningRef.current = shiftSheet === "plan";
   const ensureShiftRef = useRef(shift.ensure);
@@ -392,6 +395,17 @@ function Shell() {
     todayOverride = <LoadError title="Couldn’t load your shift" subject="tasks" onRetry={shift.reload} />;
   }
 
+  const exportSheet = exportDay !== null && (
+    <ExportSheet
+      variant={wide ? "wide" : "expanded"}
+      dayKey={exportDay}
+      todayKey={todayKey}
+      onClose={() => {
+        setExportDay(null);
+      }}
+    />
+  );
+
   const notesView = (variant: "expanded" | "wide") => (
     <NotesView
       variant={variant}
@@ -479,6 +493,7 @@ function Shell() {
           nextMeeting={nextMeeting}
           syncChip={<SyncChip sync={cloud} />}
           notes={notesView("wide")}
+          onExport={setExportDay}
           plan={
             <PlanView
               variant="wide"
@@ -496,6 +511,7 @@ function Shell() {
         <ToastViewport
           bottomClass={wideView === "log" ? "bottom-12" : wideView === "today-calendar" ? "bottom-51" : "bottom-4"}
         />
+        {exportSheet}
         {details.popover}
       </WindowFrame>
     );
@@ -588,12 +604,13 @@ function Shell() {
         )}
         {tab === "notes" && notesView("expanded")}
         {tab === "calendar" && <CalendarView calendar={calendar} todayKey={todayKey} timer={work.timer} />}
-        {tab === "log" && <LogView variant="expanded" todayKey={todayKey} timer={work.timer} />}
+        {tab === "log" && <LogView variant="expanded" todayKey={todayKey} timer={work.timer} onExport={setExportDay} />}
       </div>
       {/* 1a script: 236px from the bottom with the timeline open, 64px with it collapsed */}
       <ToastViewport bottomClass={tab !== "today" ? "bottom-4" : timelineOpen ? "bottom-59" : "bottom-16"} />
       {sheet}
       {shiftSheetNode}
+      {exportSheet}
       {details.popover}
     </WindowFrame>
   );

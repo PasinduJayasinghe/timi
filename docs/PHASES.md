@@ -144,3 +144,16 @@ Design: `docs/design/drafts/Timi Notes and Export (draft).html`, screens 8a–8d
 - [ ] Wide mode: list and note side by side; empty, no results, loading and error states
 
 Done when: a note written during a shift is there the next day, and Make a task puts it on Today.
+
+## Phase 11: Export to Excel
+
+Goal: hand in tasks and time as an Excel workbook.
+
+Design: `docs/design/drafts/Timi Notes and Export (draft).html`, screens 9a–9d (approved draft).
+
+- [ ] Excel button in the Log (Export to Excel in the wide Log)
+- [ ] Export sheet: Today, This week, Last week or Custom, with a live summary
+- [ ] Windows Save As dialog (Rust, no web view permission); Tasks and Sessions sheets with totals, real dates and h:mm durations
+- [ ] Exported toast with Open file; an error toast when the file can't be saved
+
+Done when: a week's export opens in Excel with totals that match the Log.
