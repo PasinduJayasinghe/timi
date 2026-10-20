@@ -152,6 +152,7 @@ pub fn run() {
         // Only used from Rust (export.rs), so the web view gets no dialog permission
         .plugin(tauri_plugin_dialog::init())
         .manage(reminders::Reminders::default())
+        .manage(export::Exports::default())
         .manage(ShortcutStatus::default())
         .manage(meetings::Meetings::default())
         .manage(cloud::Cloud::default())
@@ -203,11 +204,11 @@ pub fn run() {
         // Closing the main window (including Alt+F4) hides Timi to the tray; Quit is in the tray
         // menu. Other windows, such as the meeting alarm, close normally.
         .on_window_event(|window, event| {
-            if let WindowEvent::CloseRequested { api, .. } = event {
-                if window.label() == "main" {
-                    api.prevent_close();
-                    let _ = window.hide();
-                }
+            if let WindowEvent::CloseRequested { api, .. } = event
+                && window.label() == "main"
+            {
+                api.prevent_close();
+                let _ = window.hide();
             }
         })
         .run(tauri::generate_context!())

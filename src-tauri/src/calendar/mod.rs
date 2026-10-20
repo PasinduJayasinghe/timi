@@ -124,10 +124,10 @@ impl Calendar {
             if inner.cache.account.is_none() {
                 return Err(IdTokenError::SignedOut);
             }
-            if let Some((token, expires)) = &inner.id_token {
-                if *expires > now_ms() + 60_000 {
-                    return Ok(token.clone());
-                }
+            if let Some((token, expires)) = &inner.id_token
+                && *expires > now_ms() + 60_000
+            {
+                return Ok(token.clone());
             }
         }
         self.access_token(true).await.map_err(|problem| match problem {
@@ -164,12 +164,11 @@ impl Calendar {
 
     /// A valid access token, refreshing it when it has (nearly) expired.
     async fn access_token(&self, force_refresh: bool) -> Result<String, SyncProblem> {
-        if !force_refresh {
-            if let Some((token, expires)) = &self.inner.lock().await.access {
-                if *expires > now_ms() + 60_000 {
-                    return Ok(token.clone());
-                }
-            }
+        if !force_refresh
+            && let Some((token, expires)) = &self.inner.lock().await.access
+            && *expires > now_ms() + 60_000
+        {
+            return Ok(token.clone());
         }
         let config = oauth::client_config().ok_or(SyncProblem::Auth)?;
         let refresh_token = stored_refresh_token().ok_or(SyncProblem::Auth)?;
@@ -400,16 +399,17 @@ pub async fn calendar_events(
         let covered = inner.cache.window.is_some_and(|(from, to)| from <= start_ms && end_ms <= to);
         (inner.cache.account.is_some(), covered, inner.cache.calendars.clone())
     };
-    if connected && !covered {
-        if let Ok(fetched) = state.fetch_events(&calendars, start_ms, end_ms).await {
-            let mut inner = state.inner.lock().await;
-            // Replace what the cache had for this range with what Google has now
-            inner.cache.events.retain(|e| !(e.end_ms > start_ms && e.start_ms < end_ms));
-            inner.cache.events.extend(fetched);
-            inner.cache.events.sort_by(|a, b| a.start_ms.cmp(&b.start_ms).then_with(|| a.id.cmp(&b.id)));
-            inner.cache.events.dedup_by(|a, b| a.id == b.id);
-            store::save(&app, &inner.cache);
-        }
+    if connected
+        && !covered
+        && let Ok(fetched) = state.fetch_events(&calendars, start_ms, end_ms).await
+    {
+        let mut inner = state.inner.lock().await;
+        // Replace what the cache had for this range with what Google has now
+        inner.cache.events.retain(|e| !(e.end_ms > start_ms && e.start_ms < end_ms));
+        inner.cache.events.extend(fetched);
+        inner.cache.events.sort_by(|a, b| a.start_ms.cmp(&b.start_ms).then_with(|| a.id.cmp(&b.id)));
+        inner.cache.events.dedup_by(|a, b| a.id == b.id);
+        store::save(&app, &inner.cache);
     }
     Ok(state.events_between(start_ms, end_ms).await)
 }

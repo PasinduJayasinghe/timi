@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { LoadError } from "../../components/LoadError";
 import { orderTasks } from "../../hooks/useTodayTasks";
 import type { Workday } from "../../hooks/useWorkday";
+import { useDelayedFlag } from "../../hooks/useDelayedFlag";
 import { useNow } from "../../hooks/useNow";
 import { planHint } from "../../lib/schedule";
 import { TYPE_STYLES } from "../../lib/taskTypes";
@@ -33,26 +34,6 @@ type TodayViewProps = {
   nextMeeting?: { title: string; startMs: number } | null;
 };
 
-/** Loading rows appear only if loading takes longer than this, to avoid a flash. */
-const LOADING_DELAY_MS = 200;
-
-function useDelayedFlag(active: boolean, delay: number): boolean {
-  const [shown, setShown] = useState(false);
-  useEffect(() => {
-    if (!active) {
-      setShown(false);
-      return;
-    }
-    const timeoutId = window.setTimeout(() => {
-      setShown(true);
-    }, delay);
-    return () => {
-      window.clearTimeout(timeoutId);
-    };
-  }, [active, delay]);
-  return shown;
-}
-
 /** Today tab content: quick add, filter chips and the task list with its states. Also a day on the Plan tab. */
 export function TodayView({
   work,
@@ -78,7 +59,7 @@ export function TodayView({
   const byId = useMemo(() => new Map(list.tasks.map((task) => [task.id, task])), [list.tasks]);
   const displayOrder = preview ? preview.flatMap((id) => byId.get(id) ?? []) : ordered;
   const visible = displayOrder.filter((task) => filter === "all" || task.type === filter);
-  const showLoading = useDelayedFlag(list.status === "loading", LOADING_DELAY_MS);
+  const showLoading = useDelayedFlag(list.status === "loading");
   // Plan hints (7c) change as time passes: re-check each minute while any task has a plan
   const hasPlans = list.tasks.some((task) => task.plannedStart !== null && !task.completedAt);
   const now = useNow(hasPlans, 60_000);

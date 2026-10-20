@@ -9,6 +9,7 @@ import { weekStartKey } from "../../lib/calendar";
 import { addDays, formatShortDate, fromLocalDayKey } from "../../lib/date";
 import { formatDuration } from "../../lib/duration";
 import { buildExport, exportFileName, type ExportData } from "../../lib/exportRows";
+import { plural } from "../../lib/text";
 import { MonthPicker } from "../calendar/DatePickers";
 import { SheetActions, ShiftSheet } from "../shift/ShiftSheet";
 
@@ -28,8 +29,6 @@ const RANGES: ReadonlyArray<{ id: Range; label: string }> = [
   { id: "last-week", label: "Last week" },
   { id: "custom", label: "Custom" },
 ];
-
-const plural = (count: number, word: string): string => `${count} ${word}${count === 1 ? "" : "s"}`;
 
 /** Export to Excel (9b): pick a range, see what's in it, then Save As. */
 export function ExportSheet({ variant, dayKey, todayKey, onClose }: ExportSheetProps) {
@@ -217,29 +216,14 @@ export function ExportSheet({ variant, dayKey, todayKey, onClose }: ExportSheetP
             : `Two sheets: Tasks and Sessions${ready ? ` (${plural(data.tasks.length, "row")} and ${plural(data.sessions.length, "row")})` : ""}. Days follow your shifts, like the Log. A running session counts up to now.`}
         </span>
       </div>
-      {empty || !ready ? (
-        <div className="mt-auto grid shrink-0 grid-cols-[1fr_auto] gap-2">
-          <span className="flex h-11 items-center justify-center gap-1.5 rounded-md bg-ink-muted/12 text-body font-semibold text-ink-disabled">
-            <Icon name="download" size={20} />
-            Export…
-          </span>
-          <button
-            type="button"
-            onClick={onClose}
-            className="h-11 rounded-md bg-white/60 px-4 text-ui font-semibold text-ink-muted hover:bg-white hover:text-ink"
-          >
-            Cancel
-          </button>
-        </div>
-      ) : (
-        <SheetActions
-          primary={saving ? "Saving…" : "Export…"}
-          primaryIcon="download"
-          onPrimary={run}
-          secondary="Cancel"
-          onSecondary={onClose}
-        />
-      )}
+      <SheetActions
+        primary={saving ? "Saving…" : "Export…"}
+        primaryIcon="download"
+        onPrimary={run}
+        secondary="Cancel"
+        onSecondary={onClose}
+        disabled={empty || !ready || saving}
+      />
     </ShiftSheet>
   );
 }

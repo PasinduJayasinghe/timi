@@ -112,12 +112,11 @@ fn upload_url(config: &CloudConfig) -> String {
 impl Cloud {
     /// A Supabase access token, signing in again with a fresh Google ID token when needed.
     async fn session_token(&self, app: &AppHandle, config: &CloudConfig, force: bool) -> Result<String, CloudError> {
-        if !force {
-            if let Some((token, expires)) = &*self.session.lock().await {
-                if *expires > now_ms() + 60_000 {
-                    return Ok(token.clone());
-                }
-            }
+        if !force
+            && let Some((token, expires)) = &*self.session.lock().await
+            && *expires > now_ms() + 60_000
+        {
+            return Ok(token.clone());
         }
         let id_token = app.state::<Calendar>().google_id_token().await.map_err(|error| match error {
             IdTokenError::SignedOut => CloudError::SignedOut,

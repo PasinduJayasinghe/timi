@@ -1,5 +1,6 @@
 import { useEffect, useState, type KeyboardEvent } from "react";
 import { Icon } from "../../components/Icon";
+import { TypeTile } from "../../components/TypeTile";
 import type { ToastMessage } from "../../components/Toast";
 import type { CalendarEvent } from "../../data/calendar";
 import { queueWrite } from "../../data/db";
@@ -11,7 +12,7 @@ import { formatTimeOfDay } from "../../lib/duration";
 import { formatMinutes, parseEstimate } from "../../lib/estimate";
 import { minutesLeftForTasks } from "../../lib/shift";
 import { displayMeta, displayTitle } from "../../lib/taskDisplay";
-import { styleOf } from "../../lib/taskTypes";
+import { plural } from "../../lib/text";
 import { MonthPicker } from "../calendar/DatePickers";
 import { SheetActions, ShiftSheet } from "./ShiftSheet";
 
@@ -34,8 +35,6 @@ type PlanMyDaySheetProps = {
   onStart: () => void;
   onClose: () => void;
 };
-
-const plural = (count: number, word: string): string => `${count} ${word}${count === 1 ? "" : "s"}`;
 
 /** Plan my day (7d): review leftovers from the last shift, then plan this one and Start shift. */
 export function PlanMyDaySheet({
@@ -248,7 +247,6 @@ function LeftoverList({ leftovers, todayKey, choiceOf, onChoose, onRetry }: Left
   return (
     <div className="flex shrink-0 flex-col gap-2">
       {leftovers.map((task) => {
-        const style = styleOf(task);
         const choice = choiceOf(task.id);
         const moveDay = choice.kind === "move" ? choice.day : addDays(todayKey, 1);
         const options: Array<{ label: string; choice: Choice }> = [
@@ -259,9 +257,7 @@ function LeftoverList({ leftovers, todayKey, choiceOf, onChoose, onRetry }: Left
         return (
           <div key={task.id} className="flex flex-col gap-1.5 rounded-md border border-white bg-white/65 p-2.5">
             <div className="flex items-center gap-2">
-              <span className={`grid size-6.5 shrink-0 place-items-center rounded-[8px] ${style.tint} ${style.ink}`}>
-                <Icon name={style.icon} size={15} />
-              </span>
+              <TypeTile task={task} size="md" />
               <div className="flex min-w-0 flex-1 flex-col leading-[1.25]">
                 <span className="truncate text-ui-sm font-semibold">{displayTitle(task)}</span>
                 <span className="truncate text-duration text-ink-muted">{displayMeta(task)}</span>
@@ -412,7 +408,6 @@ function YourShift({ todayKey, tasks, events, onAdd, onEstimate }: YourShiftProp
 }
 
 function PlanRow({ task, onEstimate }: { task: Task; onEstimate: (id: string, minutes: number | null) => void }) {
-  const style = styleOf(task);
   const [text, setText] = useState(task.estimateMinutes === null ? "" : formatMinutes(task.estimateMinutes));
   const [invalid, setInvalid] = useState(false);
 
@@ -429,9 +424,7 @@ function PlanRow({ task, onEstimate }: { task: Task; onEstimate: (id: string, mi
 
   return (
     <div className="flex min-h-9 items-center gap-2">
-      <span className={`grid size-6 shrink-0 place-items-center rounded-[7px] ${style.tint} ${style.ink}`}>
-        <Icon name={style.icon} size={14} />
-      </span>
+      <TypeTile task={task} />
       <span className="min-w-0 flex-1 truncate text-ui-sm font-medium">{displayTitle(task)}</span>
       {task.carriedFrom && (
         <span className="flex shrink-0 items-center gap-0.5 rounded-xs bg-ink-muted/10 py-px pr-1.5 pl-1 text-meta font-medium text-type-other-ink">

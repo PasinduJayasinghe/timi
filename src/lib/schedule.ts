@@ -2,9 +2,9 @@ import { addDays, dayStartOf, fromLocalDayKey } from "./date";
 import { WORK_SPAN_MIN, WORK_START_MIN } from "./timeline";
 
 /** Planned blocks snap to this many minutes (7b). */
-export const SNAP_MIN = 15;
+const SNAP_MIN = 15;
 /** The shortest planned block. */
-export const MIN_BLOCK_MIN = 15;
+const MIN_BLOCK_MIN = 15;
 /** A new block's length when the task has no estimate. */
 export const DEFAULT_BLOCK_MIN = 60;
 /** Length choices in the Schedule popover (7b). */

@@ -14,6 +14,18 @@ export function formatTitleDate(date: Date): string {
   return `${part(parts, "weekday")}, ${part(parts, "day")} ${part(parts, "month")}`;
 }
 
+/** A day in full, e.g. "Friday 10 October" (headings and labels). */
+export function formatLongDate(key: string): string {
+  return new Intl.DateTimeFormat(LOCALE, { weekday: "long", day: "numeric", month: "long" }).format(
+    fromLocalDayKey(key),
+  );
+}
+
+/** A day's weekday, e.g. "Friday" (a shift keeps its evening's name after midnight). */
+export function formatWeekday(key: string): string {
+  return new Intl.DateTimeFormat(LOCALE, { weekday: "long" }).format(fromLocalDayKey(key));
+}
+
 /** Log day picker date in local time, e.g. "Fri 10 Oct". */
 export function formatShortDate(date: Date): string {
   const parts = new Intl.DateTimeFormat(LOCALE, {
@@ -28,7 +40,7 @@ export function formatShortDate(date: Date): string {
  * A work day starts at 6 am, so a night shift (7 pm – 4 am) counts as one day: in the Today list,
  * the Log, the timeline, totals and carry-over. Day keys ("YYYY-MM-DD") name the date it starts on.
  */
-export const DAY_START_HOUR = 6;
+const DAY_START_HOUR = 6;
 
 /** Local calendar date as "YYYY-MM-DD". */
 export function toLocalDayKey(date: Date): string {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Session } from "../data/types";
-import { buildTimesheet } from "./timesheet";
+import { buildTimesheet, cell } from "./timesheet";
 
 // Local times (vitest runs in Europe/London)
 const at = (hours: number, minutes: number): string => new Date(2026, 9, 10, hours, minutes).toISOString();
@@ -69,5 +69,18 @@ describe("buildTimesheet", () => {
       0,
     );
     expect(text.split("\n")[1].split("\t")[0]).toBe("A B C");
+  });
+});
+
+describe("cell", () => {
+  it("keeps formula-like text as text when pasted into a spreadsheet", () => {
+    expect(cell("=HYPERLINK(\"http://example.com\")")).toBe("'=HYPERLINK(\"http://example.com\")");
+    expect(cell("+1 call")).toBe("'+1 call");
+    expect(cell("@here sync")).toBe("'@here sync");
+    expect(cell("Daily standup")).toBe("Daily standup");
+  });
+
+  it("turns tabs and line breaks into spaces", () => {
+    expect(cell("a\tb\r\nc")).toBe("a b c");
   });
 });

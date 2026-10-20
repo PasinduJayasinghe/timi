@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
+import { CloseButton } from "../../components/CloseButton";
 import { FieldError } from "../../components/FieldError";
 import { Icon } from "../../components/Icon";
 import { createClient, createProject, listClients, listProjects } from "../../data/catalog";
 import { recentTasks, type RecentTask } from "../../data/sessions";
 import type { Task } from "../../data/types";
+import { useDialogFocus } from "../../hooks/useDialogFocus";
 import type { TaskDraft } from "../../hooks/useTodayTasks";
 import { relativeDayLabel, workDayKey } from "../../lib/date";
 import { parseEstimate } from "../../lib/estimate";
@@ -98,14 +100,8 @@ export function StartTaskSheet({ variant, todayKey, runningTaskId, onStart, onRe
 
   const style = TYPE_STYLES[type];
 
-  // Focus the first field on open; give focus back to the button that opened the sheet on close
-  useEffect(() => {
-    const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    sheetRef.current?.querySelector<HTMLElement>("[data-autofocus]")?.focus();
-    return () => {
-      if (opener?.isConnected) opener.focus();
-    };
-  }, []);
+  // Focus the first field on open, give it back on close; Esc closes and Tab stays inside
+  const dialogKeys = useDialogFocus(sheetRef, onClose);
 
   useEffect(() => {
     let cancelled = false;
@@ -167,24 +163,8 @@ export function StartTaskSheet({ variant, todayKey, runningTaskId, onStart, onRe
     if (event.key === "Enter" && event.ctrlKey) {
       event.preventDefault();
       submit();
-    } else if (event.key === "Escape") {
-      event.preventDefault();
-      onClose();
-    } else if (event.key === "Tab") {
-      // Keep focus inside the sheet
-      const focusable = sheetRef.current?.querySelectorAll<HTMLElement>(
-        "button:not([disabled]), input:not([disabled]), [tabindex='0']",
-      );
-      if (!focusable || focusable.length === 0) return;
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-      if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault();
-        first.focus();
-      }
+    } else {
+      dialogKeys(event);
     }
   };
 
@@ -358,15 +338,7 @@ export function StartTaskSheet({ variant, todayKey, runningTaskId, onStart, onRe
         <div aria-hidden="true" className="h-1 w-9 shrink-0 self-center rounded-[2px] bg-ink-muted/30" />
         <div className="-mt-1 flex items-center justify-between">
           <span className="text-title tracking-title">Start a task</span>
-          <button
-            type="button"
-            aria-label="Close"
-            title="Close"
-            onClick={onClose}
-            className="grid size-8 place-items-center rounded-sm bg-ink-muted/8 text-ink-muted hover:bg-ink-muted/16 hover:text-ink"
-          >
-            <Icon name="close" size={18} />
-          </button>
+          <CloseButton onClick={onClose} />
         </div>
 
         <div

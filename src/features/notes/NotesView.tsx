@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 
 import { Icon, type IconName } from "../../components/Icon";
 import { LoadError } from "../../components/LoadError";
 import { useToast } from "../../components/Toast";
+import { useDelayedFlag } from "../../hooks/useDelayedFlag";
 import { useNotes, type Notes } from "../../hooks/useNotes";
 import { useNow } from "../../hooks/useNow";
 import { editedLabel, matchesSearch, notePreview, noteTitle, type Note } from "../../lib/notes";
@@ -16,8 +17,6 @@ type NotesViewProps = {
   onSaveError: () => void;
 };
 
-/** Loading cards appear only if loading takes longer than this. */
-const LOADING_DELAY_MS = 200;
 /** Typing saves after this pause (8b: no Save button). */
 const SAVE_DELAY_MS = 600;
 
@@ -28,21 +27,9 @@ export function NotesView({ variant, onMakeTask, onOpenToday, onSaveError }: Not
   const wide = variant === "wide";
   const [query, setQuery] = useState("");
   const [openId, setOpenId] = useState<string | null>(null);
-  const [showLoading, setShowLoading] = useState(false);
   const now = useNow(true, 60_000);
 
-  useEffect(() => {
-    if (notes.status !== "loading") {
-      setShowLoading(false);
-      return;
-    }
-    const timeoutId = window.setTimeout(() => {
-      setShowLoading(true);
-    }, LOADING_DELAY_MS);
-    return () => {
-      window.clearTimeout(timeoutId);
-    };
-  }, [notes.status]);
+  const showLoading = useDelayedFlag(notes.status === "loading");
 
   const visible = notes.notes.filter((note) => matchesSearch(note, query));
   // Wide mode always shows a note on the right: the one opened, or the first

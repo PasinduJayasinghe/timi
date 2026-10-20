@@ -1,5 +1,5 @@
 import { Icon } from "../../components/Icon";
-import { formatShortDate, fromLocalDayKey } from "../../lib/date";
+import { formatLongDate, formatShortDate, fromLocalDayKey } from "../../lib/date";
 import { formatDuration } from "../../lib/duration";
 import { formatMinutes } from "../../lib/estimate";
 import type { DayLoad } from "../../lib/plan";
@@ -50,9 +50,7 @@ export function PastDaySummary({
   trackedSeconds,
   className = "mx-3",
 }: PastDaySummaryProps) {
-  const title = new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "long" }).format(
-    fromLocalDayKey(dayKey),
-  );
+  const title = formatLongDate(dayKey);
   const tiles = [
     { label: "Planned", value: planned === null ? "…" : `${planned} ${planned === 1 ? "task" : "tasks"}` },
     { label: "Done", value: doneCount === null || planned === null ? "…" : `${doneCount} of ${planned}` },
@@ -87,9 +85,7 @@ export function PastDaySummary({
 
 /** An empty future day (7h). */
 export function PlanEmpty({ dayKey, className = "mx-3 mt-2.5" }: { dayKey: string; className?: string }) {
-  const name = new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "long" }).format(
-    fromLocalDayKey(dayKey),
-  );
+  const name = formatLongDate(dayKey);
   return (
     <div
       className={`relative z-1 flex flex-col gap-2 rounded-lg border border-white/85 bg-white/55 px-4 py-3.5 ${className}`}

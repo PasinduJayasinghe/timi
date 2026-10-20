@@ -1,7 +1,9 @@
-import { useEffect, useRef, useState, type KeyboardEvent } from "react";
+import { useRef, useState } from "react";
+import { CloseButton } from "../../components/CloseButton";
 import { FieldError } from "../../components/FieldError";
 import { Icon } from "../../components/Icon";
 import type { Task } from "../../data/types";
+import { useDialogFocus } from "../../hooks/useDialogFocus";
 import { formatMinutes } from "../../lib/estimate";
 import { parseTimeOfDay } from "../../lib/reminder";
 import { DEFAULT_BLOCK_MIN, LENGTHS_MIN, shortTime, timeOnDay } from "../../lib/schedule";
@@ -22,14 +24,8 @@ export function SchedulePopover({ task, dayKey, onSave, onUnschedule, onClose }:
   const [length, setLength] = useState<number>(task.plannedMinutes ?? task.estimateMinutes ?? DEFAULT_BLOCK_MIN);
   const [invalid, setInvalid] = useState(false);
 
-  // Focus the start field on open; give focus back on close
-  useEffect(() => {
-    const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    ref.current?.querySelector<HTMLInputElement>("input")?.focus();
-    return () => {
-      if (opener?.isConnected) opener.focus();
-    };
-  }, []);
+  // Focus the start field on open, give it back on close; Esc closes and Tab stays inside
+  const onKeyDown = useDialogFocus(ref, onClose);
 
   const time = parseTimeOfDay(start);
   const startMs = time ? timeOnDay(dayKey, time) : null;
@@ -40,25 +36,6 @@ export function SchedulePopover({ task, dayKey, onSave, onUnschedule, onClose }:
       return;
     }
     onSave(startMs, length);
-  };
-
-  const onKeyDown = (event: KeyboardEvent<HTMLDivElement>): void => {
-    if (event.key === "Escape") {
-      event.preventDefault();
-      onClose();
-    } else if (event.key === "Tab") {
-      const focusable = ref.current?.querySelectorAll<HTMLElement>("button:not([disabled]), input");
-      if (!focusable || focusable.length === 0) return;
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-      if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault();
-        first.focus();
-      }
-    }
   };
 
   return (
@@ -75,15 +52,7 @@ export function SchedulePopover({ task, dayKey, onSave, onUnschedule, onClose }:
         <div className="flex items-center gap-1.5">
           <Icon name="schedule" size={18} className="text-accent-ink" />
           <span className="min-w-0 flex-1 truncate text-ui font-bold">Schedule “{displayTitle(task)}”</span>
-          <button
-            type="button"
-            aria-label="Close"
-            title="Close"
-            onClick={onClose}
-            className="grid size-8 shrink-0 place-items-center rounded-sm bg-ink-muted/8 text-ink-muted hover:bg-ink-muted/16 hover:text-ink"
-          >
-            <Icon name="close" size={18} />
-          </button>
+          <CloseButton onClick={onClose} />
         </div>
         <div className="grid grid-cols-2 gap-2.5">
           <label className="flex flex-col gap-1.25">
@@ -95,6 +64,7 @@ export function SchedulePopover({ task, dayKey, onSave, onUnschedule, onClose }:
             >
               <Icon name="schedule" size={16} className="text-ink-muted" />
               <input
+                data-autofocus
                 value={start}
                 placeholder="11 pm"
                 aria-invalid={invalid}

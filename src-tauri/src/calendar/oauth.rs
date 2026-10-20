@@ -20,6 +20,9 @@ const REVOKE_URL: &str = "https://oauth2.googleapis.com/revoke";
 const SCOPES: &str = "openid email https://www.googleapis.com/auth/calendar.readonly";
 /// How long the browser sign-in may take.
 const SIGN_IN_TIMEOUT: Duration = Duration::from_secs(5 * 60);
+/// A connection to the loopback port that sends nothing for this long is dropped, so it can't
+/// hold up the real redirect.
+const READ_TIMEOUT: Duration = Duration::from_secs(5);
 
 /// The page shown in the browser tab after sign-in.
 const DONE_PAGE: &str = "<!doctype html><meta charset=utf-8><title>Timi</title>\
@@ -146,7 +149,11 @@ pub async fn sign_in(
         loop {
             let (mut stream, _) = listener.accept().await.map_err(|e| OAuthError::Network(e.to_string()))?;
             let mut buffer = vec![0u8; 8192];
-            let read = stream.read(&mut buffer).await.unwrap_or(0);
+            let read = tokio::time::timeout(READ_TIMEOUT, stream.read(&mut buffer))
+                .await
+                .ok()
+                .and_then(Result::ok)
+                .unwrap_or(0);
             let request = String::from_utf8_lossy(&buffer[..read]);
             // Ignore anything that isn't the redirect, such as a favicon request
             let Some(params) = redirect_params(&request) else {
@@ -154,10 +161,16 @@ pub async fn sign_in(
                 continue;
             };
             let get = |key: &str| params.iter().find(|(k, _)| k == key).map(|(_, v)| v.clone());
-            let result = match (get("state"), get("code"), get("error")) {
-                (Some(s), Some(code), _) if s == state => Ok(code),
-                (_, _, Some(error)) => Err(OAuthError::Cancelled(error)),
-                _ => Err(OAuthError::Cancelled("state mismatch".into())),
+            // Only Google's redirect carries our state; anything else (another program poking
+            // the port) is refused without ending the sign-in
+            if get("state").as_deref() != Some(state.as_str()) {
+                let _ = stream.write_all(b"HTTP/1.1 400 Bad Request\r\nContent-Length: 0\r\n\r\n").await;
+                continue;
+            }
+            let result = match (get("code"), get("error")) {
+                (Some(code), _) => Ok(code),
+                (None, Some(error)) => Err(OAuthError::Cancelled(error)),
+                (None, None) => Err(OAuthError::Cancelled("no code".into())),
             };
             let page = if result.is_ok() { DONE_PAGE } else { FAILED_PAGE };
             let response = format!(

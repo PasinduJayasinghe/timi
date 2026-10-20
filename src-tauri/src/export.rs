@@ -5,6 +5,8 @@ use rust_xlsxwriter::{
     ExcelDateTime, Format, FormatAlign, Formula, Workbook, Worksheet, XlsxError,
 };
 use serde::Deserialize;
+use std::path::PathBuf;
+use std::sync::Mutex;
 use tauri::{AppHandle, Manager};
 use tauri_plugin_dialog::DialogExt;
 use tauri_plugin_opener::OpenerExt;
@@ -46,6 +48,11 @@ pub struct ExportRequest {
 }
 
 const SECONDS_PER_DAY: f64 = 86_400.0;
+
+/// Workbooks saved by `export_xlsx` in this run. `open_export` opens only these, so the web view
+/// can't use it to open (and run) any other file.
+#[derive(Default)]
+pub struct Exports(Mutex<Vec<PathBuf>>);
 
 struct Formats {
     header: Format,
@@ -219,7 +226,11 @@ fn build_workbook(request: &ExportRequest) -> Result<Workbook, XlsxError> {
 /// Asks where to save (the Windows Save As dialog, starting in Downloads) and writes the
 /// workbook there. Returns the saved path, or None if the dialog was cancelled.
 #[tauri::command]
-pub async fn export_xlsx(app: AppHandle, request: ExportRequest) -> Result<Option<String>, String> {
+pub async fn export_xlsx(
+    app: AppHandle,
+    exports: tauri::State<'_, Exports>,
+    request: ExportRequest,
+) -> Result<Option<String>, String> {
     let (sender, receiver) = tokio::sync::oneshot::channel();
     let mut dialog = app
         .dialog()
@@ -236,19 +247,36 @@ pub async fn export_xlsx(app: AppHandle, request: ExportRequest) -> Result<Optio
     let Some(path) = receiver.await.map_err(|e| e.to_string())? else {
         return Ok(None);
     };
-    let path = path.into_path().map_err(|e| e.to_string())?;
+    let mut path = path.into_path().map_err(|e| e.to_string())?;
+    // Always a workbook, whatever name was typed
+    if !path.extension().is_some_and(|ext| ext.eq_ignore_ascii_case("xlsx")) {
+        path.set_extension("xlsx");
+    }
 
     let mut workbook = build_workbook(&request).map_err(|e| e.to_string())?;
     // Fails if the file is open in Excel; the toast says so (9c)
     workbook
         .save(&path)
         .map_err(|e| format!("save-failed: {e}"))?;
-    Ok(Some(path.to_string_lossy().into_owned()))
+    let saved = path.to_string_lossy().into_owned();
+    if let Ok(mut list) = exports.0.lock() {
+        list.push(path);
+    }
+    Ok(Some(saved))
 }
 
-/// Opens an exported workbook in its default app (the toast's "Open file").
+/// Opens an exported workbook in its default app (the toast's "Open file"). Only a workbook
+/// saved by `export_xlsx` in this run can be opened.
 #[tauri::command]
-pub fn open_export(app: AppHandle, path: String) -> Result<(), String> {
+pub fn open_export(app: AppHandle, exports: tauri::State<'_, Exports>, path: String) -> Result<(), String> {
+    let known = exports
+        .0
+        .lock()
+        .map(|list| list.iter().any(|saved| saved.as_os_str() == path.as_str()))
+        .unwrap_or(false);
+    if !known {
+        return Err("not an exported workbook".into());
+    }
     app.opener()
         .open_path(path, None::<&str>)
         .map_err(|e| e.to_string())

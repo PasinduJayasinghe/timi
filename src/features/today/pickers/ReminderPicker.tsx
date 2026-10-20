@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { FieldError } from "../../../components/FieldError";
+import { useOutsideClose } from "../../../hooks/useOutsideClose";
 import { nextOccurrence, parseTimeOfDay, QUICK_REMINDERS, reminderLength } from "../../../lib/reminder";
 import { PICKER_PANEL, PickerOptions, usePickerList, type PickerOption } from "./Picker";
 
@@ -60,17 +61,7 @@ export function ReminderPicker({
     listRef.current?.focus();
   }, []);
 
-  useEffect(() => {
-    // The parent wraps the field that opened the picker, so clicking the field again doesn't close-then-reopen
-    const onPointerDown = (event: PointerEvent): void => {
-      const area = panelRef.current?.parentElement ?? panelRef.current;
-      if (area && !area.contains(event.target as Node)) onClose();
-    };
-    document.addEventListener("pointerdown", onPointerDown, true);
-    return () => {
-      document.removeEventListener("pointerdown", onPointerDown, true);
-    };
-  }, [onClose]);
+  useOutsideClose(panelRef, onClose);
 
   const submitTyped = (): void => {
     const time = parseTimeOfDay(typed);

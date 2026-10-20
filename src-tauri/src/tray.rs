@@ -200,7 +200,7 @@ pub fn create(app: &AppHandle) -> tauri::Result<()> {
             if running.is_some() {
                 let _ = state.header.set_text(header_text(&running));
             }
-            if ticks % 15 == 0 {
+            if ticks.is_multiple_of(15) {
                 let (text, enabled) = next_text(&app);
                 let _ = state.next.set_text(text);
                 let _ = state.next.set_enabled(enabled);

@@ -3,7 +3,7 @@ import { getCurrentWindow, LogicalSize } from "@tauri-apps/api/window";
 export type WindowMode = "expanded" | "wide" | "mini";
 
 /** Logical window sizes from the design: 1a expanded, 1d wide, 1e mini bar. */
-export const WINDOW_SIZES: Record<WindowMode, { width: number; height: number }> = {
+const WINDOW_SIZES: Record<WindowMode, { width: number; height: number }> = {
   expanded: { width: 380, height: 780 },
   wide: { width: 760, height: 600 },
   mini: { width: 380, height: 56 },

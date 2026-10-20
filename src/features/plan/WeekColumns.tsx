@@ -3,7 +3,7 @@ import { Icon } from "../../components/Icon";
 import { IconButton } from "../../components/IconButton";
 import type { Task } from "../../data/types";
 import type { ListStatus } from "../../hooks/useTodayTasks";
-import { fromLocalDayKey } from "../../lib/date";
+import { formatLongDate, fromLocalDayKey } from "../../lib/date";
 import { formatMinutes } from "../../lib/estimate";
 import { isOverPlanned } from "../../lib/plan";
 import { displayTitle } from "../../lib/taskDisplay";
@@ -106,9 +106,7 @@ export function WeekColumns({
               <button
                 type="button"
                 aria-pressed={selected}
-                aria-label={new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "long" }).format(
-                  date,
-                )}
+                aria-label={formatLongDate(key)}
                 onClick={() => {
                   onSelect(key);
                 }}

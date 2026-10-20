@@ -102,8 +102,18 @@ fn parse_time(time: &Option<EventTime>) -> Option<i64> {
 }
 
 /// Only Google Meet links are kept, so Join never opens anything else.
+/// Only plain https links to meet.google.com are opened (no other host, login part or port).
 pub fn is_meet_url(url: &str) -> bool {
-    url.starts_with("https://meet.google.com/")
+    match Url::parse(url) {
+        Ok(parsed) => {
+            parsed.scheme() == "https"
+                && parsed.host_str() == Some("meet.google.com")
+                && parsed.port().is_none()
+                && parsed.username().is_empty()
+                && parsed.password().is_none()
+        }
+        Err(_) => false,
+    }
 }
 
 fn meet_url(item: &EventItem) -> Option<String> {
@@ -279,5 +289,8 @@ mod tests {
         assert!(!is_meet_url("http://meet.google.com/abc"));
         assert!(!is_meet_url("https://meet.google.com.evil.example/abc"));
         assert!(!is_meet_url("javascript:alert(1)"));
+        assert!(!is_meet_url("https://meet.google.com@evil.example/abc"));
+        assert!(!is_meet_url("https://meet.google.com:8443/abc"));
+        assert!(!is_meet_url("https://user@meet.google.com/abc"));
     }
 }

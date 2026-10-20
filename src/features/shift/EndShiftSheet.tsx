@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { Icon } from "../../components/Icon";
 import { LiveDuration } from "../../components/LiveDuration";
+import { TypeTile } from "../../components/TypeTile";
 import type { Session, Task } from "../../data/types";
-import { fromLocalDayKey } from "../../lib/date";
+import { formatWeekday } from "../../lib/date";
 import { formatDuration, formatTimeOfDay } from "../../lib/duration";
 import { formatMinutes } from "../../lib/estimate";
 import type { Shift } from "../../lib/shift";
 import { totalSeconds } from "../../lib/sessionMath";
 import { displayTitle, sessionDisplay } from "../../lib/taskDisplay";
-import { styleOf } from "../../lib/taskTypes";
 import { buildTimesheet } from "../../lib/timesheet";
 import { SheetActions, ShiftSheet } from "./ShiftSheet";
 
@@ -24,9 +24,6 @@ type EndShiftSheetProps = {
   onEnd: () => void;
   onClose: () => void;
 };
-
-const weekday = (dayKey: string): string =>
-  new Intl.DateTimeFormat("en-GB", { weekday: "long" }).format(fromLocalDayKey(dayKey));
 
 /** End shift (7j): the shift's summary, a last Copy for timesheet, then End shift. */
 export function EndShiftSheet({
@@ -72,7 +69,7 @@ export function EndShiftSheet({
   return (
     <ShiftSheet title="End shift" icon="bedtime" iconClass="text-accent-ink" variant={variant} onClose={onClose}>
       <span className="-mt-2.5 text-meta text-ink-muted">
-        {weekday(shift.dayKey)} · {formatTimeOfDay(shift.startedAt)} – now
+        {formatWeekday(shift.dayKey)} · {formatTimeOfDay(shift.startedAt)} – now
       </span>
 
       <div className="grid shrink-0 grid-cols-3 gap-2">
@@ -103,16 +100,13 @@ export function EndShiftSheet({
             Unfinished · {unfinished.length}
           </span>
           {unfinished.map((task) => {
-            const style = styleOf(task);
             const tracked = trackedByTask.get(task.id) ?? 0;
             let meta = "—";
             if (tracked > 0) meta = formatDuration(tracked);
             else if (task.estimateMinutes !== null) meta = `est ${formatMinutes(task.estimateMinutes)}`;
             return (
               <div key={task.id} className="flex min-h-8.5 items-center gap-2">
-                <span className={`grid size-6 shrink-0 place-items-center rounded-[7px] ${style.tint} ${style.ink}`}>
-                  <Icon name={style.icon} size={14} />
-                </span>
+                <TypeTile task={task} />
                 <span className="min-w-0 flex-1 truncate text-ui-sm font-medium">{displayTitle(task)}</span>
                 <span className="font-mono text-meta text-ink-muted">{meta}</span>
               </div>

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import { Icon } from "../../components/Icon";
+import { TypeTile } from "../../components/TypeTile";
 import type { CalendarEvent } from "../../data/calendar";
 import type { Task } from "../../data/types";
 import { useNow } from "../../hooks/useNow";
@@ -165,7 +166,6 @@ export function ScheduleView({ dayKey, isToday, tasks, events, onSchedule, varia
         {unscheduled.length > 0 && (
           <div className="flex flex-wrap gap-1.5">
             {unscheduled.map((task) => {
-              const style = styleOf(task);
               const dragging = drag?.taskId === task.id && drag.moved;
               return (
                 <button
@@ -186,9 +186,7 @@ export function ScheduleView({ dayKey, isToday, tasks, events, onSchedule, varia
                   }`}
                 >
                   <Icon name="drag_indicator" size={15} className="text-ink-muted/50" />
-                  <span className={`grid size-6 shrink-0 place-items-center rounded-[7px] ${style.tint} ${style.ink}`}>
-                    <Icon name={style.icon} size={14} />
-                  </span>
+                  <TypeTile task={task} />
                   <span className="truncate text-caption font-medium">{displayTitle(task)}</span>
                   <span className="font-mono text-duration text-ink-muted">{formatMinutes(lengthOf(task))}</span>
                 </button>

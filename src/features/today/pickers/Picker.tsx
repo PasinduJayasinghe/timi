@@ -1,5 +1,6 @@
 import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 import { Icon, type IconName } from "../../../components/Icon";
+import { useOutsideClose } from "../../../hooks/useOutsideClose";
 
 export type PickerOption = {
   id: string;
@@ -236,17 +237,7 @@ export function Picker({
     else listRef.current?.focus();
   }, [filterable]);
 
-  useEffect(() => {
-    // The parent wraps the chip that opened the picker, so clicking the chip again doesn't close-then-reopen
-    const onPointerDown = (event: PointerEvent): void => {
-      const area = panelRef.current?.parentElement ?? panelRef.current;
-      if (area && !area.contains(event.target as Node)) onClose();
-    };
-    document.addEventListener("pointerdown", onPointerDown, true);
-    return () => {
-      document.removeEventListener("pointerdown", onPointerDown, true);
-    };
-  }, [onClose]);
+  useOutsideClose(panelRef, onClose);
 
   return (
     <div

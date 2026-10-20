@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Icon } from "../../components/Icon";
 import { IconButton } from "../../components/IconButton";
+import { useOutsideClose } from "../../hooks/useOutsideClose";
 import { weekStartKey } from "../../lib/calendar";
-import { addDays, fromLocalDayKey, toLocalDayKey } from "../../lib/date";
+import { addDays, formatLongDate, fromLocalDayKey, toLocalDayKey } from "../../lib/date";
 
 const WEEKDAYS = ["M", "T", "W", "T", "F", "S", "S"] as const;
 
@@ -82,9 +83,7 @@ export function WeekStrip({
               key={key}
               type="button"
               aria-pressed={selected}
-              aria-label={new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "long" }).format(
-                fromLocalDayKey(key),
-              )}
+              aria-label={formatLongDate(key)}
               onClick={() => {
                 onSelect(key);
               }}
@@ -139,18 +138,13 @@ export function MonthPicker({
   const selected = fromLocalDayKey(selectedKey);
   const [month, setMonth] = useState({ year: selected.getFullYear(), month: selected.getMonth() });
 
+  useOutsideClose(ref, onClose);
   useEffect(() => {
-    const onPointerDown = (event: PointerEvent): void => {
-      const area = ref.current?.parentElement ?? ref.current;
-      if (area && !area.contains(event.target as Node)) onClose();
-    };
     const onKeyDown = (event: KeyboardEvent): void => {
       if (event.key === "Escape") onClose();
     };
-    document.addEventListener("pointerdown", onPointerDown, true);
     document.addEventListener("keydown", onKeyDown);
     return () => {
-      document.removeEventListener("pointerdown", onPointerDown, true);
       document.removeEventListener("keydown", onKeyDown);
     };
   }, [onClose]);

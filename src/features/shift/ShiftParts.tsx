@@ -1,10 +1,9 @@
 import { Icon } from "../../components/Icon";
 import { LiveDuration, type LiveTotal } from "../../components/LiveDuration";
-import { fromLocalDayKey } from "../../lib/date";
+import { formatWeekday } from "../../lib/date";
 import { formatTimeOfDay } from "../../lib/duration";
 import type { Shift } from "../../lib/shift";
-
-const plural = (count: number, word: string): string => `${count} ${word}${count === 1 ? "" : "s"}`;
+import { plural } from "../../lib/text";
 
 /** "End shift" (7i): in the shift strip, and in the wide title bar. */
 export function EndShiftButton({ onClick }: { onClick: () => void }) {
@@ -79,10 +78,6 @@ type BetweenShiftsProps = {
   className?: string;
 };
 
-/** The weekday a shift belongs to, from its day (a night shift keeps its evening's name). */
-const weekday = (dayKey: string): string =>
-  new Intl.DateTimeFormat("en-GB", { weekday: "long" }).format(fromLocalDayKey(dayKey));
-
 /** Between shifts (7k): a clean Today with Start shift. Earlier days stay in the Log. */
 export function BetweenShifts({
   last,
@@ -93,7 +88,7 @@ export function BetweenShifts({
   onReopen,
   className = "",
 }: BetweenShiftsProps) {
-  const day = weekday(last.dayKey);
+  const day = formatWeekday(last.dayKey);
   return (
     <div
       className={`relative z-1 flex shrink-0 flex-col items-center gap-1.5 rounded-lg border border-white/85 bg-white/55 px-3.5 pt-3.5 pb-2.5 text-center shadow-sm backdrop-blur-glass ${className}`}
@@ -161,7 +156,7 @@ export function ShiftNotice({
     >
       <Icon name="info" size={18} className="mt-px text-accent-ink" />
       <div className="flex flex-1 flex-col gap-0.5">
-        <span className="text-ui-sm font-semibold">{weekday(shift.dayKey)}’s shift was ended for you</span>
+        <span className="text-ui-sm font-semibold">{formatWeekday(shift.dayKey)}’s shift was ended for you</span>
         <span className="text-caption leading-[1.45] text-ink-muted">
           It ended at {shift.endedAt ? formatTimeOfDay(shift.endedAt) : "its last activity"}, when you last timed
           anything. Nothing after that was counted.

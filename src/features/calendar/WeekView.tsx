@@ -3,7 +3,7 @@ import type { Session } from "../../data/types";
 import { useNow } from "../../hooks/useNow";
 import { formatWeekTotal, hourLabel } from "../../lib/calendar";
 import { formatDuration } from "../../lib/duration";
-import { fromLocalDayKey, workDayKey } from "../../lib/date";
+import { formatLongDate, fromLocalDayKey, workDayKey } from "../../lib/date";
 import { totalSeconds } from "../../lib/sessionMath";
 import { axisHours, axisPercent, barPosition, rangePosition, timelineAxis } from "../../lib/timeline";
 import { weekDays } from "./DatePickers";
@@ -89,9 +89,7 @@ export function WeekView({ dayKey, todayKey, sessions, events, onOpenDay }: Week
           const axis = timelineAxis(day.key, [], now);
           const isToday = day.key === todayKey;
           const nowPercent = isToday ? axisPercent(now, axis) : null;
-          const date = new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "long" }).format(
-            fromLocalDayKey(day.key),
-          );
+          const date = formatLongDate(day.key);
           return (
             <button
               key={day.key}

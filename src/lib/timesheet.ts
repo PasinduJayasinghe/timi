@@ -6,9 +6,14 @@ import { TYPE_STYLES } from "./taskTypes";
 
 const HEADER = ["Task", "Type", "Client/Project", "Start", "End", "Duration"];
 
-/** Tabs and line breaks would split a cell, so they become spaces. */
-function cell(value: string): string {
-  return value.replace(/[\t\r\n]+/g, " ");
+/**
+ * Tabs and line breaks would split a cell, so they become spaces. A cell that starts like a
+ * formula (=, +, -, @) gets a leading apostrophe, so pasting into Excel or Sheets keeps it as
+ * text: meeting titles come from other people's calendar invites.
+ */
+export function cell(value: string): string {
+  const text = value.replace(/[\t\r\n]+/g, " ");
+  return /^[=+\-@]/.test(text) ? `'${text}` : text;
 }
 
 /**

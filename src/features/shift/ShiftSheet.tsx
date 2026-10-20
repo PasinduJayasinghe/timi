@@ -1,5 +1,7 @@
-import { useEffect, useRef, type KeyboardEvent, type ReactNode } from "react";
+import { useRef, type ReactNode } from "react";
+import { CloseButton } from "../../components/CloseButton";
 import { Icon, type IconName } from "../../components/Icon";
+import { useDialogFocus } from "../../hooks/useDialogFocus";
 
 type ShiftSheetProps = {
   title: string;
@@ -16,36 +18,8 @@ type ShiftSheetProps = {
 export function ShiftSheet({ title, icon, iconClass, variant, onClose, steps, children }: ShiftSheetProps) {
   const sheetRef = useRef<HTMLDivElement>(null);
 
-  // Focus the first control on open; give focus back to the button that opened the sheet on close
-  useEffect(() => {
-    const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    const sheet = sheetRef.current;
-    (sheet?.querySelector<HTMLElement>("[data-autofocus]") ?? sheet)?.focus();
-    return () => {
-      if (opener?.isConnected) opener.focus();
-    };
-  }, []);
-
-  const onKeyDown = (event: KeyboardEvent<HTMLDivElement>): void => {
-    if (event.key === "Escape") {
-      event.preventDefault();
-      onClose();
-    } else if (event.key === "Tab") {
-      const focusable = sheetRef.current?.querySelectorAll<HTMLElement>(
-        "button:not([disabled]), input:not([disabled]), [tabindex='0']",
-      );
-      if (!focusable || focusable.length === 0) return;
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-      if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault();
-        first.focus();
-      }
-    }
-  };
+  // Focus on open, give it back on close; Esc closes and Tab stays inside
+  const onKeyDown = useDialogFocus(sheetRef, onClose);
 
   return (
     <div className="absolute inset-0 z-40">
@@ -88,15 +62,7 @@ export function ShiftSheet({ title, icon, iconClass, variant, onClose, steps, ch
               </span>
             </span>
           )}
-          <button
-            type="button"
-            aria-label="Close"
-            title="Close"
-            onClick={onClose}
-            className="grid size-8 place-items-center rounded-sm bg-ink-muted/8 text-ink-muted hover:bg-ink-muted/16 hover:text-ink"
-          >
-            <Icon name="close" size={18} />
-          </button>
+          <CloseButton onClick={onClose} />
         </div>
         {children}
       </div>
@@ -112,6 +78,7 @@ export function SheetActions({
   secondary,
   onSecondary,
   autoFocus = false,
+  disabled = false,
 }: {
   primary: string;
   primaryIcon: IconName;
@@ -119,16 +86,23 @@ export function SheetActions({
   secondary: string;
   onSecondary: () => void;
   autoFocus?: boolean;
+  /** Greys out the main button, e.g. Export with nothing to export (9b). */
+  disabled?: boolean;
 }) {
   return (
     <div className="mt-auto grid shrink-0 grid-cols-[1fr_auto] gap-2">
       <button
         type="button"
         data-autofocus={autoFocus ? true : undefined}
+        disabled={disabled}
         onClick={onPrimary}
-        className="flex h-11 items-center justify-center gap-1.5 rounded-md bg-accent-gradient-strong text-body font-semibold text-white shadow-copy focus-visible:outline-offset-3"
+        className={`flex h-11 items-center justify-center gap-1.5 rounded-md text-body font-semibold focus-visible:outline-offset-3 ${
+          disabled
+            ? "cursor-default bg-ink-muted/12 text-ink-disabled"
+            : "bg-accent-gradient-strong text-white shadow-copy"
+        }`}
       >
-        <Icon name={primaryIcon} size={20} fill />
+        <Icon name={primaryIcon} size={20} fill={!disabled} />
         {primary}
       </button>
       <button

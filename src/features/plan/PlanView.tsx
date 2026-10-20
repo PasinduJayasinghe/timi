@@ -8,7 +8,7 @@ import { useTodayTasks } from "../../hooks/useTodayTasks";
 import { useWeekSummary } from "../../hooks/useWeekSummary";
 import type { Workday } from "../../hooks/useWorkday";
 import { weekStartKey } from "../../lib/calendar";
-import { addDays, formatShortDate, fromLocalDayKey, workDayRange } from "../../lib/date";
+import { addDays, formatLongDate, formatShortDate, fromLocalDayKey, workDayRange } from "../../lib/date";
 import { dayLoad, isOverPlanned, weekCellLabel } from "../../lib/plan";
 import { WORK_SPAN_MIN, WORK_START_MIN } from "../../lib/timeline";
 import { MonthPicker, WeekStrip } from "../calendar/DatePickers";
@@ -106,9 +106,7 @@ export function PlanView({
       : day === addDays(todayKey, -1)
         ? "Yesterday"
         : null;
-  const title = new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "long" }).format(
-    fromLocalDayKey(day),
-  );
+  const title = formatLongDate(day);
   /** A task dropped on a day column (8b): moved, with Undo. */
   const moveTask = (id: string, to: string): void => {
     const moved = list.moveToDay(id, to);

@@ -5,7 +5,7 @@ import type { TaskType } from "./taskTypes";
 export const HEARTBEAT_MS = 60_000;
 
 /** A gap longer than this (crash, shutdown or sleep) closes the session at its last seen time. */
-export const STALE_AFTER_MS = 5 * 60_000;
+const STALE_AFTER_MS = 5 * 60_000;
 
 type Timed = Pick<Session, "startedAt" | "endedAt">;
 
