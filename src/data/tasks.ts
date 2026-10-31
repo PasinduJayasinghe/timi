@@ -125,37 +125,7 @@ export async function move(id: string, position: number): Promise<void> {
   await db.execute("UPDATE tasks SET position = $1, updated_at = $2 WHERE id = $3", [position, nowIso(), id]);
 }
 
-/** Moves unfinished tasks from earlier days onto `today`. Returns how many moved. */
-export async function carryOver(today: string): Promise<number> {
-  const db = await getDb();
-  const result = await db.execute(
-    `UPDATE tasks SET carried_from = list_day, list_day = $1, updated_at = $2
-     WHERE completed_at IS NULL AND deleted_at IS NULL AND list_day < $1`,
-    [today, nowIso()],
-  );
-  return result.rowsAffected;
-}
-
-const LEFTOVER = "t.completed_at IS NULL AND t.deleted_at IS NULL AND t.list_day < $1";
-
-/** Unfinished tasks from days before `today`, put aside when their shift ended (Plan my day step 1). */
-export async function leftovers(today: string): Promise<Task[]> {
-  const db = await getDb();
-  const rows = await db.select<TaskRow[]>(`${SELECT_TASKS} WHERE ${LEFTOVER} ORDER BY t.list_day, t.position`, [
-    today,
-  ]);
-  return rows.map(toTask);
-}
-
-export async function countLeftovers(today: string): Promise<number> {
-  const db = await getDb();
-  const rows = await db.select<Array<{ count: number }>>(`SELECT COUNT(*) AS count FROM tasks t WHERE ${LEFTOVER}`, [
-    today,
-  ]);
-  return rows[0]?.count ?? 0;
-}
-
-/** Lists a task on another day (Keep or Move in Plan my day), tagged with the day it came from. */
+/** Lists a task on another day (the Day field, 7f), tagged with the day it came from. */
 export async function moveToDay(id: string, day: string): Promise<void> {
   const db = await getDb();
   await db.execute(
@@ -206,4 +176,16 @@ export async function listForDayRange(fromDay: string, toDay: string): Promise<T
     [fromDay, toDay],
   );
   return rows.map(toTask);
+}
+
+/** Each task's notes by id, deleted tasks included (their time was still worked). For the export. */
+export async function notesByIds(ids: readonly string[]): Promise<Map<string, string>> {
+  if (ids.length === 0) return new Map();
+  const db = await getDb();
+  const placeholders = ids.map((_, index) => `$${index + 1}`).join(", ");
+  const rows = await db.select<Array<{ id: string; notes: string }>>(
+    `SELECT id, notes FROM tasks WHERE id IN (${placeholders})`,
+    [...ids],
+  );
+  return new Map(rows.map((row) => [row.id, row.notes]));
 }

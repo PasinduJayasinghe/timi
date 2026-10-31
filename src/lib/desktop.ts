@@ -22,7 +22,7 @@ export function setTrayState(state: TrayState): Promise<void> {
 export type ScheduledReminder = {
   taskId: string;
   title: string;
-  /** e.g. "Reminder · 11:55 pm · Client B". */
+  /** e.g. "Reminder · 23:55 · Client B". */
   body: string;
   atMs: number;
 };

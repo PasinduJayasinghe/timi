@@ -1,35 +1,30 @@
-import type { Session, Task } from "../data/types";
+import type { Session } from "../data/types";
 import { sessionSeconds } from "./sessionMath";
-import { displayTitle, sessionDisplay, whereLabel, type DisplayFields } from "./taskDisplay";
-import { styleOf } from "./taskTypes";
+import { displayTitle, sessionDisplay } from "./taskDisplay";
+import { styleOf, TYPE_FIELDS } from "./taskTypes";
 
-/** A row of the Tasks sheet (9d): a task on one work day. */
-export type TaskExportRow = {
-  day: string;
-  title: string;
-  typeLabel: string;
-  whereLabel: string;
-  estimateMinutes: number | null;
-  trackedSeconds: number;
-  done: boolean;
-};
-
-/** A row of the Sessions sheet (9d). Times are local, "YYYY-MM-DDThh:mm:ss". */
-export type SessionExportRow = {
-  day: string;
-  title: string;
-  typeLabel: string;
-  whereLabel: string;
+/**
+ * One row of the hours sheet, in the columns of the timesheet template (Phase 12): Date, Start,
+ * Finish, Kind of work, Clients, Project, What you worked on, Note.
+ */
+export type TimesheetRow = {
+  /** The session's work day, "YYYY-MM-DD" (a night shift keeps its date after midnight). */
+  date: string;
+  /** Local time, "YYYY-MM-DDThh:mm:ss", written to Excel as a 24-hour time. */
   start: string;
-  end: string;
-  seconds: number;
+  finish: string;
+  kindOfWork: string;
+  clients: string;
+  project: string;
+  workedOn: string;
+  note: string;
 };
 
 export type ExportData = {
-  tasks: TaskExportRow[];
-  sessions: SessionExportRow[];
-  /** Days with tracked time, for the summary (9b). */
+  rows: TimesheetRow[];
+  /** Days with tracked time, tasks timed and time tracked, for the summary (9b). */
   days: number;
+  tasks: number;
   trackedSeconds: number;
 };
 
@@ -43,88 +38,44 @@ export function localIso(ms: number): string {
   );
 }
 
-const labels = (fields: DisplayFields): Pick<TaskExportRow, "title" | "typeLabel" | "whereLabel"> => ({
-  title: displayTitle(fields),
-  typeLabel: styleOf(fields).label,
-  whereLabel: whereLabel(fields) ?? "",
-});
-
-type Draft = TaskExportRow & { taskId: string; firstStart: number };
+/** Notes on one line: a cell can't hold the line breaks of the task's notes. */
+function oneLine(text: string): string {
+  return text
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line !== "")
+    .join("; ");
+}
 
 /**
- * The workbook's rows for a range of days: one task row per task per work day it was listed on or
- * timed on (its sessions' days, split by shift), and one row per session. A running session
- * counts up to now.
+ * The hours sheet's rows for a range of days: one row per timer session, oldest first. A running
+ * session finishes now. `notes` holds each task's notes by task id.
  */
-export function buildExport(tasks: readonly Task[], sessions: readonly Session[], nowMs: number): ExportData {
-  const rows = new Map<string, Draft>();
-  const byTask = new Map(tasks.map((task) => [task.id, task]));
+export function buildExport(
+  sessions: readonly Session[],
+  notes: ReadonlyMap<string, string>,
+  nowMs: number,
+): ExportData {
   const sorted = [...sessions].sort((a, b) => a.startedAt.localeCompare(b.startedAt));
-
-  for (const session of sorted) {
-    const key = `${session.taskId}|${session.dayKey}`;
-    const seconds = sessionSeconds(session, nowMs);
-    const row = rows.get(key);
-    if (row) {
-      row.trackedSeconds += seconds;
-    } else {
-      const task = byTask.get(session.taskId);
-      rows.set(key, {
-        taskId: session.taskId,
-        day: session.dayKey,
-        ...labels(task ?? sessionDisplay(session)),
-        estimateMinutes: task?.estimateMinutes ?? null,
-        trackedSeconds: seconds,
-        done: false,
-        firstStart: Date.parse(session.startedAt),
-      });
-    }
-  }
-  for (const task of tasks) {
-    const key = `${task.id}|${task.listDay}`;
-    if (!rows.has(key)) {
-      rows.set(key, {
-        taskId: task.id,
-        day: task.listDay,
-        ...labels(task),
-        estimateMinutes: task.estimateMinutes,
-        trackedSeconds: 0,
-        done: false,
-        firstStart: Number.POSITIVE_INFINITY,
-      });
-    }
-  }
-
-  // A finished task is done on the last day it appears
-  const lastDay = new Map<string, string>();
-  for (const row of rows.values()) {
-    if ((lastDay.get(row.taskId) ?? "") < row.day) lastDay.set(row.taskId, row.day);
-  }
-  const taskRows = [...rows.values()]
-    .map((row) => ({
-      ...row,
-      done: Boolean(byTask.get(row.taskId)?.completedAt) && lastDay.get(row.taskId) === row.day,
-    }))
-    .sort((a, b) => a.day.localeCompare(b.day) || a.firstStart - b.firstStart || a.title.localeCompare(b.title))
-    .map(({ taskId: _taskId, firstStart: _firstStart, ...row }) => row);
-
-  const sessionRows = sorted.map((session) => {
-    const startMs = Date.parse(session.startedAt);
-    const seconds = sessionSeconds(session, nowMs);
+  const rows = sorted.map((session): TimesheetRow => {
+    const task = sessionDisplay(session);
+    const fields = TYPE_FIELDS[task.type];
     return {
-      day: session.dayKey,
-      ...labels(sessionDisplay(session)),
-      start: localIso(startMs),
-      end: localIso(session.endedAt ? Date.parse(session.endedAt) : nowMs),
-      seconds,
+      date: session.dayKey,
+      start: localIso(Date.parse(session.startedAt)),
+      finish: localIso(session.endedAt ? Date.parse(session.endedAt) : nowMs),
+      kindOfWork: styleOf(task).short,
+      clients: fields.client !== "none" ? (task.clientName ?? "") : "",
+      project: fields.project !== "none" ? (task.projectName ?? "") : "",
+      workedOn: displayTitle(task),
+      note: oneLine(notes.get(session.taskId) ?? ""),
     };
   });
-
   return {
-    tasks: taskRows,
-    sessions: sessionRows,
+    rows,
     days: new Set(sorted.map((session) => session.dayKey)).size,
-    trackedSeconds: sessionRows.reduce((sum, row) => sum + row.seconds, 0),
+    tasks: new Set(sorted.map((session) => session.taskId)).size,
+    trackedSeconds: sorted.reduce((sum, session) => sum + sessionSeconds(session, nowMs), 0),
   };
 }
 

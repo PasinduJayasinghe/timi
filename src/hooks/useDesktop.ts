@@ -26,7 +26,7 @@ type DesktopOptions = {
   onStartSheet: () => void;
 };
 
-/** Toast text (4c): "Reminder · 11:55 pm · Client B". */
+/** Toast text (4c): "Reminder · 23:55 · Client B". */
 function reminderBody(task: Task, remindAt: string): string {
   const who = whoLabel(task);
   return `Reminder · ${formatTimeOfDay(remindAt)}${who ? ` · ${who}` : ""}`;

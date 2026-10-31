@@ -3,34 +3,20 @@ import type { CalendarEvent } from "../data/calendar";
 const MINUTE_MS = 60_000;
 const pad = (value: number): string => String(value).padStart(2, "0");
 
-function clock(ms: number): { time: string; suffix: "am" | "pm" } {
-  const date = new Date(ms);
-  const hours = date.getHours();
-  return { time: `${hours % 12 || 12}:${pad(date.getMinutes())}`, suffix: hours >= 12 ? "pm" : "am" };
-}
-
-/**
- * An event's times (3a): "12:30–1:15 am", or "11:30 pm–12:15 am" across noon or midnight.
- * `withSuffix: false` gives the compact "2:00–2:30" of smaller cards.
- */
-export function formatSpan(startMs: number, endMs: number, withSuffix = true): string {
-  const start = clock(startMs);
-  const end = clock(endMs);
-  if (!withSuffix) return `${start.time}–${end.time}`;
-  if (start.suffix === end.suffix) return `${start.time}–${end.time} ${end.suffix}`;
-  return `${start.time} ${start.suffix}–${end.time} ${end.suffix}`;
-}
-
-/** Hour on a time axis (3a, 3b, 1d): "10p", "1a". */
-export function hourLabel(ms: number): string {
-  const hours = new Date(ms).getHours();
-  return `${hours % 12 || 12}${hours < 12 ? "a" : "p"}`;
-}
-
-/** A time without am/pm (3a now line "11:42", 1d "2:00"). */
+/** A time, 24-hour (Phase 12): "23:42", "00:30". */
 export function shortTime(ms: number): string {
   const date = new Date(ms);
-  return `${date.getHours() % 12 || 12}:${pad(date.getMinutes())}`;
+  return `${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+/** An event's times (3a): "00:30–01:15". */
+export function formatSpan(startMs: number, endMs: number): string {
+  return `${shortTime(startMs)}–${shortTime(endMs)}`;
+}
+
+/** Hour on a time axis (3a, 3b, 1d): "22:00", "01:00". */
+export function hourLabel(ms: number): string {
+  return `${pad(new Date(ms).getHours())}:00`;
 }
 
 /** "in 48m", "in 1h 5m", "now" while it runs, or null once it has ended. */

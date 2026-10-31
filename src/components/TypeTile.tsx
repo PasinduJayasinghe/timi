@@ -4,7 +4,7 @@ import { Icon } from "./Icon";
 const SIZES = {
   /** 24px: compact lists (sheets, the schedule tray). */
   sm: { box: "size-6 rounded-[7px]", icon: 14 },
-  /** 26px: the 2a Recent list and Plan my day leftovers. */
+  /** 26px: the 2a Recent list. */
   md: { box: "size-6.5 rounded-[8px]", icon: 15 },
 } as const;
 

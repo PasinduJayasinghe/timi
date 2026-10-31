@@ -76,7 +76,7 @@ export function JoinButton({ event, variant }: { event: CalendarEvent; variant: 
   );
 }
 
-/** "12:30–1:15 am · in 48m" (3a). */
+/** "00:30–01:15 · in 48m" (3a). */
 export function eventTiming(event: CalendarEvent, nowMs: number): string {
   const when = startsIn(event, nowMs);
   return when ? `${formatSpan(event.startMs, event.endMs)} · ${when}` : formatSpan(event.startMs, event.endMs);

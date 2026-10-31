@@ -15,7 +15,7 @@ const at = (d: number, h: number, min = 0): number => new Date(2026, 9, d, h, mi
 const window = workWindow("2026-10-17");
 
 describe("workWindow", () => {
-  it("is 7 pm to 4 am", () => {
+  it("is 19:00 to 04:00", () => {
     expect(window).toEqual({ startMs: at(17, 19), endMs: at(18, 4) });
   });
 });
@@ -55,9 +55,9 @@ describe("timeOnDay", () => {
 
 describe("labels", () => {
   it("writes short times and ranges", () => {
-    expect(shortTime(at(17, 23))).toBe("11 pm");
-    expect(shortTime(at(18, 0, 30))).toBe("12:30 am");
-    expect(plannedRange(at(17, 23), 90)).toBe("11 pm–12:30 am");
+    expect(shortTime(at(17, 23))).toBe("23:00");
+    expect(shortTime(at(18, 0, 30))).toBe("00:30");
+    expect(plannedRange(at(17, 23), 90)).toBe("23:00–00:30");
   });
 });
 
@@ -65,7 +65,7 @@ describe("planHint", () => {
   const task = { plannedStart: new Date(at(17, 23)).toISOString(), plannedMinutes: 90, completedAt: null };
 
   it("shows the plan while it is ahead", () => {
-    expect(planHint(task, null, at(17, 20))).toEqual({ kind: "planned", text: "planned 11 pm–12:30 am" });
+    expect(planHint(task, null, at(17, 20))).toEqual({ kind: "planned", text: "planned 23:00–00:30" });
   });
 
   it("keeps showing it while the task is under way", () => {
@@ -73,7 +73,7 @@ describe("planHint", () => {
   });
 
   it("says not started once its time passes without a session", () => {
-    expect(planHint(task, null, at(17, 23, 5))).toEqual({ kind: "late", text: "not started · 11 pm" });
+    expect(planHint(task, null, at(17, 23, 5))).toEqual({ kind: "late", text: "not started · 23:00" });
     // A session from much earlier doesn't count
     expect(planHint(task, at(17, 19), at(17, 23, 5))?.kind).toBe("late");
   });

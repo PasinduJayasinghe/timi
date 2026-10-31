@@ -49,9 +49,9 @@ describe("buildTimesheet", () => {
 
     expect(text.split("\n")).toEqual([
       "Task\tType\tClient/Project\tStart\tEnd\tDuration",
-      "Checkout flow — fix payment step\tClient\tClient A · Storefront\t8:00 pm\t9:15 pm\t1h 15m",
-      "#4821 Login loop on Safari\tSupport\tClient C\t10:00 pm\t10:50 pm\t50m",
-      "Inbox & admin\tOther\t—\t10:50 pm\t11:10 pm\t20m",
+      "Checkout flow — fix payment step\tClient\tClient A · Storefront\t20:00\t21:15\t1h 15m",
+      "#4821 Login loop on Safari\tSupport\tClient C\t22:00\t22:50\t50m",
+      "Inbox & admin\tOther\t—\t22:50\t23:10\t20m",
     ]);
   });
 
@@ -59,7 +59,7 @@ describe("buildTimesheet", () => {
     const now = Date.parse(at(23, 42));
     const text = buildTimesheet([{ ...base, id: "s1", startedAt: at(23, 18), endedAt: null }], now);
     expect(text.split("\n")[1]).toBe(
-      "Checkout flow — fix payment step\tClient\tClient A · Storefront\t11:18 pm\tnow\t24m",
+      "Checkout flow — fix payment step\tClient\tClient A · Storefront\t23:18\tnow\t24m",
     );
   });
 

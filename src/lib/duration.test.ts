@@ -40,14 +40,14 @@ describe("time of day", () => {
   // Local times (vitest runs in Europe/London)
   const at = (hours: number, minutes: number): string => new Date(2026, 9, 10, hours, minutes).toISOString();
 
-  it("formats 12-hour times as in 3g", () => {
-    expect(formatTimeOfDay(at(19, 2))).toBe("7:02 pm");
-    expect(formatTimeOfDay(at(0, 40))).toBe("12:40 am");
-    expect(formatTimeOfDay(at(12, 5))).toBe("12:05 pm");
+  it("formats 24-hour times", () => {
+    expect(formatTimeOfDay(at(19, 2))).toBe("19:02");
+    expect(formatTimeOfDay(at(0, 40))).toBe("00:40");
+    expect(formatTimeOfDay(at(12, 5))).toBe("12:05");
   });
 
-  it("formats short ranges as in 3f", () => {
-    expect(formatTimeRange(at(20, 0), at(21, 15))).toBe("8:00p – 9:15p");
-    expect(formatTimeRange(at(23, 18), null)).toBe("11:18p – now");
+  it("formats ranges", () => {
+    expect(formatTimeRange(at(20, 0), at(21, 15))).toBe("20:00 – 21:15");
+    expect(formatTimeRange(at(23, 18), null)).toBe("23:18 – now");
   });
 });

@@ -32,7 +32,7 @@ type TaskRowProps = {
   onDragEnd: () => void;
   /** False on another day's plan (7a): only today's tasks can be timed. */
   startable?: boolean;
-  /** "planned 11 pm–12:30 am" or "not started · 7:30 pm" (7c). */
+  /** "planned 23:00–00:30" or "not started · 19:30" (7c). */
   planHint?: PlanHint | null;
 };
 

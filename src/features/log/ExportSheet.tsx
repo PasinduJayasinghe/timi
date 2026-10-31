@@ -51,11 +51,9 @@ export function ExportSheet({ variant, dayKey, todayKey, onClose }: ExportSheetP
     setData("loading");
     const load = async (): Promise<void> => {
       await writesSettled();
-      const [tasks, sessions] = await Promise.all([
-        taskStore.listForDayRange(from, addDays(to, 1)),
-        sessionStore.listForDays(from, addDays(to, 1)),
-      ]);
-      if (!cancelled) setData(buildExport(tasks, sessions, Date.now()));
+      const sessions = await sessionStore.listForDays(from, addDays(to, 1));
+      const notes = await taskStore.notesByIds([...new Set(sessions.map((session) => session.taskId))]);
+      if (!cancelled) setData(buildExport(sessions, notes, Date.now()));
     };
     load().catch((error: unknown) => {
       console.error("[export] load failed", error);
@@ -67,13 +65,13 @@ export function ExportSheet({ variant, dayKey, todayKey, onClose }: ExportSheetP
   }, [from, to]);
 
   const ready = typeof data === "object";
-  const empty = ready && data.sessions.length === 0 && data.tasks.length === 0;
+  const empty = ready && data.rows.length === 0;
 
   const run = (): void => {
     if (!ready || empty || saving) return;
     const fileName = exportFileName(from, to);
     setSaving(true);
-    exportXlsx(fileName, data.tasks, data.sessions)
+    exportXlsx(fileName, data.rows)
       .then((path) => {
         setSaving(false);
         if (path === null) return;
@@ -152,8 +150,8 @@ export function ExportSheet({ variant, dayKey, todayKey, onClose }: ExportSheetP
   else {
     const stats = [
       { label: "days", value: String(data.days) },
-      { label: "tasks", value: String(data.tasks.length) },
-      { label: "sessions", value: String(data.sessions.length) },
+      { label: "tasks", value: String(data.tasks) },
+      { label: "sessions", value: String(data.rows.length) },
       { label: "tracked", value: formatDuration(data.trackedSeconds) },
     ];
     summary = (
@@ -212,8 +210,8 @@ export function ExportSheet({ variant, dayKey, todayKey, onClose }: ExportSheetP
         <span className="flex items-start gap-1.5 text-meta leading-[1.45] text-ink-muted">
           <Icon name="info" size={15} />
           {empty
-            ? "Nothing was tracked or planned in this range. Pick other dates."
-            : `Two sheets: Tasks and Sessions${ready ? ` (${plural(data.tasks.length, "row")} and ${plural(data.sessions.length, "row")})` : ""}. Days follow your shifts, like the Log. A running session counts up to now.`}
+            ? "Nothing was tracked in this range. Pick other dates."
+            : `Your hours sheet: one row per session${ready ? ` (${plural(data.rows.length, "row")})` : ""}, 24-hour times. Days follow your shifts, like the Log. A running session counts up to now.`}
         </span>
       </div>
       <SheetActions

@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { startResize, type ResizeEdge } from "../lib/window";
 
 /**
  * Blob placements differ per screen in the design, so each layout passes its own.
@@ -57,12 +58,34 @@ type WindowFrameProps = {
   children: ReactNode;
 };
 
-/** The glass window: app gradient, inner white edge, two colour blobs. */
+/** Invisible handles on the edges and corners, since the window has no frame to grab (Phase 12). */
+const RESIZE_HANDLES: ReadonlyArray<{ edge: ResizeEdge; className: string }> = [
+  { edge: "North", className: "inset-x-3 top-0 h-1.5 cursor-ns-resize" },
+  { edge: "South", className: "inset-x-3 bottom-0 h-1.5 cursor-ns-resize" },
+  { edge: "West", className: "inset-y-3 left-0 w-1.5 cursor-ew-resize" },
+  { edge: "East", className: "inset-y-3 right-0 w-1.5 cursor-ew-resize" },
+  { edge: "NorthWest", className: "top-0 left-0 size-3 cursor-nwse-resize" },
+  { edge: "NorthEast", className: "top-0 right-0 size-3 cursor-nesw-resize" },
+  { edge: "SouthWest", className: "bottom-0 left-0 size-3 cursor-nesw-resize" },
+  { edge: "SouthEast", className: "right-0 bottom-0 size-3 cursor-nwse-resize" },
+];
+
+/** The glass window: app gradient, inner white edge, two colour blobs, and resize handles. */
 export function WindowFrame({ blobs, className = "", children }: WindowFrameProps) {
   return (
     <div
       className={`relative flex h-full w-full flex-col overflow-hidden rounded-xl bg-app text-ink shadow-window-edge ${className}`}
     >
+      {RESIZE_HANDLES.map(({ edge, className: place }) => (
+        <div
+          key={edge}
+          aria-hidden="true"
+          onMouseDown={(event) => {
+            if (event.button === 0) void startResize(edge);
+          }}
+          className={`absolute z-60 ${place}`}
+        />
+      ))}
       <div aria-hidden="true" className={`pointer-events-none absolute rounded-full bg-blob-violet ${blobs.violet}`} />
       <div aria-hidden="true" className={`pointer-events-none absolute rounded-full bg-blob-sky ${blobs.sky}`} />
       {blobs.rose && <div aria-hidden="true" className={`${ROSE_BLOB} ${blobs.rose}`} />}

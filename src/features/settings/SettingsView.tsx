@@ -136,7 +136,7 @@ export function SettingsView({ calendar, settings, onChange, onBack, onClose, va
                 onChange={changeStartOnLogin}
               />
             </Row>
-            <Row title="Plan my day when a shift starts" sub="Off: unfinished tasks carry over on their own">
+            <Row title="Plan my day when a shift starts" sub="Off: Start shift starts straight away">
               <Switch
                 checked={settings.planMyDay}
                 label="Plan my day when a shift starts"

@@ -19,30 +19,14 @@ export function EndShiftButton({ onClick }: { onClick: () => void }) {
   );
 }
 
-/** "3 left over · Review" (7i): leftovers waiting after a shift started without Plan my day. */
-export function LeftoversChip({ count, onClick }: { count: number; onClick: () => void }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="target-32 flex h-7 shrink-0 items-center gap-1 rounded-tile bg-type-meeting/20 px-2 text-meta font-semibold whitespace-nowrap text-type-meeting-ink hover:bg-type-meeting/30"
-    >
-      <Icon name="history" size={14} />
-      {count} left over · Review
-    </button>
-  );
-}
-
 type ShiftStripProps = {
   shift: Shift;
   total: LiveTotal;
-  leftovers: number;
-  onReview: () => void;
   onEndShift: () => void;
 };
 
 /** The shift strip above quick add (7i): when the shift started, time tracked, and End shift. */
-export function ShiftStrip({ shift, total, leftovers, onReview, onEndShift }: ShiftStripProps) {
+export function ShiftStrip({ shift, total, onEndShift }: ShiftStripProps) {
   return (
     <div className="relative z-1 mx-3 mb-2 flex min-h-10 shrink-0 items-center gap-1.5 rounded-md border border-white/80 bg-white/40 py-1 pr-1 pl-2.5">
       <span
@@ -50,18 +34,11 @@ export function ShiftStrip({ shift, total, leftovers, onReview, onEndShift }: Sh
         className="size-2 shrink-0 rounded-full bg-status-success shadow-[0_0_0_3px] shadow-status-success/18"
       />
       <span className="min-w-0 flex-1 truncate text-caption text-ink-muted">
-        {leftovers > 0 ? (
-          `Since ${formatTimeOfDay(shift.startedAt)}`
-        ) : (
-          <>
-            Shift since {formatTimeOfDay(shift.startedAt)} ·{" "}
-            <span className="font-mono font-semibold text-ink">
-              <LiveDuration {...total} />
-            </span>
-          </>
-        )}
+        Shift since {formatTimeOfDay(shift.startedAt)} ·{" "}
+        <span className="font-mono font-semibold text-ink">
+          <LiveDuration {...total} />
+        </span>
       </span>
-      {leftovers > 0 && <LeftoversChip count={leftovers} onClick={onReview} />}
       <EndShiftButton onClick={onEndShift} />
     </div>
   );
@@ -72,7 +49,6 @@ type BetweenShiftsProps = {
   /** Seconds tracked in the last shift, or null while loading. */
   trackedSeconds: number | null;
   doneCount: number | null;
-  leftovers: number;
   onStart: () => void;
   onReopen: () => void;
   className?: string;
@@ -83,7 +59,6 @@ export function BetweenShifts({
   last,
   trackedSeconds,
   doneCount,
-  leftovers,
   onStart,
   onReopen,
   className = "",
@@ -129,12 +104,6 @@ export function BetweenShifts({
           Reopen {day}’s shift
         </button>
       </div>
-      {leftovers > 0 && (
-        <span className="mt-1 flex items-center gap-1.25 text-meta text-ink-muted">
-          <Icon name="history" size={14} />
-          {plural(leftovers, "task")} left over · you’ll review them when you start
-        </span>
-      )}
     </div>
   );
 }
@@ -158,8 +127,9 @@ export function ShiftNotice({
       <div className="flex flex-1 flex-col gap-0.5">
         <span className="text-ui-sm font-semibold">{formatWeekday(shift.dayKey)}’s shift was ended for you</span>
         <span className="text-caption leading-[1.45] text-ink-muted">
-          It ended at {shift.endedAt ? formatTimeOfDay(shift.endedAt) : "its last activity"}, when you last timed
-          anything. Nothing after that was counted.
+          It was still open after 06:00, so it ended at{" "}
+          {shift.endedAt ? formatTimeOfDay(shift.endedAt) : "its last activity"}, when you last timed anything. Its
+          tasks are in the Log.
         </span>
       </div>
       <button

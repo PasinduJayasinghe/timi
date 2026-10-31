@@ -66,7 +66,7 @@ export function SchedulePopover({ task, dayKey, onSave, onUnschedule, onClose }:
               <input
                 data-autofocus
                 value={start}
-                placeholder="11 pm"
+                placeholder="23:00"
                 aria-invalid={invalid}
                 onChange={(event) => {
                   setStart(event.currentTarget.value);
@@ -86,7 +86,7 @@ export function SchedulePopover({ task, dayKey, onSave, onUnschedule, onClose }:
             </span>
           </div>
         </div>
-        {invalid && <FieldError>Type a time like 11 pm or 23:30</FieldError>}
+        {invalid && <FieldError>Type a time like 23:30</FieldError>}
         <div role="radiogroup" aria-label="Length" className="flex gap-1.5">
           {LENGTHS_MIN.map((minutes) => {
             const active = minutes === length;

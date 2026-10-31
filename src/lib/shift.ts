@@ -15,9 +15,6 @@ export type Shift = {
   noticedAt: string | null;
 };
 
-/** A shift left open ends on its own once nothing has been timed for this long (7l). */
-export const AUTO_END_IDLE_MS = 4 * 60 * 60 * 1000;
-
 /**
  * The day a new shift starts on: the work day now (days start at 6 am), or the day after the last
  * shift when that day is already taken, e.g. starting again at 5 am after ending at 4 am.
@@ -28,9 +25,9 @@ export function nextShiftDay(now: Date, lastDayKey: string | null): string {
 }
 
 /**
- * When a shift that was left open should end, or null to keep it open. It ends only after the
- * 6 am line following its day, with no timer running and nothing timed for AUTO_END_IDLE_MS; it
- * ends at the last thing timed (or when it started, if nothing was).
+ * When a shift that was left open should end, or null to keep it open (Phase 12). It ends once
+ * the 6 am line after its day has passed, unless a timer is still running; it ends at the last
+ * thing timed (or when it started, if nothing was), so idle time isn't counted.
  */
 export function autoEndAt(
   shift: Pick<Shift, "dayKey" | "startedAt">,
@@ -40,9 +37,7 @@ export function autoEndAt(
 ): string | null {
   if (timerRunning) return null;
   if (nowMs < dayStartOf(addDays(shift.dayKey, 1)).getTime()) return null;
-  const last = Math.max(Date.parse(shift.startedAt), lastActivityMs ?? 0);
-  if (nowMs - last < AUTO_END_IDLE_MS) return null;
-  return new Date(last).toISOString();
+  return new Date(Math.max(Date.parse(shift.startedAt), lastActivityMs ?? 0)).toISOString();
 }
 
 /**

@@ -112,27 +112,30 @@ export function axisHours(axis: TimelineAxis): AxisHour[] {
 
 export type AxisLabel = { text: string; percent: number; align: "start" | "center" | "end" };
 
-const hour12 = (hour: number): number => hour % 12 || 12;
+/** The end label is left out when the last hour label is closer than this (they'd overlap). */
+const END_LABEL_GAP_PERCENT = 15;
+
+/** "19:00", "01:00" (24-hour, Phase 12). */
+const hourText = (hour: number): string => `${String(hour).padStart(2, "0")}:00`;
 
 /**
- * Axis labels.
- * - expanded (1a): every 2 hours ("7p 9p 11p 1a 3a") plus the end at the right ("4a").
- * - wide (1d): every hour ("7 pm 8 9 10 11 12 am 1 2 3"), with am/pm on the first hour and at 12.
+ * Axis labels (24-hour).
+ * - expanded (1a): every 3 hours ("19:00 22:00 01:00") plus the end at the right ("04:00") when
+ *   there's room for it, since the longer labels would otherwise overlap in the narrow panel.
+ * - wide (1d): every hour.
  */
 export function axisLabels(axis: TimelineAxis, variant: "expanded" | "wide"): AxisLabel[] {
   const hours = axisHours(axis);
   if (variant === "wide") {
-    return hours.map(({ hour, percent }, index) => ({
-      text: index === 0 || hour % 12 === 0 ? `${hour12(hour)} ${hour < 12 ? "am" : "pm"}` : String(hour12(hour)),
-      percent,
-      align: "start",
-    }));
+    return hours.map(({ hour, percent }) => ({ text: hourText(hour), percent, align: "start" }));
   }
-  const short = (hour: number): string => `${hour12(hour)}${hour < 12 ? "a" : "p"}`;
   const labels: AxisLabel[] = hours
-    .filter((_, index) => index % 2 === 0)
-    .map(({ hour, percent }, index) => ({ text: short(hour), percent, align: index === 0 ? "start" : "center" }));
-  labels.push({ text: short(new Date(axis.endMs).getHours()), percent: 100, align: "end" });
+    .filter((_, index) => index % 3 === 0)
+    .map(({ hour, percent }, index) => ({ text: hourText(hour), percent, align: index === 0 ? "start" : "center" }));
+  const last = labels[labels.length - 1];
+  if (!last || 100 - last.percent >= END_LABEL_GAP_PERCENT) {
+    labels.push({ text: hourText(new Date(axis.endMs).getHours()), percent: 100, align: "end" });
+  }
   return labels;
 }
 

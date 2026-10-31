@@ -64,17 +64,13 @@ export function timeOnDay(dayKey: string, time: { hours: number; minutes: number
   return new Date(next.getFullYear(), next.getMonth(), next.getDate(), time.hours, time.minutes).getTime();
 }
 
-/** Short clock time: "11 pm", "12:30 am". */
+/** Clock time, 24-hour (Phase 12): "23:00", "00:30". */
 export function shortTime(ms: number): string {
   const date = new Date(ms);
-  const hours = date.getHours();
-  const minutes = date.getMinutes();
-  const hour = hours % 12 || 12;
-  const suffix = hours >= 12 ? "pm" : "am";
-  return minutes === 0 ? `${hour} ${suffix}` : `${hour}:${String(minutes).padStart(2, "0")} ${suffix}`;
+  return `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
 }
 
-/** "11 pm–12:30 am". */
+/** "23:00–00:30". */
 export function plannedRange(startMs: number, minutes: number): string {
   return `${shortTime(startMs)}–${shortTime(startMs + minutes * MINUTE)}`;
 }

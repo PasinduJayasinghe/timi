@@ -2,7 +2,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { nowIso, queueWrite, writesSettled } from "../data/db";
 import * as sessionStore from "../data/sessions";
 import * as shiftStore from "../data/shifts";
-import * as taskStore from "../data/tasks";
 import { msUntilNextDayStart, workDayKey } from "../lib/date";
 import { isStale } from "../lib/sessionMath";
 import { autoEndAt, nextShiftDay, type Shift } from "../lib/shift";
@@ -22,7 +21,7 @@ export type ShiftState = {
   ready: boolean;
   /** A shift Timi ended because it was left open, until its note is dismissed (7l). */
   notice: Shift | null;
-  /** Starts a shift between shifts. Resolves once it is saved (and leftovers carried over, if Plan my day is off). */
+  /** Starts a shift between shifts. Resolves once it is saved. */
   start: () => Promise<void>;
   /** Starts a shift if none is open: adding a task or starting a timer between shifts (7i). */
   ensure: () => void;
@@ -45,16 +44,11 @@ function nextKey(current: ShiftView): string {
 }
 
 /**
- * The work day comes from shifts (Phase 7): a day runs from Start shift to End shift, and 6 am is
- * only the fallback for a shift left open (`autoEndAt`). The first run with shifts opens one for
- * the current work day, so nothing changes on upgrade.
+ * The work day comes from shifts (Phase 7): a day runs from Start shift to End shift, and a shift
+ * left open ends at the next 6 am (`autoEndAt`). Unfinished tasks stay on their own day (Phase 12).
+ * The first run with shifts opens one for the current work day, so nothing changes on upgrade.
  */
-export function useShift(
-  planMyDay: boolean,
-  onSaveError: () => void,
-  /** After a shift started with Plan my day off, once leftovers were carried over: reload the list. */
-  onCarriedOver: () => void,
-): ShiftState {
+export function useShift(onSaveError: () => void): ShiftState {
   const [view, setView] = useState<ShiftView>({ status: "loading" });
   const [notice, setNoticeState] = useState<Shift | null>(null);
   const noticeRef = useRef<Shift | null>(null);
@@ -66,10 +60,6 @@ export function useShift(
   const [clock, setClock] = useState(() => Date.now());
   const viewRef = useRef<ShiftView>(view);
   viewRef.current = view;
-  const planMyDayRef = useRef(planMyDay);
-  planMyDayRef.current = planMyDay;
-  const onCarriedOverRef = useRef(onCarriedOver);
-  onCarriedOverRef.current = onCarriedOver;
   const loadId = useRef(0);
 
   const load = useCallback(async (): Promise<void> => {
@@ -158,18 +148,12 @@ export function useShift(
       endedBy: null,
       noticedAt: null,
     };
-    const carryOver = !planMyDayRef.current;
     const opened: ShiftView = { status: "open", shift };
     viewRef.current = opened;
     setView(opened);
     setNotice(null);
-    return queueWrite(async () => {
-      await shiftStore.start(shift);
-      // Plan my day off: unfinished tasks come over on their own, as before shifts
-      if (carryOver) await taskStore.carryOver(shift.dayKey);
-    })
+    return queueWrite(() => shiftStore.start(shift))
       .then(() => {
-        if (carryOver) onCarriedOverRef.current();
         // Read back the saved shift: starting on a day that already had one reopens that row
         void load();
       })

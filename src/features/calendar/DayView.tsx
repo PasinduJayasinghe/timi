@@ -155,7 +155,7 @@ export function DayView({ dayKey, isToday, sessions, events }: DayViewProps) {
                   <div className="min-w-0 flex-1 leading-[1.15]">
                     <div className="truncate text-caption font-semibold">{event.title}</div>
                     <div className="truncate font-mono text-[10px] font-medium text-ink-muted">
-                      {formatSpan(event.startMs, event.endMs, false)}
+                      {formatSpan(event.startMs, event.endMs)}
                       {!meet && ` · ${event.location ? `${event.location}, no Meet link` : "no Meet link"}`}
                     </div>
                   </div>

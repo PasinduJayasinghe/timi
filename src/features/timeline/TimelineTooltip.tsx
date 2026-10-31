@@ -8,7 +8,7 @@ export type TooltipContent = {
   ink: string;
   heading: string;
   title: string;
-  /** "8:00 pm → 9:15 pm". */
+  /** "20:00 → 21:15". */
   range: string;
   duration: string;
   /** e.g. "Click to open task". */

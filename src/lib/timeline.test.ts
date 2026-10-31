@@ -104,25 +104,30 @@ describe("axisPercent", () => {
 describe("axisLabels", () => {
   const axis = { startMs: at(10, 19), endMs: at(11, 4) };
 
-  it("labels every 2 hours and the end in the expanded panel (1a)", () => {
-    expect(axisLabels(axis, "expanded").map((label) => label.text)).toEqual(["7p", "9p", "11p", "1a", "3a", "4a"]);
+  it("labels every 3 hours and the end in the expanded panel (1a)", () => {
+    expect(axisLabels(axis, "expanded").map((label) => label.text)).toEqual(["19:00", "22:00", "01:00", "04:00"]);
     const labels = axisLabels(axis, "expanded");
     expect(labels[0].align).toBe("start");
-    expect(labels[1].percent).toBeCloseTo(22.22, 2);
-    expect(labels[labels.length - 1]).toEqual({ text: "4a", percent: 100, align: "end" });
+    expect(labels[1].percent).toBeCloseTo(33.33, 2);
+    expect(labels[labels.length - 1]).toEqual({ text: "04:00", percent: 100, align: "end" });
+  });
+
+  it("leaves out the end label when it would overlap the last hour", () => {
+    const tenHours = { startMs: at(10, 19), endMs: at(11, 5) };
+    expect(axisLabels(tenHours, "expanded").map((label) => label.text)).toEqual(["19:00", "22:00", "01:00", "04:00"]);
   });
 
   it("labels every hour in the wide strip (1d)", () => {
     expect(axisLabels(axis, "wide").map((label) => label.text)).toEqual([
-      "7 pm",
-      "8",
-      "9",
-      "10",
-      "11",
-      "12 am",
-      "1",
-      "2",
-      "3",
+      "19:00",
+      "20:00",
+      "21:00",
+      "22:00",
+      "23:00",
+      "00:00",
+      "01:00",
+      "02:00",
+      "03:00",
     ]);
   });
 
@@ -130,16 +135,16 @@ describe("axisLabels", () => {
     // 1 am happens twice on 25 October, so the 7 pm – 4 am axis has 10 hours
     const longNight = { startMs: at(24, 19), endMs: at(25, 4) };
     expect(axisLabels(longNight, "wide").map((label) => label.text)).toEqual([
-      "7 pm",
-      "8",
-      "9",
-      "10",
-      "11",
-      "12 am",
-      "1",
-      "1",
-      "2",
-      "3",
+      "19:00",
+      "20:00",
+      "21:00",
+      "22:00",
+      "23:00",
+      "00:00",
+      "01:00",
+      "01:00",
+      "02:00",
+      "03:00",
     ]);
   });
 });

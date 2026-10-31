@@ -105,7 +105,7 @@ fn next_text(app: &AppHandle) -> (String, bool) {
         title.push('…');
     }
     let time = chrono::DateTime::from_timestamp_millis(event.start_ms)
-        .map(|t| t.with_timezone(&chrono::Local).format("%-I:%M %P").to_string())
+        .map(|t| t.with_timezone(&chrono::Local).format("%H:%M").to_string())
         .unwrap_or_default();
     let minutes = ((event.start_ms - now_ms()) as f64 / 60_000.0).ceil() as i64;
     let until = if minutes < 60 {

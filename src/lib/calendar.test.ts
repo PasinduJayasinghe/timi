@@ -16,27 +16,20 @@ import {
 const at = (day: number, hours: number, minutes = 0): number => new Date(2026, 9, day, hours, minutes).getTime();
 
 describe("formatSpan", () => {
-  it("writes am/pm once when both ends share it (3a)", () => {
-    expect(formatSpan(at(11, 0, 30), at(11, 1, 15))).toBe("12:30–1:15 am");
-  });
-
-  it("writes both when the meeting crosses midnight or noon", () => {
-    expect(formatSpan(at(10, 23, 30), at(11, 0, 15))).toBe("11:30 pm–12:15 am");
-    expect(formatSpan(at(10, 11, 45), at(10, 12, 30))).toBe("11:45 am–12:30 pm");
-  });
-
-  it("has a compact form for small cards", () => {
-    expect(formatSpan(at(11, 2), at(11, 2, 30), false)).toBe("2:00–2:30");
+  it("writes both ends in 24-hour time", () => {
+    expect(formatSpan(at(11, 0, 30), at(11, 1, 15))).toBe("00:30–01:15");
+    expect(formatSpan(at(10, 23, 30), at(11, 0, 15))).toBe("23:30–00:15");
+    expect(formatSpan(at(10, 11, 45), at(10, 12, 30))).toBe("11:45–12:30");
   });
 });
 
 describe("hourLabel and shortTime", () => {
-  it("labels hours and times without am/pm", () => {
-    expect(hourLabel(at(10, 22))).toBe("10p");
-    expect(hourLabel(at(11, 0))).toBe("12a");
-    expect(hourLabel(at(11, 1))).toBe("1a");
-    expect(shortTime(at(10, 23, 42))).toBe("11:42");
-    expect(shortTime(at(11, 2, 5))).toBe("2:05");
+  it("labels hours and times in 24-hour time", () => {
+    expect(hourLabel(at(10, 22))).toBe("22:00");
+    expect(hourLabel(at(11, 0))).toBe("00:00");
+    expect(hourLabel(at(11, 1))).toBe("01:00");
+    expect(shortTime(at(10, 23, 42))).toBe("23:42");
+    expect(shortTime(at(11, 2, 5))).toBe("02:05");
   });
 });
 

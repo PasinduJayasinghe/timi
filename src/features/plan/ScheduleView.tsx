@@ -208,7 +208,7 @@ export function ScheduleView({ dayKey, isToday, tasks, events, onSchedule, varia
             {Array.from({ length: Math.ceil(hours) }, (_, index) => (
               <div key={index} className="absolute inset-x-0 flex" style={{ top: index * hourPx }}>
                 <span className="w-8.5 -translate-y-1.5 font-mono text-[10px] font-medium text-ink-muted">
-                  {shortTime(win.startMs + index * 60 * MINUTE).replace(" ", "")}
+                  {shortTime(win.startMs + index * 60 * MINUTE)}
                 </span>
                 <span className="flex-1 border-t border-ink-muted/14" />
               </div>

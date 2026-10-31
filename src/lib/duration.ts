@@ -24,26 +24,13 @@ export function formatDuration(seconds: number, options: { padMinutes?: boolean 
   return rest === 0 ? `${hours}h` : `${hours}h ${pad(rest)}m`;
 }
 
-function clockParts(iso: string): { time: string; suffix: "am" | "pm" } {
-  const date = new Date(iso);
-  const hours = date.getHours();
-  return {
-    time: `${hours % 12 || 12}:${pad(date.getMinutes())}`,
-    suffix: hours >= 12 ? "pm" : "am",
-  };
-}
-
-/** Local time of day, as in the Log (3g): "7:02 pm". */
+/** Local time of day, 24-hour (Phase 12): "19:02", "01:30". */
 export function formatTimeOfDay(iso: string): string {
-  const { time, suffix } = clockParts(iso);
-  return `${time} ${suffix}`;
+  const date = new Date(iso);
+  return `${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
-/** Start and end in the narrow Log (3f): "8:00p – 9:15p", or "11:18p – now" while running. */
+/** Start and end in the Log: "20:00 – 21:15", or "23:18 – now" while running. */
 export function formatTimeRange(startIso: string, endIso: string | null): string {
-  const short = (iso: string): string => {
-    const { time, suffix } = clockParts(iso);
-    return `${time}${suffix[0]}`;
-  };
-  return `${short(startIso)} – ${endIso ? short(endIso) : "now"}`;
+  return `${formatTimeOfDay(startIso)} – ${endIso ? formatTimeOfDay(endIso) : "now"}`;
 }

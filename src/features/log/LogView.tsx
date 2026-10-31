@@ -2,20 +2,22 @@ import { useEffect, useState } from "react";
 import { Icon } from "../../components/Icon";
 import { IconButton } from "../../components/IconButton";
 import { LoadError } from "../../components/LoadError";
-import type { Session } from "../../data/types";
+import type { Session, Task } from "../../data/types";
 import { useDaySessions } from "../../hooks/useDaySessions";
 import { useNow } from "../../hooks/useNow";
 import type { Timer } from "../../hooks/useTimer";
 import { addDays, formatShortDate, fromLocalDayKey } from "../../lib/date";
 import { formatDuration, formatTimeOfDay, formatTimeRange } from "../../lib/duration";
-import { sessionSeconds, SUMMARY_KEYS, totalSeconds, totalsBySummary } from "../../lib/sessionMath";
+import { secondsByTask, sessionSeconds, SUMMARY_KEYS, totalSeconds, totalsBySummary } from "../../lib/sessionMath";
 import { SUMMARY_STYLES as SUMMARY } from "../../lib/summaryStyles";
 import { displayTitle, sessionDisplay, whereLabel } from "../../lib/taskDisplay";
 import { styleOf } from "../../lib/taskTypes";
 import { buildTimesheet } from "../../lib/timesheet";
 import { useDayPlan } from "../../hooks/useDayPlan";
+import { useDayTasks } from "../../hooks/useDayTasks";
 import { GoalsCard } from "../plan/GoalsCard";
 import { LogEmpty } from "./LogEmpty";
+import { LogTasks } from "./LogTasks";
 
 const noSave = (): void => undefined;
 
@@ -23,6 +25,8 @@ type LogViewProps = {
   /** "expanded" is 3f; "wide" is 3g. */
   variant: "expanded" | "wide";
   todayKey: string;
+  /** Today's tasks, from the Today list (past days are loaded here). */
+  todayTasks: readonly Task[];
   /** Today's sessions come from the timer, so the running one stays live. */
   timer: Timer;
   /** Opens Export to Excel (9a), starting with the day shown. */
@@ -34,7 +38,7 @@ type CopyState = { kind: "idle" } | { kind: "copied"; rows: number } | { kind: "
 const COPIED_MS = 2200;
 
 /** Log tab (3f; 3g in wide mode): one day's sessions, totals per type and "Copy for timesheet". */
-export function LogView({ variant, todayKey, timer, onExport }: LogViewProps) {
+export function LogView({ variant, todayKey, todayTasks, timer, onExport }: LogViewProps) {
   const wide = variant === "wide";
   // Days back from today, so the Log moves on when a new work day starts
   const [offset, setOffset] = useState(0);
@@ -44,6 +48,7 @@ export function LogView({ variant, todayKey, timer, onExport }: LogViewProps) {
   const past = useDaySessions(isToday ? null : day);
   // Read-only here: nothing is written, so a failed save can't happen
   const plan = useDayPlan(day, noSave);
+  const pastTasks = useDayTasks(isToday ? null : day);
   const status = isToday ? timer.status : past.status;
   const sessions = isToday ? timer.todaySessions : past.sessions;
   const reload = isToday ? timer.reload : past.reload;
@@ -184,6 +189,10 @@ export function LogView({ variant, todayKey, timer, onExport }: LogViewProps) {
     body = <NarrowTable sessions={sessions} now={now} />;
   }
 
+  // The day's tasks, done or not (Phase 12), with the time tracked on them that day
+  const dayTasks = isToday ? todayTasks : pastTasks.status === "ready" ? pastTasks.tasks : [];
+  const trackedToday = secondsByTask(sessions, now);
+
   // The day's goals and note (7e), only if it had any
   const hasPlan = plan.status === "ready" && (plan.goals.length > 0 || plan.note.trim() !== "");
 
@@ -191,6 +200,7 @@ export function LogView({ variant, todayKey, timer, onExport }: LogViewProps) {
     <div className={`relative z-1 flex min-h-0 flex-1 flex-col ${wide ? "" : "px-3 pb-3"}`}>
       {picker}
       {hasPlan && <GoalsCard plan={plan} readOnly className={wide ? "mb-2.5" : "mb-2"} />}
+      {dayTasks.length > 0 && <LogTasks tasks={dayTasks} tracked={trackedToday} className={wide ? "mb-2.5" : "mb-2"} />}
       {body}
       {!wide && (
         <div className="flex shrink-0 flex-col gap-1.5 pt-2.5">

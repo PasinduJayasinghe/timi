@@ -19,8 +19,6 @@ type EndShiftSheetProps = {
   sessions: readonly Session[];
   running: Session | null;
   trackedByTask: ReadonlyMap<string, number>;
-  /** Plan my day is on: unfinished tasks wait for review instead of carrying over. */
-  planMyDay: boolean;
   onEnd: () => void;
   onClose: () => void;
 };
@@ -33,7 +31,6 @@ export function EndShiftSheet({
   sessions,
   running,
   trackedByTask,
-  planMyDay,
   onEnd,
   onClose,
 }: EndShiftSheetProps) {
@@ -113,9 +110,7 @@ export function EndShiftSheet({
             );
           })}
           <span className="mt-1 text-meta leading-[1.45] text-ink-muted">
-            {planMyDay
-              ? "They’re put aside. You’ll review them when your next shift starts."
-              : "They carry over to your next shift."}
+            They stay on {formatWeekday(shift.dayKey)}; you’ll find them in the Log.
           </span>
         </div>
       )}

@@ -157,3 +157,15 @@ Design: `docs/design/drafts/Timi Notes and Export (draft).html`, screens 9a–9d
 - [ ] Exported toast with Open file; an error toast when the file can't be saved
 
 Done when: a week's export opens in Excel with totals that match the Log.
+
+## Phase 12: Adjustments after use
+
+Goal: a simpler day, 24-hour times, a bigger window and the timesheet's own format.
+
+- [ ] Notes tab removed (the notes table stays in the database, unused)
+- [ ] Unfinished tasks stay on their own day: no carry-over or leftover review; the Log lists each day's tasks; a forgotten shift ends at 6 am
+- [ ] 24-hour times everywhere (app, timeline, Calendar, tray)
+- [ ] The window can be resized by dragging its edges; sizes are remembered per mode; task notes can grow
+- [ ] Excel export in the hours template: Date, Start, Finish, Kind of work, Clients, Project, What you worked on, Note (one row per session)
+
+Done when: an exported week pastes straight into the timesheet, and a forgotten shift no longer leaves tasks on Today.

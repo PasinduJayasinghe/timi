@@ -95,7 +95,7 @@ export function ReminderPicker({
       <div aria-hidden="true" className="mx-1 my-0.5 h-px shrink-0 bg-ink-muted/12" />
       <input
         value={typed}
-        placeholder="Type a time, e.g. 4:30 pm"
+        placeholder="Type a time, e.g. 16:30"
         aria-label="Reminder time"
         aria-invalid={typedError}
         onChange={(event) => {

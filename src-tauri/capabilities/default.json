@@ -1,12 +1,15 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "Phase 4: window controls, the local SQLite database, tray and reminder events, and start on login",
+  "description": "Window controls (resizable since Phase 12), the local SQLite database, tray and reminder events, and start on login",
   "windows": ["main"],
   "permissions": [
     "core:window:allow-start-dragging",
     "core:window:allow-set-always-on-top",
     "core:window:allow-set-size",
+    "core:window:allow-set-min-size",
+    "core:window:allow-set-resizable",
+    "core:window:allow-start-resize-dragging",
     "core:window:allow-hide",
     "core:event:allow-listen",
     "core:event:allow-unlisten",

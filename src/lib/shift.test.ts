@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { AUTO_END_IDLE_MS, autoEndAt, minutesLeftForTasks, nextShiftDay } from "./shift";
+import { autoEndAt, minutesLeftForTasks, nextShiftDay } from "./shift";
 
 const local = (y: number, m: number, d: number, h: number, min = 0): Date => new Date(y, m - 1, d, h, min);
 
@@ -37,9 +37,9 @@ describe("autoEndAt", () => {
     expect(autoEndAt(shift, lastTimed, local(2026, 10, 17, 19).getTime(), true)).toBeNull();
   });
 
-  it("keeps a shift open until nothing has been timed for 4 hours", () => {
-    const working = local(2026, 10, 17, 7).getTime();
-    expect(autoEndAt(shift, working, working + AUTO_END_IDLE_MS - 1, false)).toBeNull();
+  it("ends a forgotten shift at 6 am, even if it was used until just before", () => {
+    const working = local(2026, 10, 17, 5, 50).getTime();
+    expect(autoEndAt(shift, working, local(2026, 10, 17, 6, 1).getTime(), false)).toBe(new Date(working).toISOString());
   });
 
   it("ends a forgotten shift at the last thing timed", () => {

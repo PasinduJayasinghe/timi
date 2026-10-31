@@ -24,20 +24,19 @@ import { LogView } from "./features/log/LogView";
 import { SettingsView } from "./features/settings/SettingsView";
 import { EndShiftSheet } from "./features/shift/EndShiftSheet";
 import { PlanMyDaySheet } from "./features/shift/PlanMyDaySheet";
-import { BetweenShifts, EndShiftButton, LeftoversChip, ShiftNotice, ShiftStrip } from "./features/shift/ShiftParts";
+import { BetweenShifts, EndShiftButton, ShiftNotice, ShiftStrip } from "./features/shift/ShiftParts";
 import { StartTaskSheet } from "./features/start/StartTaskSheet";
 import { TimelinePanel } from "./features/timeline/TimelinePanel";
 import { TodayView } from "./features/today/TodayView";
 import { useTaskDetails, workdaySource } from "./features/today/useTaskDetails";
 import { PlanView } from "./features/plan/PlanView";
-import { NotesView } from "./features/notes/NotesView";
 import { ExportSheet } from "./features/log/ExportSheet";
 import { WideShell, type WideView } from "./features/wide/WideShell";
 import { DEFAULT_SETTINGS } from "./data/settings";
 import { useCalendar, useCalendarEvents } from "./hooks/useCalendar";
 import { useCloudSync } from "./hooks/useCloudSync";
 import { useDesktop } from "./hooks/useDesktop";
-import { useDaySummary, useLeftoverCount } from "./hooks/useLeftovers";
+import { useDaySummary } from "./hooks/useDaySummary";
 import { useMeetings } from "./hooks/useMeetings";
 import { useSettings } from "./hooks/useSettings";
 import { useShift } from "./hooks/useShift";
@@ -46,17 +45,19 @@ import { useWorkday } from "./hooks/useWorkday";
 import { fromLocalDayKey, workDayRange } from "./lib/date";
 import { summaryKey, totalSeconds } from "./lib/sessionMath";
 import type { PlannedBlock } from "./features/timeline/TimelineRows";
-import { hideToTray, resizeForMode, setPinned, type WindowMode } from "./lib/window";
+import { hideToTray, rememberSize, resizeForMode, setPinned, type WindowMode } from "./lib/window";
+
+/** A mode's own resize settles within this long; resizes after it are ones you dragged. */
+const MODE_SETTLE_MS = 1500;
 
 /** Window modes remembered between runs; the mini bar always reopens as the last of these. */
 const OPEN_MODES = ["expanded", "wide"] as const;
 
-type Tab = "today" | "plan" | "notes" | "calendar" | "log";
+type Tab = "today" | "plan" | "calendar" | "log";
 
 const TABS: readonly TabItem<Tab>[] = [
   { id: "today", label: "Today" },
   { id: "plan", label: "Plan" },
-  { id: "notes", label: "Notes" },
   { id: "calendar", label: "Calendar" },
   { id: "log", label: "Log" },
 ];
@@ -64,14 +65,12 @@ const TABS: readonly TabItem<Tab>[] = [
 const WIDE_TABS: readonly TabItem<WideView>[] = [
   { id: "today-calendar", label: "Today + Calendar" },
   { id: "plan", label: "Plan" },
-  { id: "notes", label: "Notes" },
   { id: "log", label: "Log" },
 ];
 
 const TAB_BLOBS: Record<Tab, BlobLayout> = {
   today: BLOBS_TODAY,
   plan: BLOBS_TODAY,
-  notes: BLOBS_TODAY,
   calendar: BLOBS_CALENDAR,
   log: BLOBS_LOG,
 };
@@ -91,19 +90,14 @@ function Shell() {
   }, [showToast]);
   const settingsState = useSettings(onSaveError);
   const settings = settingsState.settings ?? DEFAULT_SETTINGS;
-  // Reloads after a shift starts with Plan my day off and leftovers carried over
-  const afterCarryOverRef = useRef<() => void>(() => undefined);
-  const onCarriedOver = useCallback((): void => {
-    afterCarryOverRef.current();
-  }, []);
-  const shift = useShift(settings.planMyDay, onSaveError, onCarriedOver);
+  const shift = useShift(onSaveError);
   const { todayKey } = shift;
   // The title bar shows the shift's day, so a night shift keeps its date after midnight
   const date = useMemo(() => fromLocalDayKey(todayKey), [todayKey]);
   // Set by session sync; a session saved while offline gets the "Saved offline" toast (2e)
   const syncOfflineRef = useRef(false);
   // Adding a task or starting a timer between shifts starts one (7i), except while planning it (7d)
-  const [shiftSheet, setShiftSheet] = useState<"end" | "plan" | "review" | null>(null);
+  const [shiftSheet, setShiftSheet] = useState<"end" | "plan" | null>(null);
   // Export to Excel (9b): open with the day shown in the Log
   const [exportDay, setExportDay] = useState<string | null>(null);
   const planningRef = useRef(false);
@@ -114,11 +108,6 @@ function Shell() {
     if (!planningRef.current) ensureShiftRef.current();
   }, []);
   const work = useWorkday(todayKey, shift.ready, onSaveError, showToast, onActivity, syncOfflineRef);
-  const leftovers = useLeftoverCount(todayKey, settings.planMyDay && shift.ready);
-  afterCarryOverRef.current = () => {
-    work.list.reload();
-    leftovers.reload();
-  };
   const lastShift = shift.view.status === "between" ? shift.view.last : null;
   const lastSummary = useDaySummary(lastShift?.dayKey ?? null);
   // A forgotten shift can end once the timer stops (7l)
@@ -152,6 +141,9 @@ function Shell() {
   // Matches alwaysOnTop: true in tauri.conf.json
   const [pinned, setPinnedState] = useState(true);
 
+  // When the mode last changed: its own resize isn't a size you dragged to
+  const modeChangedAt = useRef(Date.now());
+
   // Size the window to the remembered mode on start, so a reload (e.g. in development) can't
   // leave one layout inside another mode's window size
   useEffect(() => {
@@ -159,9 +151,28 @@ function Shell() {
     // Only on start: later changes resize in changeMode
   }, []);
 
+  // Remember the size you drag the window to, per mode (Phase 12)
+  useEffect(() => {
+    if (mode === "mini") return;
+    let timeoutId = 0;
+    const onResize = (): void => {
+      window.clearTimeout(timeoutId);
+      timeoutId = window.setTimeout(() => {
+        if (Date.now() - modeChangedAt.current < MODE_SETTLE_MS) return;
+        rememberSize(mode, { width: window.innerWidth, height: window.innerHeight });
+      }, 400);
+    };
+    window.addEventListener("resize", onResize);
+    return () => {
+      window.clearTimeout(timeoutId);
+      window.removeEventListener("resize", onResize);
+    };
+  }, [mode]);
+
   const changeMode = (next: WindowMode): void => {
     // The popover's anchor won't survive the layout change
     details.close();
+    modeChangedAt.current = Date.now();
     setMode(next);
     if (next !== "mini") {
       setLastOpenMode(next);
@@ -269,7 +280,6 @@ function Shell() {
   let wideView: WideView = "today-calendar";
   if (tab === "log") wideView = "log";
   else if (tab === "plan") wideView = "plan";
-  else if (tab === "notes") wideView = "notes";
 
   if (settingsOpen) {
     return (
@@ -312,7 +322,7 @@ function Shell() {
 
   // Shifts (Phase 7): End shift (7j), Plan my day (7d), between shifts (7k) and the 7l note
   const shiftView = shift.view;
-  const openShiftSheet = (kind: "end" | "plan" | "review"): void => {
+  const openShiftSheet = (kind: "end" | "plan"): void => {
     details.close();
     setSheetOpen(false);
     setTab("today");
@@ -325,10 +335,6 @@ function Shell() {
     if (settings.planMyDay) openShiftSheet("plan");
     else void shift.start();
   };
-  const reloadAfterPlan = (): void => {
-    work.list.reload();
-    leftovers.reload();
-  };
 
   let shiftSheetNode: ReactNode = null;
   if (shiftSheet === "end" && shiftView.status === "open") {
@@ -340,7 +346,6 @@ function Shell() {
         sessions={todaySessions}
         running={running}
         trackedByTask={trackedByTask}
-        planMyDay={settings.planMyDay}
         onEnd={() => {
           work.timer.stopQuietly();
           shift.end();
@@ -349,11 +354,10 @@ function Shell() {
         onClose={closeShiftSheet}
       />
     );
-  } else if (shiftSheet === "plan" || shiftSheet === "review") {
+  } else if (shiftSheet === "plan") {
     shiftSheetNode = (
       <PlanMyDaySheet
         variant={wide ? "wide" : "expanded"}
-        mode={shiftSheet === "plan" ? "start" : "review"}
         todayKey={todayKey}
         tasks={work.list.tasks}
         events={todayEvents}
@@ -363,8 +367,6 @@ function Shell() {
         onEstimate={(id, minutes) => {
           work.list.update(id, { estimateMinutes: minutes });
         }}
-        onChanged={reloadAfterPlan}
-        showToast={showToast}
         onStart={() => {
           setShiftSheet(null);
           void shift.start();
@@ -386,7 +388,6 @@ function Shell() {
         last={shiftView.last}
         trackedSeconds={lastSummary.trackedSeconds}
         doneCount={lastSummary.doneCount}
-        leftovers={leftovers.count}
         onStart={startShift}
         onReopen={shift.reopen}
       />
@@ -406,22 +407,6 @@ function Shell() {
     />
   );
 
-  const notesView = (variant: "expanded" | "wide") => (
-    <NotesView
-      variant={variant}
-      onMakeTask={(title) => {
-        work.list.add({ title, type: "other" });
-      }}
-      onOpenToday={() => {
-        setTab("today");
-      }}
-      onSaveError={onSaveError}
-    />
-  );
-
-  const reviewLeftovers = (): void => {
-    openShiftSheet("review");
-  };
   const endShift = (): void => {
     openShiftSheet("end");
   };
@@ -445,12 +430,7 @@ function Shell() {
       }}
       onOpenSettings={openSettings}
       shiftAction={
-        wide && shiftView.status === "open" ? (
-          <>
-            {leftovers.count > 0 && <LeftoversChip count={leftovers.count} onClick={reviewLeftovers} />}
-            <EndShiftButton onClick={endShift} />
-          </>
-        ) : undefined
+        wide && shiftView.status === "open" ? <EndShiftButton onClick={endShift} /> : undefined
       }
       switcher={
         wide ? (
@@ -492,7 +472,6 @@ function Shell() {
           focusQuickAdd={quickAddFocus}
           nextMeeting={nextMeeting}
           syncChip={<SyncChip sync={cloud} />}
-          notes={notesView("wide")}
           onExport={setExportDay}
           plan={
             <PlanView
@@ -554,8 +533,6 @@ function Shell() {
                   <ShiftStrip
                     shift={shiftView.shift}
                     total={todayTotal}
-                    leftovers={leftovers.count}
-                    onReview={reviewLeftovers}
                     onEndShift={endShift}
                   />
                 )}
@@ -602,9 +579,16 @@ function Shell() {
             onSaveError={onSaveError}
           />
         )}
-        {tab === "notes" && notesView("expanded")}
         {tab === "calendar" && <CalendarView calendar={calendar} todayKey={todayKey} timer={work.timer} />}
-        {tab === "log" && <LogView variant="expanded" todayKey={todayKey} timer={work.timer} onExport={setExportDay} />}
+        {tab === "log" && (
+          <LogView
+            variant="expanded"
+            todayKey={todayKey}
+            todayTasks={work.list.tasks}
+            timer={work.timer}
+            onExport={setExportDay}
+          />
+        )}
       </div>
       {/* 1a script: 236px from the bottom with the timeline open, 64px with it collapsed */}
       <ToastViewport bottomClass={tab !== "today" ? "bottom-4" : timelineOpen ? "bottom-59" : "bottom-16"} />

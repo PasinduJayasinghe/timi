@@ -107,7 +107,7 @@ export function CalendarPane({ calendar, events, sessions }: CalendarPaneProps) 
                   </div>
                   <div className="flex items-center gap-1.5">
                     <span className="flex-1 font-mono text-duration font-medium text-ink-muted">
-                      {formatSpan(event.startMs, event.endMs, false)} · {startsIn(event, now)}
+                      {formatSpan(event.startMs, event.endMs)} · {startsIn(event, now)}
                     </span>
                     <JoinButton event={event} variant="pane" />
                   </div>

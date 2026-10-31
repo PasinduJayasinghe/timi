@@ -15,7 +15,7 @@ const onDragArea = (event: MouseEvent<HTMLElement>): void => {
   if (event.button === 0) void startDrag();
 };
 
-/** "Starts at 12:30 am · 45 min · 6 people" (4a). */
+/** "Starts at 00:30 · 45 min · 6 people" (4a). */
 function startsLine(info: AlarmInfo): string {
   const { event } = info;
   const minutes = Math.round((event.endMs - event.startMs) / 60_000);

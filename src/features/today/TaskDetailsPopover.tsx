@@ -488,7 +488,8 @@ export function TaskDetailsPopover({
             setNotes(event.currentTarget.value);
           }}
           rows={3}
-          className="min-h-16 resize-none rounded-control border border-ink-muted/14 bg-app-from/60 px-3 py-2.25 text-ui leading-normal font-normal text-ink focus-visible:outline-offset-1"
+          // Drag the corner to make it taller; a bigger window leaves room for more (Phase 12)
+          className="max-h-[50vh] min-h-16 resize-y rounded-control border border-ink-muted/14 bg-app-from/60 px-3 py-2.25 text-ui leading-normal font-normal text-ink focus-visible:outline-offset-1"
         />
       </label>
 

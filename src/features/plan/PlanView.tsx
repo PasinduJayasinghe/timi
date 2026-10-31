@@ -3,7 +3,7 @@ import { useToast } from "../../components/Toast";
 import { useCalendarEvents, type CalendarState } from "../../hooks/useCalendar";
 import { useDayPlan } from "../../hooks/useDayPlan";
 import { useDayRangeTasks } from "../../hooks/useDayRangeTasks";
-import { useDaySummary } from "../../hooks/useLeftovers";
+import { useDaySummary } from "../../hooks/useDaySummary";
 import { useTodayTasks } from "../../hooks/useTodayTasks";
 import { useWeekSummary } from "../../hooks/useWeekSummary";
 import type { Workday } from "../../hooks/useWorkday";
@@ -38,12 +38,10 @@ type PlanViewProps = {
 
 const noop = (): void => undefined;
 
-/** "7 pm – 4 am": the working hours on the timeline. */
+/** "19:00 – 04:00": the working hours on the timeline. */
 function workingHours(): string {
-  const label = (minutes: number): string => {
-    const hour = Math.floor(minutes / 60) % 24;
-    return `${hour % 12 || 12} ${hour >= 12 ? "pm" : "am"}`;
-  };
+  const label = (minutes: number): string =>
+    `${String(Math.floor(minutes / 60) % 24).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
   return `${label(WORK_START_MIN)} – ${label(WORK_START_MIN + WORK_SPAN_MIN)}`;
 }
 
